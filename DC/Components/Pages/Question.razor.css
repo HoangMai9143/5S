@@ -1,0 +1,57 @@
+body {
+}
+
+h1 {
+  text-align: center;
+}
+
+.employee-name {
+  font-size: 1.2em;
+  margin-bottom: 20px;
+}
+
+.question {
+  margin-bottom: 10px;
+}
+
+.question summary {
+  cursor: pointer;
+  padding: 10px;
+  background-color: #f0f0f0;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.options div {
+  flex-basis: calc(50% - 10px); /* Adjust based on desired spacing */
+  display: flex;
+  align-items: center; /* Keeps checkbox and label aligned */
+  margin-bottom: 5px; /* Spacing between rows */
+}
+
+.options label {
+  margin-left: 8px; /* Space between checkbox and label */
+  text-align: left;
+}
+
+@media (max-width: 700px) {
+  .options div {
+    flex-basis: 100%; /* Stack vertically on smaller screens */
+  }
+}
+
+.submit-btn {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}

@@ -1,25 +1,3 @@
-htmlCopy@page
-  "/question"
-  <!DOCTYPE
-  html
-  > <html
-  lang="en"
-  > <head
-  > <meta
-  charset="UTF-8"
-  > <meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0"
-  > <title
-  > Grading</title
-  > <style
-  > body {
-  font-family: Arial, sans-serif;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
 h1 {
   text-align: center;
   font-size: 1.5em;
@@ -41,54 +19,48 @@ h1 {
   font-size: 1em;
 }
 
-.options {
+.slider-container {
+  margin-top: 10px;
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 15px;
+  border-radius: 5px;
+  background: linear-gradient(to right, #ff0000, #ffffff, #ffff00, #4caf50);
+  outline: none;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #000000;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #00212b;
+  cursor: pointer;
+}
+
+.slider-labels {
   display: flex;
   justify-content: space-between;
-  padding: 10px 0;
-}
-
-.option {
-  width: 22%;
-  aspect-ratio: 1 / 1;
-  max-width: 80px;
-  max-height: 80px;
-}
-
-.option input[type="radio"] {
-  display: none;
-}
-
-.option label {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
+  margin-top: 5px;
   font-size: 0.8em;
-  font-weight: bold;
-  color: white;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-  cursor: pointer;
-  border: 2px solid transparent;
-  transition: all 0.3s ease;
-}
-
-.option input[type="radio"]:checked + label {
-  border-color: #000;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-}
-
-.option-bad label {
-  background-color: #808080;
-}
-.option-okay label {
-  background-color: #ffd700;
-}
-.option-good label {
-  background-color: #4caf50;
-}
-.option-perfect label {
-  background-color: #e6e6fa;
 }
 
 .submit-btn {
@@ -101,10 +73,4 @@ h1 {
   cursor: pointer;
   border-radius: 4px;
   font-size: 1em;
-}
-
-@media (max-width: 600px) {
-  .options {
-    flex-wrap: wrap;
-  }
 }

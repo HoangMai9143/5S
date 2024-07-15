@@ -15,16 +15,23 @@
 
     <form id="gradingForm">
         @{
-            string[] questions = new string[] { "Cleanliness", "Tidiness", "Decoration" };
-            for (int i = 0; i < questions.Length; i++)
+            var questions = new List<QuestionModel>
+        {
+        new QuestionModel { Title = "Cleanliness" },
+        new QuestionModel { Title = "Tidiness" },
+        new QuestionModel { Title = "Decoration" }
+        };
+
+            for (int i = 0; i < questions.Count; i++)
             {
                 <details class="question">
-                    <summary>Question @(i + 1): @questions[i]</summary>
+                    <summary>Question @(i + 1): @questions[i].Title</summary>
                     <div class="options">
-                        <div><input type="radio" name="q@(i+1)" value="bad" id="q@(i+1)-bad"><label for="q@(i+1)-bad">1. Bad</label></div>
-                        <div><input type="radio" name="q@(i+1)" value="okay" id="q@(i+1)-okay"><label for="q@(i+1)-okay">2. Okay</label></div>
-                        <div><input type="radio" name="q@(i+1)" value="good" id="q@(i+1)-good"><label for="q@(i+1)-good">3. Good</label></div>
-                        <div><input type="radio" name="q@(i+1)" value="very-good" id="q@(i+1)-very-good"><label for="q@(i+1)-very-good">4. Perfect!</label></div>
+                        @foreach (var option in questions[i].Options)
+                        {
+                            var optionId = $"q{i + 1}-{option.ToLower()}";
+                            <div><input type="radio" name="q@(i+1)" value="@option.ToLower()" id="@optionId"><label for="@optionId">@option</label></div>
+                        }
                     </div>
                 </details>
             }

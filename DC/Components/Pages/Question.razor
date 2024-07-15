@@ -7,7 +7,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Desk Grading</title>
-
 </head>
 
 <body>
@@ -15,38 +14,21 @@
     <div class="employee-name">Current employee: <span id="employeeName">Hoang Mai</span></div>
 
     <form id="gradingForm">
-        <!-- Question 1: Cleanliness -->
-        <details class="question">
-            <summary>Question 1: Cleanliness</summary>
-            <div class="options">
-                <div><input type="radio" name="q1" value="bad" id="q1-bad"><label for="q1-bad">1. Bad</label></div>
-                <div><input type="radio" name="q1" value="okay" id="q1-okay"><label for="q1-okay">2. Okay</label></div>
-                <div><input type="radio" name="q1" value="good" id="q1-good"><label for="q1-good">3. Good</label></div>
-                <div><input type="radio" name="q1" value="very-good" id="q1-very-good"><label for="q1-very-good">4. Perfect!</label></div>
-            </div>
-        </details>
-
-        <!-- Question 2: Tidiness -->
-        <details class="question">
-            <summary>Question 2: Tidiness</summary>
-            <div class="options">
-                <div><input type="radio" name="q1" value="bad" id="q1-bad"><label for="q1-bad">1. Bad</label></div>
-                <div><input type="radio" name="q1" value="okay" id="q1-okay"><label for="q1-okay">2. Okay</label></div>
-                <div><input type="radio" name="q1" value="good" id="q1-good"><label for="q1-good">3. Good</label></div>
-                <div><input type="radio" name="q1" value="very-good" id="q1-very-good"><label for="q1-very-good">4. Perfect!</label></div>
-            </div>
-        </details>
-
-        <!-- Question 3: Decoration -->
-        <details class="question">
-            <summary>Question 3: Decoration</summary>
-            <div class="options">
-                <div><input type="radio" name="q1" value="bad" id="q1-bad"><label for="q1-bad">1. Bad</label></div>
-                <div><input type="radio" name="q1" value="okay" id="q1-okay"><label for="q1-okay">2. Okay</label></div>
-                <div><input type="radio" name="q1" value="good" id="q1-good"><label for="q1-good">3. Good</label></div>
-                <div><input type="radio" name="q1" value="very-good" id="q1-very-good"><label for="q1-very-good">4. Perfect!</label></div>
-            </div>
-        </details>
+        @{
+            string[] questions = new string[] { "Cleanliness", "Tidiness", "Decoration" };
+            for (int i = 0; i < questions.Length; i++)
+            {
+                <details class="question">
+                    <summary>Question @(i + 1): @questions[i]</summary>
+                    <div class="options">
+                        <div><input type="radio" name="q@(i+1)" value="bad" id="q@(i+1)-bad"><label for="q@(i+1)-bad">1. Bad</label></div>
+                        <div><input type="radio" name="q@(i+1)" value="okay" id="q@(i+1)-okay"><label for="q@(i+1)-okay">2. Okay</label></div>
+                        <div><input type="radio" name="q@(i+1)" value="good" id="q@(i+1)-good"><label for="q@(i+1)-good">3. Good</label></div>
+                        <div><input type="radio" name="q@(i+1)" value="very-good" id="q@(i+1)-very-good"><label for="q@(i+1)-very-good">4. Perfect!</label></div>
+                    </div>
+                </details>
+            }
+        }
     </form>
     <button type="submit" class="submit-btn">Submit</button>
 </body>

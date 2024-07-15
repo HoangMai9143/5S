@@ -6,7 +6,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Desk Grading</title>
+    <title>Grading</title>
+
 </head>
 
 <body>
@@ -15,8 +16,7 @@
 
     <form id="gradingForm">
         @{
-            var questions = new List<QuestionModel>
-        {
+            var questions = new List<QuestionModel> {
         new QuestionModel { Title = "Cleanliness" },
         new QuestionModel { Title = "Tidiness" },
         new QuestionModel { Title = "Decoration" }
@@ -27,10 +27,13 @@
                 <details class="question">
                     <summary>Question @(i + 1): @questions[i].Title</summary>
                     <div class="options">
-                        @foreach (var option in questions[i].Options)
+                        @foreach (var option in new[] { "Bad", "Okay", "Good", "Perfect" })
                         {
                             var optionId = $"q{i + 1}-{option.ToLower()}";
-                            <div><input type="radio" name="q@(i+1)" value="@option.ToLower()" id="@optionId"><label for="@optionId">@option</label></div>
+                            <div class="option option-@option.ToLower()">
+                                <input type="radio" name="q@(i+1)" value="@option.ToLower()" id="@optionId">
+                                <label for="@optionId">@option</label>
+                            </div>
                         }
                     </div>
                 </details>

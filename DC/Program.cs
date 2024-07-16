@@ -34,7 +34,11 @@ builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddHttpClient();
 
-//TODO Add database connection
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("DbConnection");
+    options.UseSqlServer(connectionString);
+});
 
 var app = builder.Build();
 

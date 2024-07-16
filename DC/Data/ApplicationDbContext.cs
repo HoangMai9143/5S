@@ -1,3 +1,4 @@
+using DC.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DC.Services
@@ -8,5 +9,6 @@ namespace DC.Services
     {
 
     }
+    public DbSet<UserAccount> UserAccounts { get; set; }
   }
 }

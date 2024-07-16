@@ -13,5 +13,4 @@ namespace DC.Components.Pages
 public class QuestionModel
 {
   public string? Title { get; set; }
-  public string[] Options { get; set; } = { "Bad", "Okay", "Good", "Very Good" };
 }

@@ -4,12 +4,13 @@ h1 {
 }
 
 .employee-name {
-  font-size: 2.2em;
+  font-size: 1.5em;
   margin-bottom: 20px;
 }
 
 .question {
   margin-bottom: 15px;
+  font-size: 1.5em;
 }
 
 .question summary {
@@ -60,7 +61,7 @@ h1 {
   display: flex;
   justify-content: space-between;
   margin-top: 5px;
-  font-size: 0.8em;
+  font-size: 1.5em;
 }
 
 .submit-btn {

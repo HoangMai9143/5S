@@ -1,0 +1,45 @@
+﻿@page "/grading"
+
+<PageTitle>Grading</PageTitle>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grading</title>
+</head>
+
+<body>
+    <div class="employee-name">Current employee: <span id="employeeName">Hoang Mai</span></div>
+
+    <form id="gradingForm">
+        @{
+            var questions = new List<QuestionModel> {
+        new QuestionModel { Title = "Cleanliness" },
+        new QuestionModel { Title = "Tidiness" },
+        new QuestionModel { Title = "Decoration" }
+        };
+
+            for (int i = 0; i < questions.Count; i++)
+            {
+                        <details class="question" open>
+                            <summary>Question @(i + 1): @questions[i].Title</summary>
+                            <div class="slider-container">
+                                <input type="range" min="1" max="4" value="2" class="slider" id="q@(i+1)">
+                                <div class="slider-labels">
+                                    <span>Bad 😒</span>
+                                    <span>Okay 👍</span>
+                                    <span>Good 👌</span>
+                                    <span>Perfecto! ✨</span>
+                                </div>
+                            </div>
+                        </details>
+            }
+        }
+    </form>
+    <button type="submit" class="submit-btn">Submit</button>
+</body>
+
+</html>

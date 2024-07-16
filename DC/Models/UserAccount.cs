@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
-namespace DC.Models.Entities
+namespace DC.Models
 {
   [Table("user_account")]
-  public class UserAccount
+  public record UserAccount
   {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

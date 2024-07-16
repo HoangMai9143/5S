@@ -5,7 +5,7 @@
 namespace DC.Migrations
 {
     /// <inheritdoc />
-    public partial class ApplicationDbMigration : Migration
+    public partial class AppDbMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

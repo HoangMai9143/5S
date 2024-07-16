@@ -4,16 +4,20 @@ using DC.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 
 var builder = WebApplication.CreateBuilder(args);
+SqlConnection conn = new SqlConnection(builder.Configuration.GetConnectionString("DbConnection"));
+conn.Open();
+conn.Dispose();
 
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    var connectionString = builder.Configuration.GetConnectionString("DbConnection");
+    Console.WriteLine(connectionString);
+
     options.UseSqlServer(connectionString);
 });
-
 
 
 // Add services to the container.
@@ -34,11 +38,6 @@ builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddHttpClient();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-{
-    var connectionString = builder.Configuration.GetConnectionString("DbConnection");
-    options.UseSqlServer(connectionString);
-});
 
 var app = builder.Build();
 

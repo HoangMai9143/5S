@@ -1,6 +1,5 @@
 @page "/"
 @page "/home"
-@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Home</PageTitle>
 
@@ -13,7 +12,7 @@
       <div class="card-body">
         <AuthorizeView>
           <NotAuthorized>
-            <span> You are not logged in. Please Login <a class="fw-bolder" href="/login">here</a> </span>
+            <span> You are not logged in. Please <a class="fw-bolder" href="/login">Login here</a> </span>
           </NotAuthorized>
           <Authorized>
             <span> You are now logged in as <b>@context.User.Identity.Name</b>.</span>

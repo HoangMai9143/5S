@@ -4,28 +4,28 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace DC.Models
 {
-  [Table("user_account")]
+  [Table("UserAccount")]
   public record UserAccount
   {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [Column("id")]
-    public int Id { get; set; }
+    [Column("ID")]
+    public int ID { get; set; }
 
-    [Column("user_name")]
+    [Column("userName")]
     [MaxLength(50)]
-    public string? Username { get; set; }
+    public string? userName { get; set; }
 
     [Column("password")]
     [MaxLength(50)]
-    public string? Password { get; set; }
+    public string? password { get; set; }
 
-    [Column("email")]
+    [Column("department")]
     [MaxLength(50)]
-    public string? Email { get; set; }
+    public string? department { get; set; }
 
     [Column("role")]
     [MaxLength(50)]
-    public string? Role { get; set; }
+    public string? role { get; set; }
   }
 }

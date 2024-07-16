@@ -1,0 +1,31 @@
+﻿@page "/"
+@page "/login"
+@using DC.ViewModels
+@inject AppDbContext appDbContext
+@inject NavigationManager navigationManager
+
+<div class="row">
+  <div class="col-lg-4 offset-lg-4 pt4 pb4 border" </div>
+    <EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm">
+      <DataAnnotationsValidator />
+      <div class="text-center flex-column">
+        <h1>LOGIN</h1>
+      </div>
+      <div class="mb-3">
+        <label>User Name</label>
+        <InputText @bind-Value="Model.userName" class="form-control" placeholder="Username" />
+        <ValidationMessage For="@(() => Model.userName)" />
+      </div>
+      <div class="mb-3">
+        <label>User Name</label>
+        <InputText @bind-Value="Model.password" type="password" class="form-control" placeholder="Password" />
+        <ValidationMessage For="@(() => Model.password)" />
+      </div>
+      <div class="mb-3 text-center">
+        <span class="text-danger">@errorMessage</span>
+      </div>
+      <div class="mb-3 d-grid gap-2">
+        <button type="submit" class="btn btn-primary">Login</button>
+      </div>
+    </EditForm>
+  </div>

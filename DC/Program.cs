@@ -1,23 +1,14 @@
 using System.Net;
 using DC.Components;
-using DC.Services;
+using DC.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 
 var builder = WebApplication.CreateBuilder(args);
-SqlConnection conn = new SqlConnection(builder.Configuration.GetConnectionString("DbConnection"));
-conn.Open();
-conn.Dispose();
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-{
-    var connectionString = builder.Configuration.GetConnectionString("DbConnection");
-    Console.WriteLine(connectionString);
 
-    options.UseSqlServer(connectionString);
-});
 
 
 // Add services to the container.
@@ -29,15 +20,16 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         option.Cookie.Name = "auth_cookie";
         option.LoginPath = "/login";
-        option.Cookie.MaxAge = TimeSpan.FromHours(6);
+        option.Cookie.MaxAge = TimeSpan.FromMinutes(5);
         option.AccessDeniedPath = "/access-denied";
     }
     );
-
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddHttpClient();
 
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 

@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Net.Http.Headers;
 using DC.Models;
-using DC.Services;
+using DC.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,9 +23,9 @@ namespace DC.Controllers
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<UserAccount?>> GetById(int id)
+    public async Task<ActionResult<UserAccount?>> GetById(int ID)
     {
-      return await _context.UserAccounts.Where(x => x.Id == id).SingleOrDefaultAsync();
+      return await _context.UserAccounts.Where(x => x.ID == ID).SingleOrDefaultAsync();
     }
 
     [HttpPost]
@@ -34,7 +34,7 @@ namespace DC.Controllers
       await _context.UserAccounts.AddAsync(userAccount);
       await _context.SaveChangesAsync();
 
-      return CreatedAtAction(nameof(GetById), new { id = userAccount.Id }, userAccount);
+      return CreatedAtAction(nameof(GetById), new { ID = userAccount.ID }, userAccount);
     }
 
     [HttpPut]
@@ -47,9 +47,9 @@ namespace DC.Controllers
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(int id)
+    public async Task<ActionResult> Delete(int ID)
     {
-      var userAccountGetById = await GetById(id);
+      var userAccountGetById = await GetById(ID);
       if (userAccountGetById.Value is null)
         return NotFound();
 

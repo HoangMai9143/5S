@@ -1,7 +1,7 @@
 using DC.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace DC.Services
+namespace DC.Data
 {
   public class AppDbContext : DbContext
   {

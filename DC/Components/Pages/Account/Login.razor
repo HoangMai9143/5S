@@ -5,9 +5,8 @@
 
 <PageTitle>Login</PageTitle>
 
-
 <div class="row">
-  <div class="col-lg-4 offset-lg-4 pt4 pb4" </div>
+  <div class="col-lg-4 offset-lg-4 pt4 pb4">
     <EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm">
       <DataAnnotationsValidator />
       <div class="text-center flex-column">
@@ -27,7 +26,8 @@
         <span class="text-danger">@errorMessage</span>
       </div>
       <div class="mb-3 d-grid gap-2">
-        <button type="submit" class="btn btn-primary">Login</button>
+        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Login</MudButton>
       </div>
     </EditForm>
   </div>
+</div>

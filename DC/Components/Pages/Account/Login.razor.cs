@@ -10,14 +10,11 @@ namespace DC.Components.Pages.Account
 {
   public partial class Login
   {
-
     [CascadingParameter]
     public HttpContext? httpContext { get; set; }
 
-
     [SupplyParameterFromForm]
     public LoginViewModel Model { get; set; } = new();
-
 
     private string? errorMessage;
 
@@ -26,12 +23,6 @@ namespace DC.Components.Pages.Account
       if (appDbContext == null)
       {
         errorMessage = "Database context is not available.";
-        return;
-      }
-
-      if (Model == null || string.IsNullOrEmpty(Model.userName) || string.IsNullOrEmpty(Model.password))
-      {
-        errorMessage = "Model is not valid.";
         return;
       }
 
@@ -44,10 +35,10 @@ namespace DC.Components.Pages.Account
       }
 
       var claims = new List<Claim>
-    {
-        new Claim(ClaimTypes.Name, userAccount.userName),
-        new Claim(ClaimTypes.Role, userAccount.role)
-    };
+      {
+          new Claim(ClaimTypes.Name, userAccount.userName),
+          new Claim(ClaimTypes.Role, userAccount.role)
+      };
 
       var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
       var principal = new ClaimsPrincipal(identity);

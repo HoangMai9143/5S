@@ -1,0 +1,29 @@
+@page "/question"
+
+@using System.Net.Http.Json
+@using System.Text.Json.Serialization;
+@inject HttpClient httpClient
+
+<MudTextField T="string" Clearable="true" Label="Type your question here" HelperText="Press enter to create" HelperTextOnFocus="true" Variant="Variant.Text" />
+
+<MudSimpleTable Style="overflow-x: auto;">
+  <thead>
+    <tr>
+      @foreach (var h in @headings)
+      {
+        <th>@h</th>
+      }
+    </tr>
+  </thead>
+  <tbody>
+    @foreach (var row in @rows)
+    {
+      <tr>
+        @foreach (var x in @row.Split())
+        {
+          <td>@x</td>
+        }
+      </tr>
+    }
+  </tbody>
+</MudSimpleTable>

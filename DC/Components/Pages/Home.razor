@@ -3,22 +3,23 @@
 
 <PageTitle>Home</PageTitle>
 
-<div class="row">
-  <div class="col-12">
-    <h2 class="fw-bolder">Welcome</h2>
-  </div>
-  <div class="col-12">
-    <div class="card">
-      <div class="card-body">
+<MudGrid>
+  <MudItem xs="12">
+    <MudText Typo="Typo.h5" Class="fw-bolder">Welcome</MudText>
+  </MudItem>
+  <MudItem xs="12">
+    <MudPaper Elevation="1">
+      <div class="p-4">
         <AuthorizeView>
           <NotAuthorized>
-            <span> You are not logged in. Please <a class="fw-bolder" href="/login">Login here</a> </span>
+            <MudText> You are not logged in. Please <MudLink Href="/login" Color="Color.Primary" Underline="Underline.Hover">Login here</MudLink>
+            </MudText>
           </NotAuthorized>
           <Authorized>
-            <span> You are now logged in as <b>@context.User.Identity.Name</b>.</span>
+            <MudText> You are now logged in as <b>@context.User.Identity.Name</b>.</MudText>
           </Authorized>
         </AuthorizeView>
       </div>
-    </div>
-  </div>
-</div>
+    </MudPaper>
+  </MudItem>
+</MudGrid>

@@ -9,6 +9,12 @@ namespace DC.Data
     {
 
     }
-    public DbSet<UserAccount> UserAccounts { get; set; }
+    public DbSet<Question> Question { get; set; }
+    public DbSet<Result> Result { get; set; }
+    public DbSet<Survey> Survey { get; set; }
+    public DbSet<SurveyQuestion> SurveyQuestion { get; set; }
+    public DbSet<SurveyResult> SurveyResults { get; set; }
+    public DbSet<User> User { get; set; }
+
   }
 }

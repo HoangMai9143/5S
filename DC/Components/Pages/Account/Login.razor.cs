@@ -26,7 +26,7 @@ namespace DC.Components.Pages.Account
         return;
       }
 
-      var userAccount = await appDbContext.UserAccounts.FirstOrDefaultAsync(x => x.userName == Model.userName && x.password == Model.password);
+      var userAccount = await appDbContext.User.FirstOrDefaultAsync(x => x.Username == Model.userName && x.Password == Model.password);
 
       if (userAccount == null)
       {
@@ -36,8 +36,8 @@ namespace DC.Components.Pages.Account
 
       var claims = new List<Claim>
       {
-          new Claim(ClaimTypes.Name, userAccount.userName),
-          new Claim(ClaimTypes.Role, userAccount.role)
+          new Claim(ClaimTypes.Name, userAccount.Username),
+          new Claim(ClaimTypes.Role, userAccount.Role)
       };
 
       var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

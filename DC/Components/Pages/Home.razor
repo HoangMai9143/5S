@@ -16,7 +16,7 @@
             </MudText>
           </NotAuthorized>
           <Authorized>
-            <MudText> You are now logged in as <b>@context.User.Identity.Name</b>.</MudText>
+            <MudText> You are now logged in as <b>@(context.User.Identity?.Name)</b>.</MudText>
           </Authorized>
         </AuthorizeView>
       </div>

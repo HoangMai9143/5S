@@ -7,20 +7,20 @@
 
 
 <div class="row">
-  <div class="col-lg-4 offset-lg-4 pt4 pb4 border" </div>
+  <div class="col-lg-4 offset-lg-4 pt4 pb4" </div>
     <EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm">
       <DataAnnotationsValidator />
       <div class="text-center flex-column">
         <h1>LOGIN</h1>
       </div>
       <div class="mb-3">
-        <label>User Name</label>
-        <InputText @bind-Value="Model.userName" class="form-control" placeholder="Username" />
+        <label>Username</label>
+        <InputText @bind-Value="Model.userName" class="form-control" placeholder="username" />
         <ValidationMessage For="@(() => Model.userName)" />
       </div>
       <div class="mb-3">
-        <label>User Name</label>
-        <InputText @bind-Value="Model.password" type="password" class="form-control" placeholder="Password" />
+        <label>Password</label>
+        <InputText @bind-Value="Model.password" type="password" class="form-control" placeholder="password" />
         <ValidationMessage For="@(() => Model.password)" />
       </div>
       <div class="mb-3 text-center">

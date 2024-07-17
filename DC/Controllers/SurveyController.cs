@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -5,7 +6,6 @@ using DC.Models;
 using DC.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
 
 namespace DC.Controllers
 {
@@ -31,6 +31,8 @@ namespace DC.Controllers
     [HttpPost]
     public async Task<ActionResult> Create(Survey survey)
     {
+      survey.CreatedAt = DateTime.UtcNow;
+
       await _context.Survey.AddAsync(survey);
       await _context.SaveChangesAsync();
 
@@ -43,7 +45,13 @@ namespace DC.Controllers
       if (id != survey.Id)
         return BadRequest();
 
-      _context.Entry(survey).State = EntityState.Modified;
+      var existingSurvey = await _context.Survey.FindAsync(id);
+      if (existingSurvey == null)
+        return NotFound();
+
+      survey.CreatedAt = existingSurvey.CreatedAt;
+
+      _context.Entry(existingSurvey).CurrentValues.SetValues(survey);
 
       try
       {

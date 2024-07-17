@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,12 +7,10 @@ using DC.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace DC.Controllers
 {
   [Route("api/[controller]")]
   [ApiController]
-
   public class UserController : ControllerBase
   {
     private readonly AppDbContext _context;
@@ -32,33 +31,44 @@ namespace DC.Controllers
     [HttpPost]
     public async Task<ActionResult> Create(User user)
     {
+      user.CreatedAt = DateTime.UtcNow;
+
       await _context.User.AddAsync(user);
       await _context.SaveChangesAsync();
 
-      return CreatedAtAction(nameof(GetById), new { ID = user.id }, user);
+      return CreatedAtAction(nameof(GetById), new { id = user.id }, user);
     }
 
-    [HttpPut]
-    public async Task<ActionResult> Update(User user)
+    [HttpPut("{id}")]
+    public async Task<ActionResult> Update(int id, User user)
     {
-      _context.User.Update(user);
+      if (id != user.id)
+        return BadRequest();
+
+      // Ensure the CreatedDate is not modified
+      var existingUser = await _context.User.FindAsync(id);
+      if (existingUser == null)
+        return NotFound();
+
+      user.CreatedAt = existingUser.CreatedAt;
+
+      _context.Entry(existingUser).CurrentValues.SetValues(user);
       await _context.SaveChangesAsync();
 
-      return Ok();
+      return NoContent();
     }
 
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
-      var userAccountGetById = await GetById(id);
-      if (userAccountGetById.Value is null)
+      var user = await _context.User.FindAsync(id);
+      if (user == null)
         return NotFound();
 
-      _context.Remove(userAccountGetById.Value);
+      _context.User.Remove(user);
       await _context.SaveChangesAsync();
 
-      return Ok();
+      return NoContent();
     }
-
   }
 }

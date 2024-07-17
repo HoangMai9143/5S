@@ -1,6 +1,6 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace DC.Models
 {
@@ -19,7 +19,7 @@ namespace DC.Models
     public DateTime EndDate { get; set; }
 
     [Column("created_date")]
-    public DateTime CreatedDate { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     [Column("isActive")]
     public bool IsActive { get; set; }

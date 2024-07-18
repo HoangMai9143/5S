@@ -3,5 +3,9 @@
 @using System.Net.Http.Json
 @using System.Text.Json.Serialization;
 @inject HttpClient httpClient
+@rendermode InteractiveServer
 
-<MudTextField T="string" Clearable="true" Label="Type your question here" HelperText="Press enter to create" HelperTextOnFocus="true" Variant="Variant.Text" />
+
+<PageTitle>Question</PageTitle>
+
+<MudTextField Label="Create Question" HelperText="Press Enter to create new question" Variant="Variant.Filled" HelperTextOnFocus="true" />

@@ -1,9 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel;
+
 
 namespace DC.Models
 {
-  [Table("StaffModel")]
+  [Table("Staff")]
   public class StaffModel
   {
     [Key]
@@ -18,7 +20,8 @@ namespace DC.Models
     [MaxLength(255)]
     public string? Department { get; set; }
 
-    [Column("isActive")]
-    public bool IsActive { get; set; }
+    [Column("isActive", TypeName = "bit")]
+    [DefaultValue(true)]
+    public bool IsActive { get; set; } = true;
   }
 }

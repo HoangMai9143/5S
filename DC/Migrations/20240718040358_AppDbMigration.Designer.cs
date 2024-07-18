@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DC.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240718022103_AppDbMigration")]
+    [Migration("20240718040358_AppDbMigration")]
     partial class AppDbMigration
     {
         /// <inheritdoc />
@@ -40,7 +40,7 @@ namespace DC.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("QuestionModel");
+                    b.ToTable("Question");
                 });
 
             modelBuilder.Entity("DC.Models.ResultModel", b =>
@@ -80,7 +80,7 @@ namespace DC.Migrations
 
                     b.HasIndex("SurveyId");
 
-                    b.ToTable("ResultModel");
+                    b.ToTable("Result");
                 });
 
             modelBuilder.Entity("DC.Models.StaffModel", b =>
@@ -107,7 +107,7 @@ namespace DC.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("StaffModel");
+                    b.ToTable("Staff");
                 });
 
             modelBuilder.Entity("DC.Models.SurveyModel", b =>
@@ -120,11 +120,11 @@ namespace DC.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("datetime")
                         .HasColumnName("created_date");
 
                     b.Property<DateTime>("EndDate")
-                        .HasColumnType("date")
+                        .HasColumnType("datetime")
                         .HasColumnName("end_date");
 
                     b.Property<bool>("IsActive")
@@ -132,12 +132,12 @@ namespace DC.Migrations
                         .HasColumnName("isActive");
 
                     b.Property<DateTime>("StartDate")
-                        .HasColumnType("date")
+                        .HasColumnType("datetime")
                         .HasColumnName("start_date");
 
                     b.HasKey("Id");
 
-                    b.ToTable("SurveyModel");
+                    b.ToTable("Survey");
                 });
 
             modelBuilder.Entity("DC.Models.SurveyQuestionModel", b =>
@@ -163,7 +163,7 @@ namespace DC.Migrations
 
                     b.HasIndex("SurveyId");
 
-                    b.ToTable("SurveyQuestionModel");
+                    b.ToTable("SurveyQuestion");
                 });
 
             modelBuilder.Entity("DC.Models.SurveyResultModel", b =>
@@ -197,7 +197,7 @@ namespace DC.Migrations
 
                     b.HasIndex("SurveyId");
 
-                    b.ToTable("SurveyResultModel");
+                    b.ToTable("SurveyResult");
                 });
 
             modelBuilder.Entity("DC.Models.UserAccountModel", b =>
@@ -230,7 +230,7 @@ namespace DC.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserAccountModel");
+                    b.ToTable("UserAccount");
                 });
 
             modelBuilder.Entity("DC.Models.ResultModel", b =>

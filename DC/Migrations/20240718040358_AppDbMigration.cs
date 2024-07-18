@@ -12,7 +12,7 @@ namespace DC.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "QuestionModel",
+                name: "Question",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -21,11 +21,11 @@ namespace DC.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_QuestionModel", x => x.Id);
+                    table.PrimaryKey("PK_Question", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "StaffModel",
+                name: "Staff",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -36,27 +36,27 @@ namespace DC.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_StaffModel", x => x.Id);
+                    table.PrimaryKey("PK_Staff", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "SurveyModel",
+                name: "Survey",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    start_date = table.Column<DateTime>(type: "date", nullable: false),
-                    end_date = table.Column<DateTime>(type: "date", nullable: false),
-                    created_date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    start_date = table.Column<DateTime>(type: "datetime", nullable: false),
+                    end_date = table.Column<DateTime>(type: "datetime", nullable: false),
+                    created_date = table.Column<DateTime>(type: "datetime", nullable: false),
                     isActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SurveyModel", x => x.id);
+                    table.PrimaryKey("PK_Survey", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserAccountModel",
+                name: "UserAccount",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "int", nullable: false)
@@ -68,11 +68,11 @@ namespace DC.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserAccountModel", x => x.id);
+                    table.PrimaryKey("PK_UserAccount", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "ResultModel",
+                name: "Result",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "int", nullable: false)
@@ -85,29 +85,29 @@ namespace DC.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ResultModel", x => x.id);
+                    table.PrimaryKey("PK_Result", x => x.id);
                     table.ForeignKey(
-                        name: "FK_ResultModel_QuestionModel_question_id",
+                        name: "FK_Result_Question_question_id",
                         column: x => x.question_id,
-                        principalTable: "QuestionModel",
+                        principalTable: "Question",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ResultModel_StaffModel_staff_id",
+                        name: "FK_Result_Staff_staff_id",
                         column: x => x.staff_id,
-                        principalTable: "StaffModel",
+                        principalTable: "Staff",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ResultModel_SurveyModel_survey_id",
+                        name: "FK_Result_Survey_survey_id",
                         column: x => x.survey_id,
-                        principalTable: "SurveyModel",
+                        principalTable: "Survey",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "SurveyQuestionModel",
+                name: "SurveyQuestion",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "int", nullable: false)
@@ -117,23 +117,23 @@ namespace DC.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SurveyQuestionModel", x => x.id);
+                    table.PrimaryKey("PK_SurveyQuestion", x => x.id);
                     table.ForeignKey(
-                        name: "FK_SurveyQuestionModel_QuestionModel_question_id",
+                        name: "FK_SurveyQuestion_Question_question_id",
                         column: x => x.question_id,
-                        principalTable: "QuestionModel",
+                        principalTable: "Question",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_SurveyQuestionModel_SurveyModel_survey_id",
+                        name: "FK_SurveyQuestion_Survey_survey_id",
                         column: x => x.survey_id,
-                        principalTable: "SurveyModel",
+                        principalTable: "Survey",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "SurveyResultModel",
+                name: "SurveyResult",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "int", nullable: false)
@@ -145,54 +145,54 @@ namespace DC.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SurveyResultModel", x => x.id);
+                    table.PrimaryKey("PK_SurveyResult", x => x.id);
                     table.ForeignKey(
-                        name: "FK_SurveyResultModel_StaffModel_staff_id",
+                        name: "FK_SurveyResult_Staff_staff_id",
                         column: x => x.staff_id,
-                        principalTable: "StaffModel",
+                        principalTable: "Staff",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_SurveyResultModel_SurveyModel_survey_id",
+                        name: "FK_SurveyResult_Survey_survey_id",
                         column: x => x.survey_id,
-                        principalTable: "SurveyModel",
+                        principalTable: "Survey",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ResultModel_question_id",
-                table: "ResultModel",
+                name: "IX_Result_question_id",
+                table: "Result",
                 column: "question_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ResultModel_staff_id",
-                table: "ResultModel",
+                name: "IX_Result_staff_id",
+                table: "Result",
                 column: "staff_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ResultModel_survey_id",
-                table: "ResultModel",
+                name: "IX_Result_survey_id",
+                table: "Result",
                 column: "survey_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SurveyQuestionModel_question_id",
-                table: "SurveyQuestionModel",
+                name: "IX_SurveyQuestion_question_id",
+                table: "SurveyQuestion",
                 column: "question_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SurveyQuestionModel_survey_id",
-                table: "SurveyQuestionModel",
+                name: "IX_SurveyQuestion_survey_id",
+                table: "SurveyQuestion",
                 column: "survey_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SurveyResultModel_staff_id",
-                table: "SurveyResultModel",
+                name: "IX_SurveyResult_staff_id",
+                table: "SurveyResult",
                 column: "staff_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SurveyResultModel_survey_id",
-                table: "SurveyResultModel",
+                name: "IX_SurveyResult_survey_id",
+                table: "SurveyResult",
                 column: "survey_id");
         }
 
@@ -200,25 +200,25 @@ namespace DC.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ResultModel");
+                name: "Result");
 
             migrationBuilder.DropTable(
-                name: "SurveyQuestionModel");
+                name: "SurveyQuestion");
 
             migrationBuilder.DropTable(
-                name: "SurveyResultModel");
+                name: "SurveyResult");
 
             migrationBuilder.DropTable(
-                name: "UserAccountModel");
+                name: "UserAccount");
 
             migrationBuilder.DropTable(
-                name: "QuestionModel");
+                name: "Question");
 
             migrationBuilder.DropTable(
-                name: "StaffModel");
+                name: "Staff");
 
             migrationBuilder.DropTable(
-                name: "SurveyModel");
+                name: "Survey");
         }
     }
 }

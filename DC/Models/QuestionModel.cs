@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DC.Models
 {
-  [Table("QuestionModel")]
+  [Table("Question")]
   public record QuestionModel
   {
     [Key]

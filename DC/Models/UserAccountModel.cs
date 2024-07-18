@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel;
 
 namespace DC.Models
 {
-  [Table("UserAccountModel")]
+  [Table("UserAccount")]
   public record UserAccountModel
   {
     [Key]
@@ -21,9 +22,11 @@ namespace DC.Models
 
     [Column("role")]
     [MaxLength(255)]
-    public string? Role { get; set; }
+    [DefaultValue("User")]
+    public string? Role { get; set; } = "User";
 
-    [Column("isActive")]
-    public bool IsActive { get; set; }
+    [Column("isActive", TypeName = "bit")]
+    [DefaultValue(true)]
+    public bool IsActive { get; set; } = true;
   }
 }

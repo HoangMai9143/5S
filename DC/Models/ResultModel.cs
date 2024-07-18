@@ -1,11 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace DC.Models
 {
-  [Table("survey_question")]
-  public record SurveyQuestion
+  [Table("ResultModel")]
+  public record ResultModel
   {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -15,13 +14,25 @@ namespace DC.Models
     [Column("survey_id")]
     public int SurveyId { get; set; }
 
+    [Column("staff_id")]
+    public int StaffId { get; set; }
+
     [Column("question_id")]
     public int QuestionId { get; set; }
 
+    [Column("grade")]
+    public int Grade { get; set; }
+
+    [Column("note")]
+    public string? Note { get; set; }
+
     [ForeignKey("SurveyId")]
-    public Survey? Survey { get; set; }
+    public SurveyModel? Survey { get; set; }
+
+    [ForeignKey("StaffId")]
+    public StaffModel? Staff { get; set; }
 
     [ForeignKey("QuestionId")]
-    public Question? Question { get; set; }
+    public QuestionModel? Question { get; set; }
   }
 }

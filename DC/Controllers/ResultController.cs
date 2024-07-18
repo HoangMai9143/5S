@@ -17,28 +17,28 @@ namespace DC.Controllers
     public ResultController(AppDbContext context) => _context = context;
 
     [HttpGet]
-    public ActionResult<IEnumerable<Result>> Get()
+    public ActionResult<IEnumerable<ResultModel>> GetAll()
     {
-      return _context.Result;
+      return _context.ResultModel;
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Result?>> GetById(int id)
+    public async Task<ActionResult<ResultModel?>> GetById(int id)
     {
-      return await _context.Result.FindAsync(id);
+      return await _context.ResultModel.FindAsync(id);
     }
 
     [HttpPost]
-    public async Task<ActionResult> Create(Result result)
+    public async Task<ActionResult> Create(ResultModel result)
     {
-      await _context.Result.AddAsync(result);
+      await _context.ResultModel.AddAsync(result);
       await _context.SaveChangesAsync();
 
       return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult> Update(int id, Result result)
+    public async Task<ActionResult> Update(int id, ResultModel result)
     {
       if (id != result.Id)
         return BadRequest();
@@ -61,13 +61,13 @@ namespace DC.Controllers
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(int id)
+    public async Task<ActionResult> DeleteById(int id)
     {
-      var result = await _context.Result.FindAsync(id);
+      var result = await _context.ResultModel.FindAsync(id);
       if (result == null)
         return NotFound();
 
-      _context.Result.Remove(result);
+      _context.ResultModel.Remove(result);
       await _context.SaveChangesAsync();
 
       return NoContent();
@@ -75,7 +75,7 @@ namespace DC.Controllers
 
     private bool ResultExists(int id)
     {
-      return _context.Result.Any(e => e.Id == id);
+      return _context.ResultModel.Any(e => e.Id == id);
     }
   }
 }

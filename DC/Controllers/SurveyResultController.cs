@@ -17,28 +17,28 @@ namespace DC.Controllers
     public SurveyResultController(AppDbContext context) => _context = context;
 
     [HttpGet]
-    public ActionResult<IEnumerable<SurveyResult>> Get()
+    public ActionResult<IEnumerable<SurveyResultModel>> GetAll()
     {
-      return _context.SurveyResult;
+      return _context.SurveyResultModel;
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<SurveyResult?>> GetById(int id)
+    public async Task<ActionResult<SurveyResultModel?>> GetById(int id)
     {
-      return await _context.SurveyResult.FindAsync(id);
+      return await _context.SurveyResultModel.FindAsync(id);
     }
 
     [HttpPost]
-    public async Task<ActionResult> Create(SurveyResult surveyResult)
+    public async Task<ActionResult> Create(SurveyResultModel surveyResult)
     {
-      await _context.SurveyResult.AddAsync(surveyResult);
+      await _context.SurveyResultModel.AddAsync(surveyResult);
       await _context.SaveChangesAsync();
 
       return CreatedAtAction(nameof(GetById), new { id = surveyResult.Id }, surveyResult);
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult> Update(int id, SurveyResult surveyResult)
+    public async Task<ActionResult> Update(int id, SurveyResultModel surveyResult)
     {
       if (id != surveyResult.Id)
         return BadRequest();
@@ -61,13 +61,13 @@ namespace DC.Controllers
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(int id)
+    public async Task<ActionResult> DeleteById(int id)
     {
-      var surveyResult = await _context.SurveyResult.FindAsync(id);
+      var surveyResult = await _context.SurveyResultModel.FindAsync(id);
       if (surveyResult == null)
         return NotFound();
 
-      _context.SurveyResult.Remove(surveyResult);
+      _context.SurveyResultModel.Remove(surveyResult);
       await _context.SaveChangesAsync();
 
       return NoContent();
@@ -75,7 +75,7 @@ namespace DC.Controllers
 
     private bool SurveyResultExists(int id)
     {
-      return _context.SurveyResult.Any(e => e.Id == id);
+      return _context.SurveyResultModel.Any(e => e.Id == id);
     }
   }
 }

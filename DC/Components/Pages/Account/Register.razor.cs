@@ -37,7 +37,7 @@ namespace DC.Components.Pages.Account
 
       try
       {
-        var newUser = new User
+        var newUser = new UserAccountModel
         {
           Username = Model.Username,
           Password = Model.Password, // Note: In a real application, you should hash the password

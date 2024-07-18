@@ -17,39 +17,39 @@ namespace DC.Controllers
     public SurveyController(AppDbContext context) => _context = context;
 
     [HttpGet]
-    public ActionResult<IEnumerable<Survey>> Get()
+    public ActionResult<IEnumerable<SurveyModel>> GetAll()
     {
-      return _context.Survey;
+      return _context.SurveyModel;
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Survey?>> GetById(int id)
+    public async Task<ActionResult<SurveyModel?>> GetById(int id)
     {
-      return await _context.Survey.FindAsync(id);
+      return await _context.SurveyModel.FindAsync(id);
     }
 
     [HttpPost]
-    public async Task<ActionResult> Create(Survey survey)
+    public async Task<ActionResult> Create(SurveyModel survey)
     {
-      survey.CreatedAt = DateTime.UtcNow;
+      survey.CreatedDate = DateTime.UtcNow;
 
-      await _context.Survey.AddAsync(survey);
+      await _context.SurveyModel.AddAsync(survey);
       await _context.SaveChangesAsync();
 
       return CreatedAtAction(nameof(GetById), new { id = survey.Id }, survey);
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult> Update(int id, Survey survey)
+    public async Task<ActionResult> Update(int id, SurveyModel survey)
     {
       if (id != survey.Id)
         return BadRequest();
 
-      var existingSurvey = await _context.Survey.FindAsync(id);
+      var existingSurvey = await _context.SurveyModel.FindAsync(id);
       if (existingSurvey == null)
         return NotFound();
 
-      survey.CreatedAt = existingSurvey.CreatedAt;
+      survey.CreatedDate = existingSurvey.CreatedDate;
 
       _context.Entry(existingSurvey).CurrentValues.SetValues(survey);
 
@@ -69,13 +69,13 @@ namespace DC.Controllers
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(int id)
+    public async Task<ActionResult> DeleteById(int id)
     {
-      var survey = await _context.Survey.FindAsync(id);
+      var survey = await _context.SurveyModel.FindAsync(id);
       if (survey == null)
         return NotFound();
 
-      _context.Survey.Remove(survey);
+      _context.SurveyModel.Remove(survey);
       await _context.SaveChangesAsync();
 
       return NoContent();
@@ -83,7 +83,7 @@ namespace DC.Controllers
 
     private bool SurveyExists(int id)
     {
-      return _context.Survey.Any(e => e.Id == id);
+      return _context.SurveyModel.Any(e => e.Id == id);
     }
   }
 }

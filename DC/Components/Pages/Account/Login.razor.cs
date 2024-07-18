@@ -20,13 +20,15 @@ namespace DC.Components.Pages.Account
 
     private async Task Authenticate()
     {
+
+
       if (appDbContext == null)
       {
         errorMessage = "Database context is not available.";
         return;
       }
 
-      var userAccount = await appDbContext.User.FirstOrDefaultAsync(x => x.Username == Model.userName && x.Password == Model.password);
+      var userAccount = await appDbContext.UserAccountModel.FirstOrDefaultAsync(x => x.Username == Model.userName && x.Password == Model.password);
 
       if (userAccount == null)
       {

@@ -15,10 +15,10 @@
     <div class="employee-name">Current employee: <span id="employeeName">Hoang Mai</span></div>
     <form id="gradingForm">
         @{
-            var questions = new List<QuestionModel> {
-        new QuestionModel { Title = "Cleanliness" },
-        new QuestionModel { Title = "Tidiness" },
-        new QuestionModel { Title = "Decoration" }
+            var questions = new List<TestQuestionModel> {
+        new TestQuestionModel { Title = "Cleanliness" },
+        new TestQuestionModel { Title = "Tidiness" },
+        new TestQuestionModel { Title = "Decoration" }
         };
 
             for (int i = 0; i < questions.Count; i++)

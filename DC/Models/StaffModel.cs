@@ -12,11 +12,11 @@ namespace DC.Models
 
     [Column("full_name")]
     [MaxLength(255)]
-    public string FullName { get; set; }
+    public string? FullName { get; set; }
 
     [Column("department")]
     [MaxLength(255)]
-    public string Department { get; set; }
+    public string? Department { get; set; }
 
     [Column("isActive")]
     public bool IsActive { get; set; }

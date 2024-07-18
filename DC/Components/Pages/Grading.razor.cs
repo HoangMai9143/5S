@@ -10,7 +10,7 @@ namespace DC.Components.Pages
 
   }
 }
-public class QuestionModel
+public class TestQuestionModel
 {
   public string? Title { get; set; }
 }

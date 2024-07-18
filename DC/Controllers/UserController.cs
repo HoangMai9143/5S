@@ -19,20 +19,20 @@ namespace DC.Controllers
     [HttpGet]
     public ActionResult<IEnumerable<UserAccountModel>> GetAll()
     {
-      return _context.UserModel;
+      return _context.UserAccountModel;
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<UserAccountModel?>> GetById(int id)
     {
-      return await _context.UserModel.Where(x => x.Id == id).SingleOrDefaultAsync();
+      return await _context.UserAccountModel.Where(x => x.Id == id).SingleOrDefaultAsync();
     }
 
     [HttpPost]
     public async Task<ActionResult> Create(UserAccountModel user)
     {
 
-      await _context.UserModel.AddAsync(user);
+      await _context.UserAccountModel.AddAsync(user);
       await _context.SaveChangesAsync();
 
       return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
@@ -45,7 +45,7 @@ namespace DC.Controllers
         return BadRequest();
 
       // Ensure the CreatedDate is not modified
-      var existingUser = await _context.UserModel.FindAsync(id);
+      var existingUser = await _context.UserAccountModel.FindAsync(id);
       if (existingUser == null)
         return NotFound();
 
@@ -59,11 +59,11 @@ namespace DC.Controllers
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteById(int id)
     {
-      var user = await _context.UserModel.FindAsync(id);
+      var user = await _context.UserAccountModel.FindAsync(id);
       if (user == null)
         return NotFound();
 
-      _context.UserModel.Remove(user);
+      _context.UserAccountModel.Remove(user);
       await _context.SaveChangesAsync();
 
       return NoContent();

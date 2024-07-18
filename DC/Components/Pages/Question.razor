@@ -1,11 +1,38 @@
 @page "/question"
-
-@using System.Net.Http.Json
-@using System.Text.Json.Serialization;
-@inject HttpClient httpClient
+@using DC.Models
+@using MudBlazor
+@inject AppDbContext appDbContext
 @rendermode InteractiveServer
 
 
-<PageTitle>Question</PageTitle>
+<PageTitle>Questions</PageTitle>
 
-<MudTextField T="string" Label="Create Question" HelperText="Press Enter to create new question" Variant="Variant.Filled" HelperTextOnFocus="true" />
+
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudText Typo="Typo.h3" Class="mb-4">Questions</MudText>
+
+    <MudText HtmlTag="span">Item: @_selectedItemText</MudText>
+    <MudText>Selected items (@selectedQuestions?.Count): @(selectedQuestions == null ? "" : string.Join(", ", selectedQuestions.OrderBy(x => x.Id).Select(x => x.QuestionContext)))</MudText>
+
+    <MudTable @ref="_table" T="QuestionModel" Items="@questions" MultiSelection="true" SelectionChangeable="_selectionChangeable" Hover="true" @bind-SelectedItems="selectedQuestions" OnRowClick="@OnRowClick" SelectOnRowClick="@_selectOnRowClick">
+        <HeaderContent>
+            <MudTh>ID</MudTh>
+            <MudTh>Question Context</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="ID">@context.Id</MudTd>
+            <MudTd DataLabel="Question Context">@context.QuestionContext</MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[] { 10, 25, 50, 100 }" />
+        </PagerContent>
+        <FooterContent>
+            <MudTd colspan="2">Select All</MudTd>
+        </FooterContent>
+    </MudTable>
+</MudContainer>

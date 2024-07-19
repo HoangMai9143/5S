@@ -1,12 +1,19 @@
 ﻿@inherits LayoutComponentBase
 @using DC.Components
 
+
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
 <div class="page">
     <div class="sidebar">
         <NavMenu />
     </div>
 
     <main>
+        
         <div class="top-row px-4">
             <AuthorizeView>
                 <NotAuthorized>
@@ -28,8 +35,3 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
-
-<MudThemeProvider />
-<MudPopoverProvider />
-<MudDialogProvider />
-<MudSnackbarProvider />

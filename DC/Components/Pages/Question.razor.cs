@@ -38,6 +38,16 @@ namespace DC.Components.Pages
         StateHasChanged();
       }
     }
+    private async Task DeleteQuestion(QuestionModel questionToDelete)
+    {
+      if (questionToDelete != null)
+      {
+        appDbContext.Set<QuestionModel>().Remove(questionToDelete);
+        await appDbContext.SaveChangesAsync();
+        questions.Remove(questionToDelete);
+        StateHasChanged();
+      }
+    }
 
     private async Task OnKeyDown(KeyboardEventArgs e)
     {

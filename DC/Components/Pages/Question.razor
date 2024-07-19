@@ -1,10 +1,11 @@
 @page "/question"
 @using DC.Models
 @using MudBlazor
+
 @inject AppDbContext appDbContext
+@inject IDialogService dialogService
+
 @rendermode InteractiveServer
-
-
 
 <MudThemeProvider />
 <MudPopoverProvider />
@@ -13,12 +14,19 @@
 
 <PageTitle>Questions</PageTitle>
 
-<MudTextField @bind-Value="newQuestionText" T="string" Label="Enter new Question here" HelperText="Press Enter to insert new question" HelperTextOnFocus="true" Variant="Variant.Text" AdornmentIcon="@Icons.Material.Filled.Send" AdornmentColor="Color.Primary" OnAdornmentClick="@InsertQuestion" OnKeyDown="@OnKeyDown" />
-<div>
-    <MudDataGrid MultiSelection="true" Items="@questions">
-        <Columns>
-            <PropertyColumn Property="x => x.Id" Title="id" Width="100px" />
-            <PropertyColumn Property="x => x.QuestionContext" Title="context" />
-        </Columns>
-    </MudDataGrid>
-</div>
+<MudTextField @bind-Value="newQuestionText" T="string" Label="Enter new Question here" HelperText="Press Enter to insert new question" HelperTextOnFocus="true" Variant="Variant.Text" AdornmentIcon="@Icons.Material.Filled.Send" AdornmentColor="Color.Primary" OnAdornmentClick="@InsertQuestion" Clearable OnKeyDown="@OnKeyDown" />
+
+<MudDataGrid Items="@questions">
+    <Columns>
+        <PropertyColumn SortBy="x => x.Id" Property="x => x.Id" Title="id" Width="100px" Defaultsort />
+        <PropertyColumn Property="x => x.QuestionContext" Title="context" />
+        <TemplateColumn CellClass="d-flex justify-end">
+            <CellTemplate>
+                <MudStack Row>
+                    <MudFab Color="@Color.Primary" Size="@Size.Medium" StartIcon="@Icons.Material.Filled.Edit" />
+                    <MudFab Color="@Color.Secondary" Size="@Size.Medium" StartIcon="@Icons.Material.Filled.Delete" @onclick="(() => DeleteQuestion(context.Item))" />
+                </MudStack>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+</MudDataGrid>

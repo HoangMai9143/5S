@@ -40,13 +40,11 @@ namespace DC.Components.Pages
       try
       {
         questions = await appDbContext.Set<QuestionModel>().OrderByDescending(q => q.Id).ToListAsync();
-        TotalQuestions = questions.Count;
       }
       catch (Exception ex)
       {
         Console.WriteLine($"Error loading questions: {ex.Message}");
         questions = new List<QuestionModel>();
-        TotalQuestions = 0;
       }
     }
 

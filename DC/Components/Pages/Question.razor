@@ -25,7 +25,7 @@
     </MudItem>
 </MudGrid>
 
-<MudDataGrid T="QuestionModel" MultiSelection="true" Items="@questions" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="true" RowClick="@RowClicked" RowContextMenuClick="RowRightClicked" SelectedItemsChanged="@SelectedItemsChanged" Dense="true" Elevation="0" Class="mt-4">
+<MudDataGrid T="QuestionModel" MultiSelection="true" Items="@questions" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="true" RowClick="@RowClicked" RowContextMenuClick="RowRightClicked" SelectedItemsChanged="@SelectedItemsChanged" Dense="true" Elevation="0" Class="no-scroll mt-4">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Questions</MudText>
         <MudSpacer />
@@ -49,5 +49,4 @@
     </PagerContent>
 </MudDataGrid>
 
-<MudText Typo="Typo.body2" Class="mt-4">Total Questions: @TotalQuestions</MudText>
 <MudText Typo="Typo.body2">Questions in List: @questions.Count</MudText>

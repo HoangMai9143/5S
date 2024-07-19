@@ -14,19 +14,40 @@
 
 <PageTitle>Questions</PageTitle>
 
-<MudTextField @bind-Value="newQuestionText" T="string" Label="Enter new Question here" HelperText="Press Enter to insert new question" HelperTextOnFocus="true" Variant="Variant.Text" AdornmentIcon="@Icons.Material.Filled.Send" AdornmentColor="Color.Primary" OnAdornmentClick="@InsertQuestion" Clearable OnKeyDown="@OnKeyDown" />
+<MudGrid>
+    <MudItem xs="10" sm="11">
+        <MudTextField @bind-Value="newQuestionText" T="string" Label="Enter new Question here" HelperText="Press Enter to insert new question" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" OnKeyDown="@OnKeyDown" />
+    </MudItem>
+    <MudItem xs="2" sm="1">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@InsertQuestion" Disabled="@string.IsNullOrWhiteSpace(newQuestionText)">
+            Add
+        </MudButton>
+    </MudItem>
+</MudGrid>
 
-<MudDataGrid Items="@questions">
+<MudDataGrid T="QuestionModel" MultiSelection="true" Items="@questions" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="true" RowClick="@RowClicked" RowContextMenuClick="RowRightClicked" SelectedItemsChanged="@SelectedItemsChanged" Dense="true" Elevation="0" Class="mt-4">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Questions</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
     <Columns>
-        <PropertyColumn SortBy="x => x.Id" Property="x => x.Id" Title="id" Width="100px" Defaultsort />
-        <PropertyColumn Property="x => x.QuestionContext" Title="context" />
+        <SelectColumn T="QuestionModel" />
+        <PropertyColumn Property="x => x.Id" Title="ID" InitialDirection="SortDirection.Descending" />
+        <PropertyColumn Property="x => x.QuestionContext" Title="Question" />
         <TemplateColumn CellClass="d-flex justify-end">
             <CellTemplate>
                 <MudStack Row>
-                    <MudFab Color="@Color.Primary" Size="@Size.Medium" StartIcon="@Icons.Material.Filled.Edit" />
-                    <MudFab Color="@Color.Secondary" Size="@Size.Medium" StartIcon="@Icons.Material.Filled.Delete" @onclick="(() => DeleteQuestion(context.Item))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="Size.Small" OnClick="(() => DeleteQuestion(context.Item))" />
                 </MudStack>
             </CellTemplate>
         </TemplateColumn>
     </Columns>
+    <PagerContent>
+        <MudDataGridPager T="QuestionModel" />
+    </PagerContent>
 </MudDataGrid>
+
+<MudText Typo="Typo.body2" Class="mt-4">Total Questions: @TotalQuestions</MudText>
+<MudText Typo="Typo.body2">Questions in List: @questions.Count</MudText>

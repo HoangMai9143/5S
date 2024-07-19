@@ -66,11 +66,11 @@ namespace DC.Components.Pages
       if (questionToDelete != null)
       {
         var parameters = new DialogParameters
-{
-{ "ContentText", "Are you sure you want to delete this question?" },
-{ "ButtonText", "Delete" },
-{ "Color", Color.Error }
-};
+        {
+          { "ContentText", "Are you sure you want to delete this question?" },
+          { "ButtonText", "Delete" },
+          { "Color", Color.Error }
+        };
 
         var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall, Position = DialogPosition.Center };
 
@@ -92,12 +92,39 @@ namespace DC.Components.Pages
       StateHasChanged();
     }
 
+    private async Task OpenEditDialog(QuestionModel questionToEdit)
+    {
+      var parameters = new DialogParameters
+      {
+        { "QuestionText", questionToEdit.QuestionContext }
+      };
+
+      var dialog = await dialogService.ShowAsync<EditQuestionDialog>("Edit Question", parameters);
+      var result = await dialog.Result;
+
+      if (!result.Canceled)
+      {
+        var editedText = result.Data.ToString();
+        await UpdateQuestion(questionToEdit, editedText);
+      }
+    }
+
+    private async Task UpdateQuestion(QuestionModel questionToUpdate, string newText)
+    {
+      questionToUpdate.QuestionContext = newText;
+      appDbContext.Set<QuestionModel>().Update(questionToUpdate);
+      await appDbContext.SaveChangesAsync();
+      StateHasChanged();
+    }
+
     private async Task OnKeyDown(KeyboardEventArgs e)
     {
       if (e.Key == "Enter")
       {
         await InsertQuestion();
+
       }
+      StateHasChanged();
     }
 
     void RowClicked(DataGridRowClickEventArgs<QuestionModel> args)

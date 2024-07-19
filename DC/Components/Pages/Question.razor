@@ -25,7 +25,7 @@
     </MudItem>
 </MudGrid>
 
-<MudDataGrid T="QuestionModel" MultiSelection="true" Items="@questions" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="true" RowClick="@RowClicked" RowContextMenuClick="RowRightClicked" SelectedItemsChanged="@SelectedItemsChanged" Dense="true" Elevation="0" Class="no-scroll mt-4">
+<MudDataGrid T="QuestionModel" Items="@questions" SortMode="SortMode.Multiple"  QuickFilter="@_quickFilter" Hideable="true" RowClick="@RowClicked" RowContextMenuClick="RowRightClicked" SelectedItemsChanged="@SelectedItemsChanged" Dense="true" Elevation="0" Class="no-scroll mt-4">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Questions</MudText>
         <MudSpacer />
@@ -38,8 +38,8 @@
         <TemplateColumn CellClass="d-flex justify-end">
             <CellTemplate>
                 <MudStack Row>
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="Size.Small" OnClick="(() => DeleteQuestion(context.Item))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenEditDialog(context.Item))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="Size.Small" OnClick="@(() => DeleteQuestion(context.Item))" />
                 </MudStack>
             </CellTemplate>
         </TemplateColumn>

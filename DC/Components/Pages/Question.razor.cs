@@ -51,13 +51,13 @@ namespace DC.Components.Pages
       if (questionToDelete != null)
       {
         var parameters = new DialogParameters
-        {
-            { "ContentText", "Are you sure you want to delete this question?" },
-            { "ButtonText", "Delete" },
-            { "Color", Color.Error }
-        };
+    {
+        { "ContentText", "Are you sure you want to delete this question?" },
+        { "ButtonText", "Delete" },
+        { "Color", Color.Error }
+    };
 
-        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall, Position = DialogPosition.Center };
 
         var dialog = await dialogService.ShowAsync<ConfirmDialog>("Delete Confirmation", parameters, options);
         var result = await dialog.Result;

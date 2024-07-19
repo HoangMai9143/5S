@@ -4,6 +4,7 @@ using MudBlazor;
 using DC.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Components.Web;
+using DC.Components.Dialog;
 
 namespace DC.Components.Pages
 {
@@ -38,14 +39,33 @@ namespace DC.Components.Pages
         StateHasChanged();
       }
     }
+    private async Task ConfirmedDelete(QuestionModel questionToDelete)
+    {
+      appDbContext.Set<QuestionModel>().Remove(questionToDelete);
+      await appDbContext.SaveChangesAsync();
+      questions.Remove(questionToDelete);
+      StateHasChanged();
+    }
     private async Task DeleteQuestion(QuestionModel questionToDelete)
     {
       if (questionToDelete != null)
       {
-        appDbContext.Set<QuestionModel>().Remove(questionToDelete);
-        await appDbContext.SaveChangesAsync();
-        questions.Remove(questionToDelete);
-        StateHasChanged();
+        var parameters = new DialogParameters
+        {
+            { "ContentText", "Are you sure you want to delete this question?" },
+            { "ButtonText", "Delete" },
+            { "Color", Color.Error }
+        };
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var dialog = await dialogService.ShowAsync<ConfirmDialog>("Delete Confirmation", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+          await ConfirmedDelete(questionToDelete);
+        }
       }
     }
 

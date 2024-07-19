@@ -1,25 +1,34 @@
 @page "/"
 @page "/home"
 
+@using MudBlazor
+
+@rendermode InteractiveServer
+
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
 <PageTitle>Home</PageTitle>
 
-<MudGrid>
-  <MudItem xs="12">
-    <MudText Typo="Typo.h5" Class="fw-bolder">Welcome</MudText>
-  </MudItem>
-  <MudItem xs="12">
-    <MudPaper Elevation="1">
-      <div class="p-4">
-        <AuthorizeView>
-          <NotAuthorized>
-            <MudText> You are not logged in. Please <MudLink Href="/login" Color="Color.Primary" Underline="Underline.Hover">Login here</MudLink>
-            </MudText>
-          </NotAuthorized>
-          <Authorized>
-            <MudText> You are now logged in as <b>@(context.User.Identity?.Name)</b>.</MudText>
-          </Authorized>
-        </AuthorizeView>
-      </div>
-    </MudPaper>
-  </MudItem>
-</MudGrid>
+<MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="OnButtonClicked">Delete</MudButton>
+
+<MudChip T="string">@state</MudChip>
+@code
+{
+  [Inject] private IDialogService DialogService { get; set; }
+
+  string state = "Message box hasn't been opened yet";
+
+
+  private async void OnButtonClicked()
+  {
+    bool? result = await DialogService.ShowMessageBox(
+    "Warning",
+    "Deleting can not be undone!",
+    yesText: "Delete!", cancelText: "Cancel");
+    state = result == null ? "Canceled" : "Deleted!";
+    StateHasChanged();
+  }
+}

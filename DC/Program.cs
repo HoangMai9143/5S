@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 using MudBlazor.Services;
+using MudBlazor;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,7 +31,10 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddHttpClient();
 
 builder.Services.AddMudServices();
-
+builder.Services.Configure<PopoverOptions>(options =>
+{
+    options.ThrowOnDuplicateProvider = false;
+});
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 

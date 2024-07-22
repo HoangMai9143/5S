@@ -1,0 +1,48 @@
+@using DC.Models
+@inject AppDbContext appDbContext
+
+<MudDialog>
+  <DialogContent>
+    <MudStack>
+      <MudDateRangePicker @bind-DateRange="_dateRange" Margin="Margin.Dense" PlaceholderStart="Start Date" PlaceholderEnd="End Date" />
+    </MudStack>
+  </DialogContent>
+  <DialogActions>
+    <MudButton OnClick="Cancel">Cancel</MudButton>
+    <MudButton Color="Color.Primary" OnClick="Submit">Create Survey</MudButton>
+  </DialogActions>
+</MudDialog>
+
+@code {
+  [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+  private DateRange _dateRange = new DateRange(DateTime.Now, DateTime.Now.AddDays(7));
+
+  private void Cancel()
+  {
+    MudDialog.Cancel();
+  }
+
+  private async Task Submit()
+  {
+    if (_dateRange.Start.HasValue && _dateRange.End.HasValue)
+    {
+      var newSurvey = new SurveyModel
+        {
+          StartDate = _dateRange.Start.Value,
+          EndDate = _dateRange.End.Value,
+          CreatedDate = DateTime.UtcNow,
+          IsActive = true
+        };
+
+      await appDbContext.Set<SurveyModel>().AddAsync(newSurvey);
+      await appDbContext.SaveChangesAsync();
+
+      MudDialog.Close(DialogResult.Ok(newSurvey));
+    }
+    else
+    {
+      // Handle invalid date range
+    }
+  }
+}

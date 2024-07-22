@@ -1,6 +1,8 @@
 @page "/survey"
 
 @inject AppDbContext appDbContext
+@inject IDialogService dialogService
+
 
 @rendermode InteractiveServer
 
@@ -10,14 +12,13 @@
   <MudTabPanel Text="Choose/Create Survey" Icon="@Icons.Material.Filled.EventNote">
     <MudCard>
       <MudCardContent>
-        <MudText Typo="Typo.h6">Choose/Create Survey</MudText>
-        <MudText Typo="Typo.body2">Choose an existing survey or create a new one.</MudText>
+        <MudText Typo="Typo.h3">Choose an existing survey or create a new one.</MudText>
+        <MudText Typo="Typo.body2">Selected Survey: @selectedSurvey?.Id</MudText>
       </MudCardContent>
       <MudCardActions>
         <MudStack Spacing="2" Row="true">
-          <MudButton Color="Color.Primary" Variant="Variant.Filled">Create New Survey</MudButton>
+          <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="OpenSurveyDialog">Create New Survey</MudButton>
         </MudStack>
-
       </MudCardActions>
     </MudCard>
     <MudDataGrid T="SurveyModel" Items="@surveys" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter">
@@ -27,11 +28,15 @@
         <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
       </ToolBarContent>
       <Columns>
-        <PropertyColumn Property="x => x.Id" Title="ID" />
-        <PropertyColumn Property="x => x.StartDate" Title="Start Date" Format="dd/MM/yyyy HH:mm" />
-        <PropertyColumn Property="x => x.EndDate" Title="End Date" Format="dd/MM/yyyy HH:mm" />
-        <PropertyColumn Property="x => x.CreatedDate" Title="Created Date" Format="dd/MM/yyyy HH:mm" />
-        <PropertyColumn Property="x => x.IsActive" Title="Is Active" />
+        <PropertyColumn T="SurveyModel" TProperty="int" Property="x => x.Id" Title="ID" />
+        <PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.StartDate" Title="Start Date" Format="dd/MM/yyyy" />
+        <PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.EndDate" Title="End Date" Format="dd/MM/yyyy" />
+        <PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.CreatedDate" Title="Created Date" Format="dd/MM/yyyy HH:mm" />
+        <PropertyColumn T="SurveyModel" TProperty="bool">
+          <CellTemplate>
+            <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="@(() => SelectItem(context.Item))" />
+          </CellTemplate>
+        </PropertyColumn>
       </Columns>
       <PagerContent>
         <MudDataGridPager T="SurveyModel" />

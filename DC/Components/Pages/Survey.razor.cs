@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DC.Components.Dialog;
 using DC.Models;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor;
 
 namespace DC.Components.Pages
 {
@@ -12,6 +14,8 @@ namespace DC.Components.Pages
     private int activeIndex = 0;
     private List<SurveyModel> surveys = new List<SurveyModel>();
     private string _searchString = string.Empty;
+
+    private SurveyModel selectedSurvey;
 
     protected override async Task OnInitializedAsync()
     {
@@ -56,9 +60,30 @@ namespace DC.Components.Pages
 
       return false;
     };
+
     private void HandleTabChanged(int index)
     {
+      if (index == 1 && selectedSurvey == null) // Assuming index 1 is for "Choose Question" tab
+      {
+        dialogService.Show<AlertDialog>("Please select a survey first.");
+        return;
+      }
       activeIndex = index;
+    }
+
+    private async Task OpenSurveyDialog()
+    {
+      var dialog = dialogService.Show<SurveyDialog>("Create New Survey");
+      var result = await dialog.Result;
+
+      if (!result.Canceled)
+      {
+        await LoadSurveys();
+      }
+    }
+    private void SelectItem(SurveyModel survey)
+    {
+      selectedSurvey = survey;
     }
   }
 }

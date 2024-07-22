@@ -1,0 +1,89 @@
+@using DC.Models
+@inject AppDbContext appDbContext
+@inject ISnackbar Snackbar
+
+<style>
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    z-index: 1;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #c4c4c4;
+    border-radius: 1px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a6a6a6;
+  }
+
+  html,
+  body * {
+    scrollbar-color: #c4c4c4 transparent;
+    scrollbar-width: none;
+    overflow-y: hidden !important;
+  }
+</style>
+
+<MudDialog>
+  <DialogContent>
+    <MudStack>
+      <MudDateRangePicker @bind-DateRange="_dateRange" Margin="Margin.Dense" PlaceholderStart="Start Date" PlaceholderEnd="End Date" MinDate="@DateTime.Now" MaxDate="@DateTime.Now.AddYears(1)" />
+    </MudStack>
+  </DialogContent>
+  <DialogActions>
+    <MudButton OnClick="Cancel">Cancel</MudButton>
+    <MudButton Color="Color.Primary" OnClick="Submit">Create Survey</MudButton>
+  </DialogActions>
+</MudDialog>
+
+@code {
+  [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+  private DateRange _dateRange = new DateRange(DateTime.Now, DateTime.Now.AddDays(7));
+
+  private void Cancel()
+  {
+    MudDialog.Cancel();
+  }
+
+  private async Task Submit()
+  {
+    if (_dateRange.Start.HasValue && _dateRange.End.HasValue)
+    {
+      if (_dateRange.Start.Value >= _dateRange.End.Value)
+      {
+        Snackbar.Add("End date must be after start date", Severity.Error);
+        return;
+      }
+
+      var newSurvey = new SurveyModel
+        {
+          StartDate = _dateRange.Start.Value,
+          EndDate = _dateRange.End.Value,
+          CreatedDate = DateTime.UtcNow,
+          IsActive = true
+        };
+
+      try
+      {
+        await appDbContext.Set<SurveyModel>().AddAsync(newSurvey);
+        await appDbContext.SaveChangesAsync();
+        MudDialog.Close(DialogResult.Ok(newSurvey));
+      }
+      catch (Exception ex)
+      {
+        Snackbar.Add($"Error creating survey: {ex.Message}", Severity.Error);
+      }
+    }
+    else
+    {
+      Snackbar.Add("Please select both start and end dates", Severity.Warning);
+    }
+  }
+}

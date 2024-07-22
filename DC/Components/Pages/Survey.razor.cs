@@ -73,7 +73,7 @@ namespace DC.Components.Pages
 
     private async Task OpenSurveyDialog()
     {
-      var dialog = dialogService.Show<SurveyDialog>("Create New Survey");
+      var dialog = dialogService.Show<SurveyCreateDialog>("Create New Survey");
       var result = await dialog.Result;
 
       if (!result.Canceled)

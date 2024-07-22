@@ -12,8 +12,7 @@
   <MudTabPanel Text="Choose/Create Survey" Icon="@Icons.Material.Filled.EventNote">
     <MudCard>
       <MudCardContent>
-        <MudText Typo="Typo.h3">Choose an existing survey or create a new one.</MudText>
-        <MudText Typo="Typo.body2">Selected Survey: @selectedSurvey?.Id</MudText>
+        <MudText Typo="Typo.body2">Select or Create Survey: @selectedSurvey?.Id</MudText>
       </MudCardContent>
       <MudCardActions>
         <MudStack Spacing="2" Row="true">
@@ -57,3 +56,4 @@
     </MudCard>
   </MudTabPanel>
 </MudTabs>
+<MudText Typo="Typo.body2">Surveys in List: @surveys.Count</MudText>

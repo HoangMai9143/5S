@@ -16,9 +16,9 @@
 
 <EditForm Model="@this" OnValidSubmit="@InsertQuestion">
     <DataAnnotationsValidator />
-    <MudGrid Spacing="5" Justify="Justify.Center">
+    <MudGrid Spacing="3" Justify="Justify.Center">
         <MudItem xs="6">
-            <MudTextField @bind-Value=" newQuestionText" T="string" Label="New Question" HelperText="Click Add to Submit" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" />
+            <MudTextField @bind-Value=" newQuestionText" T="string" Label="New Question" HelperText="Click the button to Add" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" />
         </MudItem>
         <MudItem xs="3">
             <MudButton Variant="Variant.Filled" Size="Size.Medium" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary" OnClick="@(() => InsertQuestion())">Add</MudButton>
@@ -33,8 +33,6 @@
 
     .mud-grid-item-xs-3 {
         flex-grow: 0;
-        max-width: calc(100% / 12* 3);
-        flex-basis: calc(100% / 12* 3);
         align-content: space-around;
         padding-bottom: 20px;
     }
@@ -47,7 +45,6 @@
         <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
     </ToolBarContent>
     <Columns>
-        <SelectColumn T="QuestionModel" />
         <PropertyColumn Property="x => x.Id" Title="ID" InitialDirection="SortDirection.Descending" />
         <PropertyColumn Property="x => x.QuestionContext" Title="Question" />
         <TemplateColumn CellClass="d-flex justify-end">

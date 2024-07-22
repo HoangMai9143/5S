@@ -2,7 +2,7 @@
 
 @inject AppDbContext appDbContext
 @inject IDialogService dialogService
-@inject ISnackbar Snackbar
+@inject ISnackbar snackbar
 
 
 
@@ -48,9 +48,20 @@
   </MudTabPanel>
   <MudTabPanel Text="Choose Questions" Icon="@Icons.Material.Filled.QuestionMark">
     <MudCard>
+      <MudCardActions>
+        <MudGrid>
+          <MudItem xs="12">
+            <MudText Typo="Typo.h6">Choose Questions for Survey: @selectedSurvey?.Id</MudText>
+          </MudItem>
+          <MudItem xs="12">
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="UpdateSurveyQuestions" Disabled="@(selectedSurvey == null)">
+              Update Questions
+            </MudButton>
+          </MudItem>
+        </MudGrid>
+      </MudCardActions>
       <MudCardContent>
-        <MudText Typo="Typo.h6">Choose Questions for Survey: @selectedSurvey?.Id</MudText>
-        <MudDataGrid T="QuestionModel" Items="@questions" MultiSelection="true" @bind-SelectedItems="selectedQuestions" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_questionQuickFilter">
+        <MudDataGrid T="QuestionModel" Items="@questions" MultiSelection="true" @bind-SelectedItems="selectedQuestions" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_questionQuickFilter" Elevation="0">
           <ToolBarContent>
             <MudText Typo="Typo.h6">Questions</MudText>
             <MudSpacer />
@@ -66,11 +77,7 @@
           </PagerContent>
         </MudDataGrid>
       </MudCardContent>
-      <MudCardActions>
-        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="AddQuestionsToSurvey" Disabled="@(selectedSurvey == null || !selectedQuestions.Any())">
-          Add Questions to Survey
-        </MudButton>
-      </MudCardActions>
+
     </MudCard>
   </MudTabPanel>
 </MudTabs>

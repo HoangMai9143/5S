@@ -16,10 +16,10 @@ namespace DC.Components.Pages
     private List<SurveyModel> surveys = new List<SurveyModel>();
     private List<QuestionModel> questions = new List<QuestionModel>();
     private HashSet<QuestionModel> selectedQuestions = new HashSet<QuestionModel>();
+    private HashSet<int> existingQuestionIds = new HashSet<int>();
 
     private string _searchString = string.Empty;
     private string _questionSearchString = string.Empty;
-
     private SurveyModel selectedSurvey;
 
     protected override async Task OnInitializedAsync()
@@ -49,12 +49,27 @@ namespace DC.Components.Pages
       try
       {
         questions = await appDbContext.Set<QuestionModel>().OrderBy(q => q.Id).ToListAsync();
+        if (selectedSurvey != null)
+        {
+          await LoadExistingQuestions();
+        }
       }
       catch (Exception ex)
       {
         Console.WriteLine($"Error loading questions: {ex.Message}");
         questions = new List<QuestionModel>();
       }
+    }
+    private async Task LoadExistingQuestions()
+    {
+      var existingQuestionIdsList = await appDbContext.Set<SurveyQuestionModel>()
+          .Where(sq => sq.SurveyId == selectedSurvey.Id)
+          .Select(sq => sq.QuestionId)
+          .ToListAsync();
+
+      existingQuestionIds = new HashSet<int>(existingQuestionIdsList);
+
+      selectedQuestions = new HashSet<QuestionModel>(questions.Where(q => existingQuestionIds.Contains(q.Id)));
     }
 
     private Func<SurveyModel, bool> _quickFilter => x =>
@@ -114,43 +129,58 @@ namespace DC.Components.Pages
         await LoadSurveys();
       }
     }
-
-    private void SelectItem(SurveyModel survey)
+    private async Task UpdateSurveyQuestions()
     {
-      selectedSurvey = survey;
-      activeIndex = 1;
-    }
-
-    private async Task AddQuestionsToSurvey()
-    {
-      if (selectedSurvey == null || !selectedQuestions.Any())
+      if (selectedSurvey == null)
       {
-        Snackbar.Add("Please select a survey and at least one question.", Severity.Warning);
+        snackbar.Add("Please select a survey.", Severity.Warning);
         return;
       }
 
       try
       {
-        foreach (var question in selectedQuestions)
+        var currentQuestionIds = selectedQuestions.Select(q => q.Id).ToHashSet();
+
+        // Get all existing survey questions
+        var existingSurveyQuestions = await appDbContext.Set<SurveyQuestionModel>()
+            .Where(sq => sq.SurveyId == selectedSurvey.Id)
+            .ToListAsync();
+
+        // Remove questions that are no longer selected
+        var questionsToRemove = existingSurveyQuestions.Where(sq => !currentQuestionIds.Contains(sq.QuestionId));
+        appDbContext.Set<SurveyQuestionModel>().RemoveRange(questionsToRemove);
+
+        // Add new questions
+        var existingQuestionIds = existingSurveyQuestions.Select(sq => sq.QuestionId).ToHashSet();
+        var questionsToAdd = currentQuestionIds.Except(existingQuestionIds);
+        foreach (var questionId in questionsToAdd)
         {
-          var surveyQuestion = new SurveyQuestionModel
+          await appDbContext.Set<SurveyQuestionModel>().AddAsync(new SurveyQuestionModel
           {
             SurveyId = selectedSurvey.Id,
-            QuestionId = question.Id
-          };
-
-          await appDbContext.Set<SurveyQuestionModel>().AddAsync(surveyQuestion);
+            QuestionId = questionId
+          });
         }
 
+        // Save changes to the database
         await appDbContext.SaveChangesAsync();
 
-        Snackbar.Add("Questions added to survey successfully.", Severity.Success);
-        selectedQuestions.Clear();
+        // Refresh the existing questions
+        await LoadExistingQuestions();
+
+        snackbar.Add("Survey questions updated successfully.", Severity.Success);
       }
       catch (Exception ex)
       {
-        Snackbar.Add($"Error adding questions to survey: {ex.Message}", Severity.Error);
+        snackbar.Add($"Error updating survey questions: {ex.Message}", Severity.Error);
       }
+    }
+
+    private void SelectItem(SurveyModel survey)
+    {
+      selectedSurvey = survey;
+      LoadExistingQuestions();
+      activeIndex = 1;
     }
   }
 }

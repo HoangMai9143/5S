@@ -6,6 +6,7 @@ using DC.Components.Dialog;
 using DC.Models;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace DC.Components.Pages
 {
@@ -13,13 +14,18 @@ namespace DC.Components.Pages
   {
     private int activeIndex = 0;
     private List<SurveyModel> surveys = new List<SurveyModel>();
+    private List<QuestionModel> questions = new List<QuestionModel>();
+    private HashSet<QuestionModel> selectedQuestions = new HashSet<QuestionModel>();
+
     private string _searchString = string.Empty;
+    private string _questionSearchString = string.Empty;
 
     private SurveyModel selectedSurvey;
 
     protected override async Task OnInitializedAsync()
     {
       await LoadSurveys();
+      await LoadQuestions();
     }
 
     private async Task LoadSurveys()
@@ -35,6 +41,19 @@ namespace DC.Components.Pages
       {
         Console.WriteLine($"Error loading surveys: {ex.Message}");
         surveys = new List<SurveyModel>();
+      }
+    }
+
+    private async Task LoadQuestions()
+    {
+      try
+      {
+        questions = await appDbContext.Set<QuestionModel>().OrderBy(q => q.Id).ToListAsync();
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine($"Error loading questions: {ex.Message}");
+        questions = new List<QuestionModel>();
       }
     }
 
@@ -61,9 +80,23 @@ namespace DC.Components.Pages
       return false;
     };
 
+    private Func<QuestionModel, bool> _questionQuickFilter => x =>
+    {
+      if (string.IsNullOrWhiteSpace(_questionSearchString))
+        return true;
+
+      if (x.Id.ToString().Contains(_questionSearchString, StringComparison.OrdinalIgnoreCase))
+        return true;
+
+      if (x.QuestionContext.Contains(_questionSearchString, StringComparison.OrdinalIgnoreCase))
+        return true;
+
+      return false;
+    };
+
     private void HandleTabChanged(int index)
     {
-      if (index == 1 && selectedSurvey == null) // Assuming index 1 is for "Choose Question" tab
+      if (index == 1 && selectedSurvey == null)
       {
         dialogService.Show<AlertDialog>("Please select a survey first.");
         return;
@@ -81,9 +114,43 @@ namespace DC.Components.Pages
         await LoadSurveys();
       }
     }
+
     private void SelectItem(SurveyModel survey)
     {
       selectedSurvey = survey;
+      activeIndex = 1;
+    }
+
+    private async Task AddQuestionsToSurvey()
+    {
+      if (selectedSurvey == null || !selectedQuestions.Any())
+      {
+        Snackbar.Add("Please select a survey and at least one question.", Severity.Warning);
+        return;
+      }
+
+      try
+      {
+        foreach (var question in selectedQuestions)
+        {
+          var surveyQuestion = new SurveyQuestionModel
+          {
+            SurveyId = selectedSurvey.Id,
+            QuestionId = question.Id
+          };
+
+          await appDbContext.Set<SurveyQuestionModel>().AddAsync(surveyQuestion);
+        }
+
+        await appDbContext.SaveChangesAsync();
+
+        Snackbar.Add("Questions added to survey successfully.", Severity.Success);
+        selectedQuestions.Clear();
+      }
+      catch (Exception ex)
+      {
+        Snackbar.Add($"Error adding questions to survey: {ex.Message}", Severity.Error);
+      }
     }
   }
 }

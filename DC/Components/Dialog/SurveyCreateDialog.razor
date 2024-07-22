@@ -56,7 +56,7 @@
   {
     if (_dateRange.Start.HasValue && _dateRange.End.HasValue)
     {
-      if (_dateRange.Start.Value >= _dateRange.End.Value)
+      if (_dateRange.Start.Value > _dateRange.End.Value)
       {
         Snackbar.Add("End date must be after start date", Severity.Error);
         return;

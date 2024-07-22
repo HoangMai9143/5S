@@ -2,6 +2,8 @@
 
 @inject AppDbContext appDbContext
 @inject IDialogService dialogService
+@inject ISnackbar Snackbar
+
 
 
 @rendermode InteractiveServer
@@ -12,7 +14,8 @@
   <MudTabPanel Text="Choose/Create Survey" Icon="@Icons.Material.Filled.EventNote">
     <MudCard>
       <MudCardContent>
-        <MudText Typo="Typo.body2">Select or Create Survey: @selectedSurvey?.Id</MudText>
+        <MudText Typo="Typo.h6">Select or Create Survey</MudText>
+        <MudText Typo="Typo.body1">Selected Survey: @selectedSurvey?.Id</MudText>
       </MudCardContent>
       <MudCardActions>
         <MudStack Spacing="2" Row="true">
@@ -31,9 +34,9 @@
         <PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.StartDate" Title="Start Date" Format="dd/MM/yyyy" />
         <PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.EndDate" Title="End Date" Format="dd/MM/yyyy" />
         <PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.CreatedDate" Title="Created Date" Format="dd/MM/yyyy HH:mm" />
-        <PropertyColumn T="SurveyModel" TProperty="bool">
+        <PropertyColumn T="SurveyModel" TProperty="bool" Filterable="false" Sortable="false">
           <CellTemplate>
-            <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="@(() => SelectItem(context.Item))" />
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Check" OnClick="@(() => SelectItem(context.Item))">Choose this Survey</MudButton>
           </CellTemplate>
         </PropertyColumn>
       </Columns>
@@ -41,19 +44,33 @@
         <MudDataGridPager T="SurveyModel" />
       </PagerContent>
     </MudDataGrid>
+    <MudText Typo="Typo.body2">Surveys in List: @surveys.Count</MudText>
   </MudTabPanel>
-  <MudTabPanel Text="Choose Question" Icon="@Icons.Material.Filled.QuestionMark">
+  <MudTabPanel Text="Choose Questions" Icon="@Icons.Material.Filled.QuestionMark">
     <MudCard>
       <MudCardContent>
-        <MudText Typo="Typo.h6">Choose Question</MudText>
-        <MudText Typo="Typo.body2">Choose a question from the list below.</MudText>
+        <MudText Typo="Typo.h6">Choose Questions for Survey: @selectedSurvey?.Id</MudText>
+        <MudDataGrid T="QuestionModel" Items="@questions" MultiSelection="true" @bind-SelectedItems="selectedQuestions" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_questionQuickFilter">
+          <ToolBarContent>
+            <MudText Typo="Typo.h6">Questions</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="_questionSearchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+          </ToolBarContent>
+          <Columns>
+            <SelectColumn T="QuestionModel" />
+            <PropertyColumn Property="x => x.Id" Title="ID" />
+            <PropertyColumn Property="x => x.QuestionContext" Title="Question" />
+          </Columns>
+          <PagerContent>
+            <MudDataGridPager T="QuestionModel" />
+          </PagerContent>
+        </MudDataGrid>
       </MudCardContent>
       <MudCardActions>
-        <MudStack Spacing="2" Row="true">
-          <MudButton Color="Color.Primary" Variant="Variant.Filled">Choose Question</MudButton>
-        </MudStack>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="AddQuestionsToSurvey" Disabled="@(selectedSurvey == null || !selectedQuestions.Any())">
+          Add Questions to Survey
+        </MudButton>
       </MudCardActions>
     </MudCard>
   </MudTabPanel>
 </MudTabs>
-<MudText Typo="Typo.body2">Surveys in List: @surveys.Count</MudText>

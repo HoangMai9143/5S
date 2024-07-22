@@ -17,11 +17,11 @@
 <EditForm Model="@this" OnValidSubmit="@InsertQuestion">
     <DataAnnotationsValidator />
     <MudGrid Spacing="5" Justify="Justify.Center">
-        <MudItem>
-            <MudTextField @bind-Value=" newQuestionText" T="string" Label="Enter new Question here" HelperText="Type your question and click Add" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" />
+        <MudItem xs="6">
+            <MudTextField @bind-Value=" newQuestionText" T="string" Label="New Question" HelperText="Click Add to Submit" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" />
         </MudItem>
-        <MudItem>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => InsertQuestion())">Add Question</MudButton>
+        <MudItem xs="3">
+            <MudButton Variant="Variant.Filled" Size="Size.Medium" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary" OnClick="@(() => InsertQuestion())">Add</MudButton>
         </MudItem>
     </MudGrid>
 </EditForm>
@@ -29,6 +29,14 @@
 <style>
     .custom-mudtable .mud-table-container {
         overflow-y: unset !important;
+    }
+
+    .mud-grid-item-xs-3 {
+        flex-grow: 0;
+        max-width: calc(100% / 12* 3);
+        flex-basis: calc(100% / 12* 3);
+        align-content: space-around;
+        padding-bottom: 20px;
     }
 </style>
 

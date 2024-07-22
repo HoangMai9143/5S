@@ -21,18 +21,6 @@
     </MudGrid>
 </EditForm>
 
-<style>
-    .custom-mudtable .mud-table-container {
-        overflow-y: unset !important;
-    }
-
-    .mud-grid-item-xs-3 {
-        flex-grow: 0;
-        align-content: space-around;
-        padding-bottom: 15px;
-    }
-</style>
-
 <MudDataGrid T="QuestionModel" Items="@questions" SortMode="SortMode.Multiple" QuickFilter="@_quickFilter" Hideable="true" RowClick="@RowClicked" RowContextMenuClick="RowRightClicked" SelectedItemsChanged="@SelectedItemsChanged" Dense="true" Elevation="0" Class="custom-mudtable no-scroll mt-4">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Questions</MudText>
@@ -57,3 +45,15 @@
 </MudDataGrid>
 
 <MudText Typo="Typo.body2">Questions in List: @questions.Count</MudText>
+
+<style>
+    .custom-mudtable .mud-table-container {
+        overflow-y: unset !important;
+    }
+
+    .mud-grid-item-xs-3 {
+        flex-grow: 0;
+        align-content: space-around;
+        padding-bottom: 15px;
+    }
+</style>

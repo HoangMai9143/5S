@@ -1,4 +1,7 @@
 @page "/survey"
+
+@inject AppDbContext appDbContext
+
 @rendermode InteractiveServer
 
 <PageTitle>Survey</PageTitle>
@@ -13,10 +16,27 @@
       <MudCardActions>
         <MudStack Spacing="2" Row="true">
           <MudButton Color="Color.Primary" Variant="Variant.Filled">Create New Survey</MudButton>
-          <MudButton Color="Color.Primary" Variant="Variant.Filled">Choose Existing Survey</MudButton>
         </MudStack>
+
       </MudCardActions>
     </MudCard>
+    <MudDataGrid T="SurveyModel" Items="@surveys" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter">
+      <ToolBarContent>
+        <MudText Typo="Typo.h6">Surveys</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+      </ToolBarContent>
+      <Columns>
+        <PropertyColumn Property="x => x.Id" Title="ID" />
+        <PropertyColumn Property="x => x.StartDate" Title="Start Date" Format="dd/MM/yyyy HH:mm" />
+        <PropertyColumn Property="x => x.EndDate" Title="End Date" Format="dd/MM/yyyy HH:mm" />
+        <PropertyColumn Property="x => x.CreatedDate" Title="Created Date" Format="dd/MM/yyyy HH:mm" />
+        <PropertyColumn Property="x => x.IsActive" Title="Is Active" />
+      </Columns>
+      <PagerContent>
+        <MudDataGridPager T="SurveyModel" />
+      </PagerContent>
+    </MudDataGrid>
   </MudTabPanel>
   <MudTabPanel Text="Choose Question" Icon="@Icons.Material.Filled.QuestionMark">
     <MudCard>
@@ -32,12 +52,3 @@
     </MudCard>
   </MudTabPanel>
 </MudTabs>
-
-@code {
-  private int activeIndex = 0;
-
-  private void HandleTabChanged(int index)
-  {
-    activeIndex = index;
-  }
-}

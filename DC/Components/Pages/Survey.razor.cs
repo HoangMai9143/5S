@@ -28,7 +28,7 @@ namespace DC.Components.Pages
       await LoadQuestions();
     }
 
-    private async Task LoadSurveys()
+    private async Task LoadSurveys() // Load all surveys
     {
       try
       {
@@ -44,7 +44,7 @@ namespace DC.Components.Pages
       }
     }
 
-    private async Task LoadQuestions()
+    private async Task LoadQuestions() // Load all questions
     {
       try
       {
@@ -67,11 +67,12 @@ namespace DC.Components.Pages
           .Select(sq => sq.QuestionId)
           .ToListAsync();
 
+      // Convert to hashset for faster lookup
       existingQuestionIds = new HashSet<int>(existingQuestionIdsList);
-
       selectedQuestions = new HashSet<QuestionModel>(questions.Where(q => existingQuestionIds.Contains(q.Id)));
     }
 
+    // Filter surveys
     private Func<SurveyModel, bool> _quickFilter => x =>
     {
       if (string.IsNullOrWhiteSpace(_searchString))
@@ -95,6 +96,7 @@ namespace DC.Components.Pages
       return false;
     };
 
+    // Filter questions
     private Func<QuestionModel, bool> _questionQuickFilter => x =>
     {
       if (string.IsNullOrWhiteSpace(_questionSearchString))
@@ -108,6 +110,7 @@ namespace DC.Components.Pages
 
       return false;
     };
+
 
     private void HandleTabChanged(int index)
     {
@@ -139,40 +142,31 @@ namespace DC.Components.Pages
 
       try
       {
+        // Get current and existing question IDs
         var currentQuestionIds = selectedQuestions.Select(q => q.Id).ToHashSet();
-
-        // Get all existing survey questions
         var existingSurveyQuestions = await appDbContext.Set<SurveyQuestionModel>()
             .Where(sq => sq.SurveyId == selectedSurvey.Id)
             .ToListAsync();
-
-        // Remove questions that are no longer selected
-        var questionsToRemove = existingSurveyQuestions.Where(sq => !currentQuestionIds.Contains(sq.QuestionId));
-        appDbContext.Set<SurveyQuestionModel>().RemoveRange(questionsToRemove);
-
-        // Add new questions
         var existingQuestionIds = existingSurveyQuestions.Select(sq => sq.QuestionId).ToHashSet();
-        var questionsToAdd = currentQuestionIds.Except(existingQuestionIds);
-        foreach (var questionId in questionsToAdd)
-        {
-          await appDbContext.Set<SurveyQuestionModel>().AddAsync(new SurveyQuestionModel
-          {
-            SurveyId = selectedSurvey.Id,
-            QuestionId = questionId
-          });
-        }
 
-        // Save changes to the database
+        // Determine questions to remove and add
+        var questionsToRemove = existingSurveyQuestions.Where(sq => !currentQuestionIds.Contains(sq.QuestionId)).ToList();
+        var questionsToAdd = currentQuestionIds.Except(existingQuestionIds)
+            .Select(questionId => new SurveyQuestionModel { SurveyId = selectedSurvey.Id, QuestionId = questionId });
+
+        // Update database
+        appDbContext.Set<SurveyQuestionModel>().RemoveRange(questionsToRemove);
+        await appDbContext.Set<SurveyQuestionModel>().AddRangeAsync(questionsToAdd);
         await appDbContext.SaveChangesAsync();
 
-        // Refresh the existing questions
+        // Refresh UI
         await LoadExistingQuestions();
 
         snackbar.Add("Survey questions updated successfully.", Severity.Success);
       }
       catch (Exception ex)
       {
-        snackbar.Add($"Error updating survey questions: {ex.Message}", Severity.Error);
+        Snackbar.Add($"Error updating survey questions: {ex.Message}", Severity.Error);
       }
     }
 

@@ -67,14 +67,21 @@ namespace DC.Components.Pages
       {
         var parameters = new DialogParameters
         {
-          { "ContentText", "Are you sure you want to delete this question?" },
-          { "ButtonText", "Delete" },
-          { "Color", Color.Error }
+            { "ContentText", "Are you sure you want to delete this question?" },
+            { "ButtonText", "Delete" },
+            { "Color", Color.Error }
         };
 
-        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall, Position = DialogPosition.Center };
+        var options = new DialogOptions()
+        {
+          MaxWidth = MaxWidth.Small,
+          FullWidth = true,
+          Position = DialogPosition.Center,
+          CloseOnEscapeKey = true,
+          FullScreen = false,
+        };
 
-        var dialog = await dialogService.ShowAsync<ConfirmDialog>("Delete Confirmation", parameters, options);
+        var dialog = await dialogService.ShowAsync<ConfirmDialog>("Delete Question", parameters, options);
         var result = await dialog.Result;
 
         if (!result.Canceled)
@@ -95,11 +102,20 @@ namespace DC.Components.Pages
     private async Task OpenEditDialog(QuestionModel questionToEdit)
     {
       var parameters = new DialogParameters
-      {
+    {
         { "QuestionText", questionToEdit.QuestionContext }
+    };
+
+      var options = new DialogOptions()
+      {
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true,
+        Position = DialogPosition.Center,
+        CloseOnEscapeKey = true,
+        FullScreen = false,
       };
 
-      var dialog = await dialogService.ShowAsync<EditQuestionDialog>("Edit Question", parameters);
+      var dialog = await dialogService.ShowAsync<EditQuestionDialog>("Edit Question", parameters, options);
       var result = await dialog.Result;
 
       if (!result.Canceled)

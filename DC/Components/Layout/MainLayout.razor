@@ -1,11 +1,10 @@
 ﻿@inherits LayoutComponentBase
 @using DC.Components
 
-
-<MudThemeProvider />
-<MudPopoverProvider />
-<MudDialogProvider />
-<MudSnackbarProvider />
+@* <MudThemeProvider /> *@
+<MudPopoverProvider @rendermode="InteractiveServer" />
+<MudDialogProvider @rendermode="InteractiveServer" />
+@* <MudSnackbarProvider /> *@
 
 <div class="page">
     <div class="sidebar">

@@ -142,20 +142,5 @@ namespace DC.Components.Pages
       }
       StateHasChanged();
     }
-
-    void RowClicked(DataGridRowClickEventArgs<QuestionModel> args)
-    {
-      _events.Insert(0, $"Event = RowClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}");
-    }
-
-    void RowRightClicked(DataGridRowClickEventArgs<QuestionModel> args)
-    {
-      _events.Insert(0, $"Event = RowRightClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}");
-    }
-
-    void SelectedItemsChanged(HashSet<QuestionModel> items)
-    {
-      _events.Insert(0, $"Event = SelectedItemsChanged, Data = {System.Text.Json.JsonSerializer.Serialize(items)}");
-    }
   }
 }

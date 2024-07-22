@@ -21,16 +21,16 @@
     </MudGrid>
 </EditForm>
 
-<MudDataGrid T="QuestionModel" Items="@questions" SortMode="SortMode.Multiple" QuickFilter="@_quickFilter" Hideable="true" RowClick="@RowClicked" RowContextMenuClick="RowRightClicked" SelectedItemsChanged="@SelectedItemsChanged" Dense="true" Elevation="0" Class="custom-mudtable no-scroll mt-4">
+<MudDataGrid T="QuestionModel" Items="@questions" SortMode="SortMode.Single" QuickFilter="@_quickFilter" Dense="true" Elevation="0" Class="custom-mudtable no-scroll mt-4">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Questions</MudText>
         <MudSpacer />
         <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
     </ToolBarContent>
     <Columns>
-        <PropertyColumn Property="x => x.Id" Title="ID" InitialDirection="SortDirection.Descending" />
-        <PropertyColumn Property="x => x.QuestionContext" Title="Question" />
-        <TemplateColumn CellClass="d-flex justify-end">
+        <PropertyColumn Property="x => x.Id" Title="ID" InitialDirection="SortDirection.Descending" Sortable="false" />
+        <PropertyColumn Property="x => x.QuestionContext" Title="Question" Sortable="false" />
+        <TemplateColumn CellClass="d-flex justify-end" Width="30px">
             <CellTemplate>
                 <MudStack Row>
                     <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenEditDialog(context.Item))" />

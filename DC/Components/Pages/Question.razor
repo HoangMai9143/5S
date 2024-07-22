@@ -14,18 +14,25 @@
 
 <PageTitle>Questions</PageTitle>
 
-<MudGrid>
-    <MudItem xs="10" sm="11">
-        <MudTextField @bind-Value="newQuestionText" T="string" Label="Enter new Question here" HelperText="Press Enter to insert new question" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" OnKeyDown="@OnKeyDown" />
-    </MudItem>
-    <MudItem xs="2" sm="1">
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@InsertQuestion" Disabled="@string.IsNullOrWhiteSpace(newQuestionText)">
-            Add
-        </MudButton>
-    </MudItem>
-</MudGrid>
+<EditForm Model="@this" OnValidSubmit="@InsertQuestion">
+    <DataAnnotationsValidator />
+    <MudGrid Spacing="5" Justify="Justify.Center">
+        <MudItem>
+            <MudTextField @bind-Value=" newQuestionText" T="string" Label="Enter new Question here" HelperText="Type your question and click Add" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" />
+        </MudItem>
+        <MudItem>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => InsertQuestion())">Add Question</MudButton>
+        </MudItem>
+    </MudGrid>
+</EditForm>
 
-<MudDataGrid T="QuestionModel" Items="@questions" SortMode="SortMode.Multiple"  QuickFilter="@_quickFilter" Hideable="true" RowClick="@RowClicked" RowContextMenuClick="RowRightClicked" SelectedItemsChanged="@SelectedItemsChanged" Dense="true" Elevation="0" Class="no-scroll mt-4">
+<style>
+    .custom-mudtable .mud-table-container {
+        overflow-y: unset !important;
+    }
+</style>
+
+<MudDataGrid T="QuestionModel" Items="@questions" SortMode="SortMode.Multiple" QuickFilter="@_quickFilter" Hideable="true" RowClick="@RowClicked" RowContextMenuClick="RowRightClicked" SelectedItemsChanged="@SelectedItemsChanged" Dense="true" Elevation="0" Class="custom-mudtable no-scroll mt-4">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Questions</MudText>
         <MudSpacer />

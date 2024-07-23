@@ -23,6 +23,45 @@ namespace DC.Components.Pages
     private string _questionSearchString = string.Empty;
     private SurveyModel selectedSurvey;
 
+    // Filter surveys
+    private Func<SurveyModel, bool> _surveyQuickFilter => x =>
+    {
+      if (string.IsNullOrWhiteSpace(_searchString))
+        return true;
+
+      if (x.Id.ToString().Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        return true;
+
+      if (x.StartDate.ToString("dd/MM/yyyy HH:mm").Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        return true;
+
+      if (x.EndDate.ToString("dd/MM/yyyy HH:mm").Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        return true;
+
+      if (x.CreatedDate.ToString("dd/MM/yyyy HH:mm").Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        return true;
+
+      if (x.IsActive.ToString().Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        return true;
+
+      return false;
+    };
+
+    // Filter questions
+    private Func<QuestionModel, bool> _questionQuickFilter => x =>
+    {
+      if (string.IsNullOrWhiteSpace(_questionSearchString))
+        return true;
+
+      if (x.Id.ToString().Contains(_questionSearchString))
+        return true;
+
+      if (x.QuestionContext.Contains(_questionSearchString, StringComparison.OrdinalIgnoreCase))
+        return true;
+
+      return false;
+    };
+
     protected override async Task OnInitializedAsync()
     {
       await LoadSurveys();
@@ -93,44 +132,7 @@ namespace DC.Components.Pages
       StateHasChanged();
     }
 
-    // Filter surveys
-    private Func<SurveyModel, bool> _surveyQuickFilter => x =>
-    {
-      if (string.IsNullOrWhiteSpace(_searchString))
-        return true;
 
-      if (x.Id.ToString().Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-        return true;
-
-      if (x.StartDate.ToString("dd/MM/yyyy HH:mm").Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-        return true;
-
-      if (x.EndDate.ToString("dd/MM/yyyy HH:mm").Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-        return true;
-
-      if (x.CreatedDate.ToString("dd/MM/yyyy HH:mm").Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-        return true;
-
-      if (x.IsActive.ToString().Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-        return true;
-
-      return false;
-    };
-
-    // Filter questions
-    private Func<QuestionModel, bool> _questionQuickFilter => x =>
-    {
-      if (string.IsNullOrWhiteSpace(_questionSearchString))
-        return true;
-
-      if (x.Id.ToString().Contains(_questionSearchString))
-        return true;
-
-      if (x.QuestionContext.Contains(_questionSearchString, StringComparison.OrdinalIgnoreCase))
-        return true;
-
-      return false;
-    };
 
 
     private async Task HandleTabChanged(int index)

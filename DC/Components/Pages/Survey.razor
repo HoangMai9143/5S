@@ -34,6 +34,18 @@
         <PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.StartDate" Title="Start Date" Format="dd/MM/yyyy" />
         <PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.EndDate" Title="End Date" Format="dd/MM/yyyy" />
         <PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.CreatedDate" Title="Created Date" Format="dd/MM/yyyy HH:mm" />
+        <PropertyColumn T="SurveyModel" TProperty="bool" Property="x => x.IsActive" Title="Status">
+          <CellTemplate>
+            @if (context.Item.IsActive)
+            {
+              <MudChip Color="Color.Success" Size="Size.Small">On going</MudChip>
+            }
+            else
+            {
+              <MudChip Size="Size.Small">Ended</MudChip>
+            }
+          </CellTemplate>
+        </PropertyColumn>
         <TemplateColumn CellClass="d-flex justify-end" Width="150px">
           <CellTemplate>
             <MudStack Row>

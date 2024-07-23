@@ -29,14 +29,29 @@ namespace DC.Components.Pages
       await LoadQuestions();
     }
 
-    private async Task LoadSurveys() // Load all surveys
+    private async Task LoadSurveys()
     {
       try
       {
         surveys = await appDbContext.Set<SurveyModel>()
-            .Where(s => s.IsActive)
             .OrderByDescending(s => s.Id)
             .ToListAsync();
+
+        // Update IsActive property for surveys
+        bool anyChanges = false;
+        foreach (var survey in surveys)
+        {
+          if (survey.EndDate < DateTime.Today.AddDays(-1) && survey.IsActive)
+          {
+            survey.IsActive = false;
+            anyChanges = true;
+          }
+        }
+
+        if (anyChanges)
+        {
+          await appDbContext.SaveChangesAsync();
+        }
       }
       catch (Exception ex)
       {
@@ -222,6 +237,7 @@ namespace DC.Components.Pages
       if (!result.Canceled)
       {
         await LoadSurveys();
+
       }
     }
     private async Task DeleteSurvey(SurveyModel surveyToDelete)
@@ -264,7 +280,6 @@ namespace DC.Components.Pages
       {
         StartDate = surveyToClone.StartDate,
         EndDate = surveyToClone.EndDate,
-        IsActive = true,
         CreatedDate = DateTime.Now
       };
 

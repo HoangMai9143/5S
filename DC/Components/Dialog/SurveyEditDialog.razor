@@ -2,40 +2,11 @@
 @inject AppDbContext appDbContext
 @inject ISnackbar Snackbar
 
-<style>
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-    z-index: 1;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: #c4c4c4;
-    border-radius: 1px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: #a6a6a6;
-  }
-
-  html,
-  body * {
-    scrollbar-color: #c4c4c4 transparent;
-    scrollbar-width: none;
-    overflow-y: hidden !important;
-  }
-</style>
-
 <MudDialog>
   <DialogContent>
     <MudStack>
-      <MudDateRangePicker @bind-DateRange="_dateRange" Margin="Margin.Dense" PlaceholderStart="Start Date" PlaceholderEnd="End Date" MinDate="@DateTime.Now.AddYears(-1)" MaxDate="@DateTime.Now.AddYears(1)" />
-      <MudCheckBox T="bool" @bind-Checked="Survey.IsActive" Label="Is Active" Color="Color.Primary" />
-
+      <MudDateRangePicker @bind-DateRange="_dateRange" Margin="Margin.Dense" PlaceholderStart="Start Date" PlaceholderEnd="End Date" MinDate="@DateTime.Today.AddYears(-1)" MaxDate="@DateTime.Today.AddYears(1)" />
+      <MudSwitch @bind-Value="_isActive" Color="Color.Success" UncheckedColor="Color.Error">Is Active</MudSwitch>
     </MudStack>
   </DialogContent>
   <DialogActions>
@@ -75,6 +46,11 @@
       Survey.StartDate = _dateRange.Start.Value;
       Survey.EndDate = _dateRange.End.Value;
       Survey.IsActive = _isActive;
+
+      if (Survey.EndDate < DateTime.Today)
+      {
+        Survey.IsActive = false;
+      }
 
       try
       {

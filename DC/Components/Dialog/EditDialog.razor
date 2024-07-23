@@ -1,21 +1,9 @@
 <MudDialog>
   <DialogContent>
-    <MudTextField TextUpdateSuppression="false" @bind-Value="QuestionText" Label="Question" />
+    <MudTextField TextUpdateSuppression="false" @bind-Value="questionText" Label="Question" />
   </DialogContent>
   <DialogActions>
     <MudButton OnClick="Cancel">Cancel</MudButton>
     <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit">Save</MudButton>
   </DialogActions>
 </MudDialog>
-
-@code {
-  [CascadingParameter] MudDialogInstance MudDialog { get; set; }
-
-  [Parameter] public string QuestionText { get; set; }
-
-  void Submit()
-  {
-    MudDialog.Close(DialogResult.Ok(QuestionText));
-  }
-  void Cancel() => MudDialog.Cancel();
-}

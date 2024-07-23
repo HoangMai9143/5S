@@ -4,33 +4,7 @@
 
 @rendermode InteractiveServer
 
-<style>
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-    z-index: 1;
-  }
 
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: #c4c4c4;
-    border-radius: 1px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: #a6a6a6;
-  }
-
-  html,
-  body * {
-    scrollbar-color: #c4c4c4 transparent;
-    scrollbar-width: none;
-    overflow-y: hidden !important;
-  }
-</style>
 
 <MudDialog>
   <DialogContent>
@@ -43,57 +17,3 @@
     <MudButton Color="Color.Primary" OnClick="Submit">Create</MudButton>
   </DialogActions>
 </MudDialog>
-
-@code {
-  [CascadingParameter] MudDialogInstance MudDialog { get; set; }
-
-  private DateRange _dateRange = new DateRange(DateTime.Today, DateTime.Today);
-
-  private void Cancel()
-  {
-    MudDialog.Cancel();
-  }
-
-  private async Task Submit()
-  {
-    if (_dateRange.Start.HasValue)
-    {
-      var startDate = _dateRange.Start.Value;
-      var endDate = _dateRange.End.HasValue ? _dateRange.End.Value : startDate;
-
-      if (startDate > endDate)
-      {
-        sb.Add("End date must be after or equal to start date", Severity.Error);
-        return;
-      }
-
-      var newSurvey = new SurveyModel
-        {
-          StartDate = startDate,
-          EndDate = endDate,
-          CreatedDate = DateTime.UtcNow,
-          IsActive = true
-        };
-
-      try
-      {
-        await appDbContext.Set<SurveyModel>().AddAsync(newSurvey);
-        await appDbContext.SaveChangesAsync();
-        MudDialog.Close(DialogResult.Ok(newSurvey));
-      }
-      catch (Exception ex)
-      {
-        sb.Add($"Error creating survey: {ex.Message}", Severity.Error);
-      }
-    }
-    else
-    {
-      sb.Add("Please select a start date", Severity.Warning);
-    }
-
-  }
-  private async Task HandleSubmit()
-  {
-    await Submit();
-  }
-}

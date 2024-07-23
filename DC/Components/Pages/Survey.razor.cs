@@ -308,7 +308,7 @@ namespace DC.Components.Pages
 
       await appDbContext.SaveChangesAsync();
       await LoadSurveys();
-      sb.Add($"Survey cloned successfully with ID: {clonedSurvey.Id}", Severity.Success);
+      sb.Add($"Survey {surveyToClone.Id} cloned successfully with ID: {clonedSurvey.Id}", Severity.Success);
     }
   }
 }

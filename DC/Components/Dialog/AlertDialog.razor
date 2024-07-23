@@ -2,19 +2,9 @@
 
 <Dialog>
   <DialogContent>
-    <MudText Typo="Typo.h6">@Message</MudText>
+    <MudText Typo="Typo.h6">@message</MudText>
   </DialogContent>
   <DialogActions>
     <MudButton Color="Color.Primary" OnClick="@Close">OK</MudButton>
   </DialogActions>
 </Dialog>
-
-@code {
-  [CascadingParameter] MudDialogInstance MudDialog { get; set; }
-  [Parameter] public string Message { get; set; }
-
-  private void Close()
-  {
-    MudDialog.Close(DialogResult.Ok(true));
-  }
-}

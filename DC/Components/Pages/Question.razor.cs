@@ -44,6 +44,7 @@ namespace DC.Components.Pages
       catch (Exception ex)
       {
         Console.WriteLine($"Error loading questions: {ex.Message}");
+        sb.Add("Error loading questions", Severity.Error);
         questions = new List<QuestionModel>();
       }
     }
@@ -57,6 +58,7 @@ namespace DC.Components.Pages
         await appDbContext.SaveChangesAsync();
         questions.Add(newQuestion);
         newQuestionText = string.Empty;
+        sb.Add($"Question added successfully with ID: {newQuestion.Id}", Severity.Success);
         StateHasChanged();
       }
     }
@@ -65,6 +67,7 @@ namespace DC.Components.Pages
     {
       if (questionToDelete != null)
       {
+        int questionToDeleteId = questionToDelete.Id;
         var parameters = new DialogParameters
         {
             { "ContentText", "Are you sure you want to delete this question?" },
@@ -87,6 +90,7 @@ namespace DC.Components.Pages
         if (!result.Canceled)
         {
           await ConfirmedDelete(questionToDelete);
+          sb.Add($"Question {questionToDeleteId} deleted", Severity.Success);
         }
       }
     }
@@ -130,6 +134,7 @@ namespace DC.Components.Pages
       questionToUpdate.QuestionContext = newText;
       appDbContext.Set<QuestionModel>().Update(questionToUpdate);
       await appDbContext.SaveChangesAsync();
+      sb.Add($"Question {questionToUpdate.Id} updated", Severity.Success);
       StateHasChanged();
     }
 

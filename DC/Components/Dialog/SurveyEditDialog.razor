@@ -1,6 +1,8 @@
 @using DC.Models
 @inject AppDbContext appDbContext
-@inject ISnackbar Snackbar
+@inject ISnackbar sb
+
+@rendermode InteractiveServer
 
 <MudDialog>
   <DialogContent>
@@ -39,7 +41,7 @@
     {
       if (_dateRange.Start.Value > _dateRange.End.Value)
       {
-        Snackbar.Add("End date must be after start date", Severity.Error);
+        sb.Add("End date must be after start date", Severity.Error);
         return;
       }
 
@@ -60,12 +62,12 @@
       }
       catch (Exception ex)
       {
-        Snackbar.Add($"Error updating survey: {ex.Message}", Severity.Error);
+        sb.Add($"Error updating survey: {ex.Message}", Severity.Error);
       }
     }
     else
     {
-      Snackbar.Add("Please select both start and end dates", Severity.Warning);
+      sb.Add("Please select both start and end dates", Severity.Warning);
     }
   }
 }

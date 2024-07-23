@@ -11,7 +11,8 @@ using MudBlazor;
 var builder = WebApplication.CreateBuilder(args);
 
 
-
+builder.Services.AddRazorPages();
+builder.Services.AddServerSideBlazor();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -30,7 +31,19 @@ builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddHttpClient();
 
-builder.Services.AddMudServices();
+builder.Services.AddMudServices(config =>
+{
+    config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.TopRight;
+
+    config.SnackbarConfiguration.PreventDuplicates = false;
+    config.SnackbarConfiguration.NewestOnTop = false;
+    config.SnackbarConfiguration.ShowCloseIcon = true;
+    config.SnackbarConfiguration.VisibleStateDuration = 5000;
+    config.SnackbarConfiguration.HideTransitionDuration = 100;
+    config.SnackbarConfiguration.ShowTransitionDuration = 300;
+    config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
+});
+
 builder.Services.Configure<PopoverOptions>(options =>
 {
     options.ThrowOnDuplicateProvider = false;

@@ -2,7 +2,7 @@
 
 @inject AppDbContext appDbContext
 @inject IDialogService dialogService
-@inject ISnackbar snackbar
+@inject ISnackbar sb
 
 
 
@@ -19,7 +19,7 @@
       </MudCardContent>
       <MudCardActions>
         <MudStack Spacing="2" Row="true">
-          <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="OpenSurveyDialog">Create New Survey</MudButton>
+          <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="OpenCreateSurveyDialog">Create New Survey</MudButton>
         </MudStack>
       </MudCardActions>
     </MudCard>

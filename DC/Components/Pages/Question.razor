@@ -4,6 +4,7 @@
 
 @inject AppDbContext appDbContext
 @inject IDialogService dialogService
+@inject ISnackbar sb
 
 @rendermode InteractiveServer
 
@@ -13,7 +14,7 @@
     <DataAnnotationsValidator />
     <MudGrid Spacing="3" Justify="Justify.Center">
         <MudItem xs="6">
-            <MudTextField @bind-Value=" newQuestionText" T="string" Label="New Question" HelperText="Click the button to Add" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" />
+            <MudTextField @bind-Value=" newQuestionText" T="string" Label="New Question" HelperText="Click the button to Add" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" TextUpdateSuppression="false" />
         </MudItem>
         <MudItem xs="3">
             <MudButton Variant="Variant.Filled" Size="Size.Medium" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary" OnClick="@(() => InsertQuestion())">Add</MudButton>

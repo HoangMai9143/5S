@@ -95,6 +95,7 @@ namespace DC.Components.Pages
       catch (Exception ex)
       {
         Console.WriteLine($"Error loading surveys: {ex.Message}");
+        sb.Add("Error loading surveys", Severity.Error);
         surveys = new List<SurveyModel>();
       }
     }
@@ -113,6 +114,7 @@ namespace DC.Components.Pages
       catch (Exception ex)
       {
         Console.WriteLine($"Error loading questions: {ex.Message}");
+        sb.Add("Error loading questions", Severity.Error);
         questions = new List<QuestionModel>();
       }
     }
@@ -139,7 +141,8 @@ namespace DC.Components.Pages
     {
       if (index == 1 && selectedSurvey == null)
       {
-        dialogService.Show<AlertDialog>("Please select a survey first.");
+        sb.Add("Please select a survey first.", Severity.Warning);
+
         return;
       }
       if (index == 0 && selectedSurvey != null)
@@ -154,14 +157,15 @@ namespace DC.Components.Pages
       activeIndex = index;
     }
 
-    private async Task OpenSurveyDialog()
+    private async Task OpenCreateSurveyDialog()
     {
       var dialog = dialogService.Show<SurveyCreateDialog>("Create New Survey");
       var result = await dialog.Result;
 
-      if (!result.Canceled)
+      if (!result.Canceled && result.Data is SurveyModel newSurvey)
       {
         await LoadSurveys();
+        sb.Add($"Survey created successfully with ID: {newSurvey.Id}.", Severity.Success);
       }
     }
     private async Task SaveSurveyQuestions()
@@ -194,11 +198,11 @@ namespace DC.Components.Pages
         existingQuestionIds = new HashSet<int>(currentQuestionIds);
         originalExistingQuestionIds = new HashSet<int>(existingQuestionIds);
 
-        snackbar.Add("Survey questions saved to database successfully.", Severity.Success);
+        sb.Add("Survey questions saved to database successfully.", Severity.Success);
       }
       catch (Exception ex)
       {
-        snackbar.Add($"Error saving survey questions: {ex.Message}", Severity.Error);
+        sb.Add($"Error saving survey questions: {ex.Message}", Severity.Error);
       }
       finally
       {
@@ -270,10 +274,11 @@ namespace DC.Components.Pages
     }
     private async Task ConfirmedDeleteSurvey(SurveyModel surveyToDelete)
     {
+      int deletedSurveyId = surveyToDelete.Id;
       appDbContext.Set<SurveyModel>().Remove(surveyToDelete);
       await appDbContext.SaveChangesAsync();
       await LoadSurveys();
-      snackbar.Add("Survey deleted successfully.", Severity.Success);
+      sb.Add($"Survey {deletedSurveyId} deleted successfully.", Severity.Success);
     }
 
     private async Task CloneSurvey(SurveyModel surveyToClone)
@@ -303,7 +308,7 @@ namespace DC.Components.Pages
 
       await appDbContext.SaveChangesAsync();
       await LoadSurveys();
-      snackbar.Add("Survey cloned successfully.", Severity.Success);
+      sb.Add($"Survey cloned successfully with ID: {clonedSurvey.Id}", Severity.Success);
     }
   }
 }

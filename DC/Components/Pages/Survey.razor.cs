@@ -48,7 +48,8 @@ namespace DC.Components.Pages
     {
       try
       {
-        questions = await appDbContext.Set<QuestionModel>().OrderBy(q => q.Id).ToListAsync();
+        // Modified to include OrderByDescending for Id
+        questions = await appDbContext.Set<QuestionModel>().OrderByDescending(q => q.Id).ToListAsync();
         if (selectedSurvey != null)
         {
           await LoadExistingQuestions();
@@ -60,6 +61,7 @@ namespace DC.Components.Pages
         questions = new List<QuestionModel>();
       }
     }
+
     private async Task LoadExistingQuestions()
     {
       var existingQuestionIdsList = await appDbContext.Set<SurveyQuestionModel>()
@@ -73,7 +75,7 @@ namespace DC.Components.Pages
     }
 
     // Filter surveys
-    private Func<SurveyModel, bool> _quickFilter => x =>
+    private Func<SurveyModel, bool> _surveyQuickFilter => x =>
     {
       if (string.IsNullOrWhiteSpace(_searchString))
         return true;
@@ -102,7 +104,7 @@ namespace DC.Components.Pages
       if (string.IsNullOrWhiteSpace(_questionSearchString))
         return true;
 
-      if (x.Id.ToString().Contains(_questionSearchString, StringComparison.OrdinalIgnoreCase))
+      if (x.Id.ToString().Contains(_questionSearchString))
         return true;
 
       if (x.QuestionContext.Contains(_questionSearchString, StringComparison.OrdinalIgnoreCase))
@@ -114,10 +116,16 @@ namespace DC.Components.Pages
 
     private void HandleTabChanged(int index)
     {
+      LoadExistingQuestions();
       if (index == 1 && selectedSurvey == null)
       {
         dialogService.Show<AlertDialog>("Please select a survey first.");
         return;
+      }
+      if (index == 0 && selectedSurvey != null)
+      {
+        selectedSurvey = null;
+        selectedQuestions.Clear();
       }
       activeIndex = index;
     }
@@ -134,12 +142,6 @@ namespace DC.Components.Pages
     }
     private async Task UpdateSurveyQuestions()
     {
-      if (selectedSurvey == null)
-      {
-        snackbar.Add("Please select a survey.", Severity.Warning);
-        return;
-      }
-
       try
       {
         // Get current and existing question IDs
@@ -166,7 +168,7 @@ namespace DC.Components.Pages
       }
       catch (Exception ex)
       {
-        Snackbar.Add($"Error updating survey questions: {ex.Message}", Severity.Error);
+        snackbar.Add($"Error updating survey questions: {ex.Message}", Severity.Error);
       }
     }
 
@@ -174,6 +176,7 @@ namespace DC.Components.Pages
     {
       selectedSurvey = survey;
       LoadExistingQuestions();
+
       activeIndex = 1;
     }
   }

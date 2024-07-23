@@ -243,7 +243,7 @@ namespace DC.Components.Pages
       if (!result.Canceled)
       {
         await LoadSurveys();
-
+        sb.Add($"Survey {surveyToEdit.Id} updated successfully.", Severity.Success);
       }
     }
     private async Task DeleteSurvey(SurveyModel surveyToDelete)
@@ -270,6 +270,7 @@ namespace DC.Components.Pages
       if (!result.Canceled)
       {
         await ConfirmedDeleteSurvey(surveyToDelete);
+        sb.Add($"Survey {surveyToDelete.Id} deleted successfully.", Severity.Success);
       }
     }
     private async Task ConfirmedDeleteSurvey(SurveyModel surveyToDelete)
@@ -278,7 +279,6 @@ namespace DC.Components.Pages
       appDbContext.Set<SurveyModel>().Remove(surveyToDelete);
       await appDbContext.SaveChangesAsync();
       await LoadSurveys();
-      sb.Add($"Survey {deletedSurveyId} deleted successfully.", Severity.Success);
     }
 
     private async Task CloneSurvey(SurveyModel surveyToClone)

@@ -17,6 +17,7 @@ namespace DC.Components.Pages
     private List<QuestionModel> questions = new List<QuestionModel>();
     private HashSet<QuestionModel> selectedQuestions = new HashSet<QuestionModel>();
     private HashSet<int> existingQuestionIds = new HashSet<int>();
+    private HashSet<int> originalExistingQuestionIds = new HashSet<int>();
 
     private string _searchString = string.Empty;
     private string _questionSearchString = string.Empty;
@@ -62,6 +63,7 @@ namespace DC.Components.Pages
       }
     }
 
+
     private async Task LoadExistingQuestions()
     {
       var existingQuestionIdsList = await appDbContext.Set<SurveyQuestionModel>()
@@ -71,7 +73,9 @@ namespace DC.Components.Pages
 
       // Convert to hashset for faster lookup
       existingQuestionIds = new HashSet<int>(existingQuestionIdsList);
+      originalExistingQuestionIds = new HashSet<int>(existingQuestionIds);
       selectedQuestions = new HashSet<QuestionModel>(questions.Where(q => existingQuestionIds.Contains(q.Id)));
+      StateHasChanged();
     }
 
     // Filter surveys
@@ -114,9 +118,8 @@ namespace DC.Components.Pages
     };
 
 
-    private void HandleTabChanged(int index)
+    private async Task HandleTabChanged(int index)
     {
-      LoadExistingQuestions();
       if (index == 1 && selectedSurvey == null)
       {
         dialogService.Show<AlertDialog>("Please select a survey first.");
@@ -126,6 +129,10 @@ namespace DC.Components.Pages
       {
         selectedSurvey = null;
         selectedQuestions.Clear();
+      }
+      if (selectedSurvey != null)
+      {
+        await LoadExistingQuestions();
       }
       activeIndex = index;
     }
@@ -140,43 +147,57 @@ namespace DC.Components.Pages
         await LoadSurveys();
       }
     }
-    private async Task UpdateSurveyQuestions()
+    private async Task SaveSurveyQuestions()
     {
       try
       {
         // Get current and existing question IDs
         var currentQuestionIds = selectedQuestions.Select(q => q.Id).ToHashSet();
-        var existingSurveyQuestions = await appDbContext.Set<SurveyQuestionModel>()
-            .Where(sq => sq.SurveyId == selectedSurvey.Id)
-            .ToListAsync();
-        var existingQuestionIds = existingSurveyQuestions.Select(sq => sq.QuestionId).ToHashSet();
 
         // Determine questions to remove and add
-        var questionsToRemove = existingSurveyQuestions.Where(sq => !currentQuestionIds.Contains(sq.QuestionId)).ToList();
-        var questionsToAdd = currentQuestionIds.Except(existingQuestionIds)
-            .Select(questionId => new SurveyQuestionModel { SurveyId = selectedSurvey.Id, QuestionId = questionId });
+        var questionsToRemove = existingQuestionIds.Except(currentQuestionIds).ToList();
+        var questionsToAdd = currentQuestionIds.Except(existingQuestionIds).ToList();
 
         // Update database
-        appDbContext.Set<SurveyQuestionModel>().RemoveRange(questionsToRemove);
-        await appDbContext.Set<SurveyQuestionModel>().AddRangeAsync(questionsToAdd);
+        foreach (var questionId in questionsToRemove)
+        {
+          var surveyQuestion = await appDbContext.Set<SurveyQuestionModel>()
+              .FirstOrDefaultAsync(sq => sq.SurveyId == selectedSurvey.Id && sq.QuestionId == questionId);
+          if (surveyQuestion != null)
+            appDbContext.Set<SurveyQuestionModel>().Remove(surveyQuestion);
+        }
+
+        await appDbContext.Set<SurveyQuestionModel>().AddRangeAsync(
+            questionsToAdd.Select(questionId => new SurveyQuestionModel { SurveyId = selectedSurvey.Id, QuestionId = questionId })
+        );
+
         await appDbContext.SaveChangesAsync();
 
-        // Refresh UI
-        await LoadExistingQuestions();
+        // Update existingQuestionIds to reflect the changes
+        existingQuestionIds = new HashSet<int>(currentQuestionIds);
+        originalExistingQuestionIds = new HashSet<int>(existingQuestionIds);
 
-        snackbar.Add("Survey questions updated successfully.", Severity.Success);
+        snackbar.Add("Survey questions saved to database successfully.", Severity.Success);
       }
       catch (Exception ex)
       {
-        snackbar.Add($"Error updating survey questions: {ex.Message}", Severity.Error);
+        snackbar.Add($"Error saving survey questions: {ex.Message}", Severity.Error);
+      }
+      finally
+      {
+        StateHasChanged();
       }
     }
 
-    private void SelectItem(SurveyModel survey)
+    private void OnSelectionChanged(HashSet<QuestionModel> selectedItems)
+    {
+      selectedQuestions = selectedItems;
+      StateHasChanged();
+    }
+    private void OnSelectSurvey(SurveyModel survey)
     {
       selectedSurvey = survey;
       LoadExistingQuestions();
-
       activeIndex = 1;
     }
   }

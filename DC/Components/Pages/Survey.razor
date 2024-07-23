@@ -36,7 +36,7 @@
         <PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.CreatedDate" Title="Created Date" Format="dd/MM/yyyy HH:mm" />
         <PropertyColumn T="SurveyModel" TProperty="bool" Filterable="false" Sortable="false">
           <CellTemplate>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Check" OnClick="@(() => SelectItem(context.Item))">Choose this Survey</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Check" OnClick="@(() => OnSelectSurvey(context.Item))">Choose this Survey</MudButton>
           </CellTemplate>
         </PropertyColumn>
       </Columns>
@@ -54,8 +54,8 @@
             <MudText Typo="Typo.h6">Choose Questions for Survey: @selectedSurvey?.Id</MudText>
           </MudItem>
           <MudItem xs="12">
-            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="UpdateSurveyQuestions" Disabled="@(selectedSurvey == null)">
-              Update Questions
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SaveSurveyQuestions" Disabled="@(selectedSurvey == null)">
+              Save to Database
             </MudButton>
           </MudItem>
         </MudGrid>
@@ -71,6 +71,25 @@
             <SelectColumn T="QuestionModel" />
             <PropertyColumn Property="x => x.Id" Title="ID" />
             <PropertyColumn Property="x => x.QuestionContext" Title="Question" />
+            <TemplateColumn Title="Status">
+              <CellTemplate>
+                @{
+                  var question = context.Item;
+                  if (existingQuestionIds.Contains(question.Id))
+                  {
+                    <MudChip Color="Color.Success" Icon="@Icons.Material.Filled.Check" Size="Size.Small">Saved</MudChip>
+                  }
+                  else if (selectedQuestions.Contains(question))
+                  {
+                    <MudChip Color="Color.Warning" Icon="@Icons.Material.Filled.AddCircle" Size="Size.Small">Not save</MudChip>
+                  }
+                  else
+                  {
+                    <MudChip Color="Color.Default" Icon="@Icons.Material.Filled.RadioButtonUnchecked" Size="Size.Small">Not Selected</MudChip>
+                  }
+                }
+              </CellTemplate>
+            </TemplateColumn>
           </Columns>
           <PagerContent>
             <MudDataGridPager T="QuestionModel" />

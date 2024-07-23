@@ -29,8 +29,8 @@
         <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
     </ToolBarContent>
     <Columns>
-        <PropertyColumn Property="x => x.Id" Title="ID" InitialDirection="SortDirection.Descending" Sortable="false" />
-        <PropertyColumn Property="x => x.QuestionContext" Title="Question" Sortable="false" />
+        <PropertyColumn Property="x => x.Id" Title="ID" InitialDirection="SortDirection.Descending" Sortable="true" />
+        <PropertyColumn Property="x => x.QuestionContext" Title="Question" />
         <TemplateColumn CellClass="d-flex justify-end" Width="30px">
             <CellTemplate>
                 <MudStack Row>

@@ -34,11 +34,16 @@
         <PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.StartDate" Title="Start Date" Format="dd/MM/yyyy" />
         <PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.EndDate" Title="End Date" Format="dd/MM/yyyy" />
         <PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.CreatedDate" Title="Created Date" Format="dd/MM/yyyy HH:mm" />
-        <PropertyColumn T="SurveyModel" TProperty="bool" Filterable="false" Sortable="false">
+        <TemplateColumn CellClass="d-flex justify-end" Width="150px">
           <CellTemplate>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Check" OnClick="@(() => OnSelectSurvey(context.Item))">Choose this Survey</MudButton>
+            <MudStack Row>
+              <MudIconButton Icon="@Icons.Material.Filled.Check" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OnSelectSurvey(context.Item))" />
+              <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenEditSurveyDialog(context.Item))" />
+              <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="Size.Small" OnClick="@(() => DeleteSurvey(context.Item))" />
+              <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Info" Size="Size.Small" OnClick="@(() => CloneSurvey(context.Item))" />
+            </MudStack>
           </CellTemplate>
-        </PropertyColumn>
+        </TemplateColumn>
       </Columns>
       <PagerContent>
         <MudDataGridPager T="SurveyModel" />

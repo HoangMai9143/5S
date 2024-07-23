@@ -33,19 +33,29 @@
 <MudDialog>
   <DialogContent>
     <MudStack>
-      <MudDateRangePicker @bind-DateRange="_dateRange" Margin="Margin.Dense" PlaceholderStart="Start Date" PlaceholderEnd="End Date" MinDate="@DateTime.Now" MaxDate="@DateTime.Now.AddYears(1)" />
+      <MudDateRangePicker @bind-DateRange="_dateRange" Margin="Margin.Dense" PlaceholderStart="Start Date" PlaceholderEnd="End Date" MinDate="@DateTime.Now.AddYears(-1)" MaxDate="@DateTime.Now.AddYears(1)" />
+      <MudCheckBox T="bool" @bind-Checked="Survey.IsActive" Label="Is Active" Color="Color.Primary" />
+
     </MudStack>
   </DialogContent>
   <DialogActions>
     <MudButton OnClick="Cancel">Cancel</MudButton>
-    <MudButton Color="Color.Primary" OnClick="Submit">Create</MudButton>
+    <MudButton Color="Color.Primary" OnClick="Submit">Save</MudButton>
   </DialogActions>
 </MudDialog>
 
 @code {
   [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+  [Parameter] public SurveyModel Survey { get; set; }
 
-  private DateRange _dateRange = new DateRange(DateTime.Now, DateTime.Now.AddDays(7));
+  private DateRange _dateRange;
+  private bool _isActive;
+
+  protected override void OnInitialized()
+  {
+    _dateRange = new DateRange(Survey.StartDate, Survey.EndDate);
+    _isActive = Survey.IsActive;
+  }
 
   private void Cancel()
   {
@@ -62,23 +72,19 @@
         return;
       }
 
-      var newSurvey = new SurveyModel
-        {
-          StartDate = _dateRange.Start.Value,
-          EndDate = _dateRange.End.Value,
-          CreatedDate = DateTime.UtcNow,
-          IsActive = true
-        };
+      Survey.StartDate = _dateRange.Start.Value;
+      Survey.EndDate = _dateRange.End.Value;
+      Survey.IsActive = _isActive;
 
       try
       {
-        await appDbContext.Set<SurveyModel>().AddAsync(newSurvey);
+        appDbContext.Set<SurveyModel>().Update(Survey);
         await appDbContext.SaveChangesAsync();
-        MudDialog.Close(DialogResult.Ok(newSurvey));
+        MudDialog.Close(DialogResult.Ok(true));
       }
       catch (Exception ex)
       {
-        Snackbar.Add($"Error creating survey: {ex.Message}", Severity.Error);
+        Snackbar.Add($"Error updating survey: {ex.Message}", Severity.Error);
       }
     }
     else

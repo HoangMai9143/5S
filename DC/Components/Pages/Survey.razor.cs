@@ -200,5 +200,93 @@ namespace DC.Components.Pages
       LoadExistingQuestions();
       activeIndex = 1;
     }
+    private async Task OpenEditSurveyDialog(SurveyModel surveyToEdit)
+    {
+      var parameters = new DialogParameters
+    {
+        { "Survey", surveyToEdit }
+    };
+
+      var options = new DialogOptions()
+      {
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true,
+        Position = DialogPosition.Center,
+        CloseOnEscapeKey = true,
+        FullScreen = false,
+      };
+
+      var dialog = await dialogService.ShowAsync<SurveyEditDialog>("Edit Survey", parameters, options);
+      var result = await dialog.Result;
+
+      if (!result.Canceled)
+      {
+        await LoadSurveys();
+      }
+    }
+    private async Task DeleteSurvey(SurveyModel surveyToDelete)
+    {
+      var parameters = new DialogParameters
+    {
+        { "ContentText", "Are you sure you want to delete this survey?" },
+        { "ButtonText", "Delete" },
+        { "Color", Color.Error }
+    };
+
+      var options = new DialogOptions()
+      {
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true,
+        Position = DialogPosition.Center,
+        CloseOnEscapeKey = true,
+        FullScreen = false,
+      };
+
+      var dialog = await dialogService.ShowAsync<ConfirmDialog>("Delete Survey", parameters, options);
+      var result = await dialog.Result;
+
+      if (!result.Canceled)
+      {
+        await ConfirmedDeleteSurvey(surveyToDelete);
+      }
+    }
+    private async Task ConfirmedDeleteSurvey(SurveyModel surveyToDelete)
+    {
+      appDbContext.Set<SurveyModel>().Remove(surveyToDelete);
+      await appDbContext.SaveChangesAsync();
+      await LoadSurveys();
+      snackbar.Add("Survey deleted successfully.", Severity.Success);
+    }
+
+    private async Task CloneSurvey(SurveyModel surveyToClone)
+    {
+      var clonedSurvey = new SurveyModel
+      {
+        StartDate = surveyToClone.StartDate,
+        EndDate = surveyToClone.EndDate,
+        IsActive = true,
+        CreatedDate = DateTime.Now
+      };
+
+      await appDbContext.Set<SurveyModel>().AddAsync(clonedSurvey);
+      await appDbContext.SaveChangesAsync();
+
+      var surveyQuestions = await appDbContext.Set<SurveyQuestionModel>()
+          .Where(sq => sq.SurveyId == surveyToClone.Id)
+          .ToListAsync();
+
+      foreach (var question in surveyQuestions)
+      {
+        await appDbContext.Set<SurveyQuestionModel>().AddAsync(new SurveyQuestionModel
+        {
+          SurveyId = clonedSurvey.Id,
+          QuestionId = question.QuestionId
+        });
+      }
+
+      await appDbContext.SaveChangesAsync();
+      await LoadSurveys();
+      snackbar.Add("Survey cloned successfully.", Severity.Success);
+    }
   }
 }

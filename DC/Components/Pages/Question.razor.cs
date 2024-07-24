@@ -15,6 +15,8 @@ namespace DC.Components.Pages
     private string _searchString = string.Empty;
     private bool _sortIdDescending = true;
     private List<string> _events = new();
+    private Timer debounceTimer;
+
     private QuestionType selectedQuestionType = QuestionType.MultipleChoice; // Default value
 
     private Func<QuestionModel, object> _sortById => x =>
@@ -45,7 +47,9 @@ namespace DC.Components.Pages
     {
       try
       {
-        questions = await appDbContext.Set<QuestionModel>().OrderByDescending(q => q.Id).ToListAsync();
+        questions = await appDbContext.Set<QuestionModel>()
+            .OrderByDescending(q => q.Id)
+            .ToListAsync();
       }
       catch (Exception ex)
       {
@@ -59,6 +63,18 @@ namespace DC.Components.Pages
     {
       if (!string.IsNullOrWhiteSpace(newQuestionText))
       {
+        var existingQuestion = await appDbContext.Set<QuestionModel>()
+            .FirstOrDefaultAsync(q => q.QuestionContext.ToLower() == newQuestionText.ToLower());
+
+        if (existingQuestion != null)
+        {
+          sb.Add("This question already exists.", Severity.Warning);
+          _searchString = newQuestionText; // Set the search string to the new question text
+          await SearchQuestions(_searchString); // Filter the questions to show the existing one
+          StateHasChanged(); // Update the UI
+          return;
+        }
+
         var newQuestion = new QuestionModel
         {
           QuestionContext = newQuestionText,
@@ -66,7 +82,9 @@ namespace DC.Components.Pages
         };
         await appDbContext.Set<QuestionModel>().AddAsync(newQuestion);
         await appDbContext.SaveChangesAsync();
-        questions.Add(newQuestion);
+
+        await LoadQuestionsAsync(); // Refresh the questions list
+
         newQuestionText = string.Empty;
         sb.Add($"Question added successfully with ID: {newQuestion.Id}", Severity.Success);
         StateHasChanged();
@@ -163,9 +181,26 @@ namespace DC.Components.Pages
       if (e.Key == "Enter")
       {
         await InsertQuestion();
-
       }
       StateHasChanged();
+    }
+    private async Task OnSearchInput(string value)
+    {
+      _searchString = value; // Update the search term
+    }
+    private async Task SearchQuestions(string searchTerm)
+    {
+      if (string.IsNullOrWhiteSpace(searchTerm))
+      {
+        await LoadQuestionsAsync(); // Load all questions if search term is empty
+      }
+      else
+      {
+        questions = await appDbContext.Set<QuestionModel>()
+            .Where(q => q.QuestionContext.Contains(searchTerm))
+            .OrderByDescending(q => q.Id)
+            .ToListAsync();
+      }
     }
   }
 }

@@ -76,20 +76,20 @@ namespace DC.Components.Pages
             .OrderByDescending(s => s.Id)
             .ToListAsync();
 
-        // Update IsActive property for surveys
+        // Update IsActive property for surveys if the end date has passed
         bool anyChanges = false;
         foreach (var survey in surveys)
         {
           if (survey.EndDate < DateTime.Today.AddDays(-1) && survey.IsActive)
           {
-            survey.IsActive = false;
+            survey.IsActive = false; // Mark the survey as ended
             anyChanges = true;
           }
         }
 
         if (anyChanges)
         {
-          await appDbContext.SaveChangesAsync();
+          await appDbContext.SaveChangesAsync(); // Save changes if any survey's status was updated
         }
       }
       catch (Exception ex)

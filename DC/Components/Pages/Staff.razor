@@ -19,10 +19,10 @@
       <DataAnnotationsValidator />
       <MudGrid Spacing="3" Justify="Justify.Center" AlignItems="AlignItems.Center">
         <MudItem xs="12" sm="4">
-          <MudTextField Value="@newStaffFullName" ValueChanged="@((string val) => OnSearchInput(val))" T="string" Label="Full Name / Search" HelperText="Type to search or add new staff" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" TextUpdateSuppression="false" Immediate="true" DebounceInterval="300" @onkeydown="@OnKeyDown" />
+          <MudTextField Value="@newStaffFullName" ValueChanged="@((string val) => OnSearchInput(val))" T="string" Label="Full Name / Search" HelperText="Type to search or add new staff" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" TextUpdateSuppression="false" Immediate="true" DebounceInterval="300" @onkeydown="@OnKeyDown" Clearable="true" />
         </MudItem>
         <MudItem xs="12" sm="3">
-          <MudTextField @bind-Value="newStaffDepartment" T="string" Label="Department" HelperText="Enter staff department" HelperTextOnFocus="true" Variant="Variant.Outlined" />
+          <MudTextField @bind-Value="newStaffDepartment" T="string" Label="Department" HelperText="Enter staff department" HelperTextOnFocus="true" Variant="Variant.Outlined" Clearable="true" />
         </MudItem>
         <MudItem xs="12" sm="1" Style="text-align: center;" Class="custom-button">
           <MudButton Variant="Variant.Filled" Size="Size.Medium" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary" OnClick="@(() => InsertStaff())">Add</MudButton>

@@ -23,6 +23,10 @@ namespace DC.Components.Pages
     private string _questionSearchString = string.Empty;
     private SurveyModel selectedSurvey;
 
+    private System.Timers.Timer _surveyDebounceTimer;
+    private System.Timers.Timer _questionDebounceTimer;
+    private const int DebounceDelay = 300; // milliseconds
+
     // Filter surveys
     private Func<SurveyModel, bool> _surveyQuickFilter => x =>
     {
@@ -66,6 +70,14 @@ namespace DC.Components.Pages
     {
       await LoadSurveys();
       await LoadQuestions();
+
+      _surveyDebounceTimer = new System.Timers.Timer(DebounceDelay);
+      _surveyDebounceTimer.Elapsed += async (sender, e) => await SurveyDebounceTimerElapsed();
+      _surveyDebounceTimer.AutoReset = false;
+
+      _questionDebounceTimer = new System.Timers.Timer(DebounceDelay);
+      _questionDebounceTimer.Elapsed += async (sender, e) => await QuestionDebounceTimerElapsed();
+      _questionDebounceTimer.AutoReset = false;
     }
 
     private async Task LoadSurveys()
@@ -100,12 +112,13 @@ namespace DC.Components.Pages
       }
     }
 
-    private async Task LoadQuestions() // Load all questions
+    private async Task LoadQuestions()
     {
       try
       {
-        // Modified to include OrderByDescending for Id
-        questions = await appDbContext.Set<QuestionModel>().OrderByDescending(q => q.Id).ToListAsync();
+        questions = await appDbContext.Set<QuestionModel>()
+            .OrderByDescending(q => q.Id)
+            .ToListAsync();
         if (selectedSurvey != null)
         {
           await LoadExistingQuestions();
@@ -309,6 +322,77 @@ namespace DC.Components.Pages
       await appDbContext.SaveChangesAsync();
       await LoadSurveys();
       sb.Add($"Survey {surveyToClone.Id} cloned successfully with ID: {clonedSurvey.Id}", Severity.Success);
+    }
+    private async Task OnSurveySearchInput(string value)
+    {
+      _searchString = value;
+      _surveyDebounceTimer.Stop();
+      _surveyDebounceTimer.Start();
+    }
+
+    private async Task SurveyDebounceTimerElapsed()
+    {
+      await InvokeAsync(async () =>
+      {
+        await SearchSurveys(_searchString);
+        StateHasChanged();
+      });
+    }
+
+    private async Task SearchSurveys(string searchTerm)
+    {
+      if (string.IsNullOrWhiteSpace(searchTerm))
+      {
+        await LoadSurveys(); // Load all surveys if search term is empty
+      }
+      else
+      {
+        searchTerm = searchTerm.ToLower(); // Convert search term to lowercase
+        var allSurveys = await appDbContext.Set<SurveyModel>()
+            .OrderByDescending(s => s.Id)
+            .ToListAsync();
+
+        surveys = allSurveys.Where(s =>
+            s.Id.ToString().Contains(searchTerm) ||
+            s.StartDate.ToString("dd/MM/yyyy HH:mm").ToLower().Contains(searchTerm) ||
+            s.EndDate.ToString("dd/MM/yyyy HH:mm").ToLower().Contains(searchTerm) ||
+            s.CreatedDate.ToString("dd/MM/yyyy HH:mm").ToLower().Contains(searchTerm) ||
+            s.IsActive.ToString().ToLower().Contains(searchTerm)
+        ).ToList();
+      }
+    }
+
+    private async Task OnQuestionSearchInput(string value)
+    {
+      _questionSearchString = value;
+      _questionDebounceTimer.Stop();
+      _questionDebounceTimer.Start();
+    }
+
+    private async Task QuestionDebounceTimerElapsed()
+    {
+      await InvokeAsync(async () =>
+      {
+        await SearchQuestions(_questionSearchString);
+        StateHasChanged();
+      });
+    }
+
+    private async Task SearchQuestions(string searchTerm)
+    {
+      if (string.IsNullOrWhiteSpace(searchTerm))
+      {
+        await LoadQuestions(); // Load all questions if search term is empty
+      }
+      else
+      {
+        searchTerm = searchTerm.ToLower(); // Convert search term to lowercase
+        questions = await appDbContext.Set<QuestionModel>()
+            .Where(q => q.Id.ToString().Contains(searchTerm) ||
+                        q.QuestionContext.ToLower().Contains(searchTerm))
+            .OrderByDescending(q => q.Id)
+            .ToListAsync();
+      }
     }
   }
 }

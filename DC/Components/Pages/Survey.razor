@@ -29,7 +29,8 @@
           <ToolBarContent>
             <MudText Typo="Typo.h6">Surveys</MudText>
             <MudSpacer />
-            <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            <MudTextField Value="@_searchString" ValueChanged="@((string val) => OnSurveySearchInput(val))" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" DebounceInterval="300" Clearable="true">
+            </MudTextField>
           </ToolBarContent>
           <Columns>
             <PropertyColumn T="SurveyModel" TProperty="int" Property="x => x.Id" Title="ID" />
@@ -86,7 +87,8 @@
               <ToolBarContent>
                 <MudText Typo="Typo.h6">Questions</MudText>
                 <MudSpacer />
-                <MudTextField @bind-Value="_questionSearchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                <MudTextField Value="@_questionSearchString" ValueChanged="@((string val) => OnQuestionSearchInput(val))" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" DebounceInterval="300" Clearable="true">
+                </MudTextField>
               </ToolBarContent>
               <Columns>
                 <SelectColumn T="QuestionModel" />

@@ -90,8 +90,9 @@
               </ToolBarContent>
               <Columns>
                 <SelectColumn T="QuestionModel" />
-                <PropertyColumn Property="x => x.Id" Title="ID" />
+                <PropertyColumn Property="x => x.Id" Title="ID" InitialDirection="SortDirection.Descending" Sortable="true" />
                 <PropertyColumn Property="x => x.QuestionContext" Title="Question" />
+                <PropertyColumn Property="x => x.QuestionType" Title="Type" Filterable="true" />
                 <TemplateColumn Title="Status">
                   <CellTemplate Context="cellContext">
                     @{

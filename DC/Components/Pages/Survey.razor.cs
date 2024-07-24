@@ -113,8 +113,8 @@ namespace DC.Components.Pages
       }
       catch (Exception ex)
       {
-        Console.WriteLine($"Error loading questions: {ex.Message}");
-        sb.Add("Error loading questions", Severity.Error);
+        Console.WriteLine($"Error loading question(s): {ex.Message}");
+        sb.Add("Error loading question(s)", Severity.Error);
         questions = new List<QuestionModel>();
       }
     }
@@ -198,11 +198,11 @@ namespace DC.Components.Pages
         existingQuestionIds = new HashSet<int>(currentQuestionIds);
         originalExistingQuestionIds = new HashSet<int>(existingQuestionIds);
 
-        sb.Add("Survey questions saved to database successfully.", Severity.Success);
+        sb.Add("Survey question(s) saved to database successfully.", Severity.Success);
       }
       catch (Exception ex)
       {
-        sb.Add($"Error saving survey questions: {ex.Message}", Severity.Error);
+        sb.Add($"Error saving survey question(s): {ex.Message}", Severity.Error);
       }
       finally
       {

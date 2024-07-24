@@ -7,6 +7,7 @@ using DC.Components.Dialog;
 using MudBlazor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Components.Web;
+using System.Timers;
 
 
 namespace DC.Components.Pages
@@ -19,6 +20,8 @@ namespace DC.Components.Pages
     private string newStaffDepartment = string.Empty;
     private bool newStaffIsActive = true;
     private string _searchString = string.Empty;
+    private System.Timers.Timer _debounceTimer;
+    private const int DebounceDelay = 300; // milliseconds
 
     private Func<StaffModel, bool> _quickFilter => x =>
     {
@@ -43,6 +46,9 @@ namespace DC.Components.Pages
     protected override async Task OnInitializedAsync()
     {
       await LoadStaffAsync();
+      _debounceTimer = new System.Timers.Timer(DebounceDelay);
+      _debounceTimer.Elapsed += async (sender, e) => await DebounceTimerElapsed();
+      _debounceTimer.AutoReset = false;
     }
 
     private async Task LoadStaffAsync()
@@ -164,6 +170,45 @@ namespace DC.Components.Pages
 
       await LoadStaffAsync();
       StateHasChanged();
+    }
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+      if (e.Key == "Enter")
+      {
+        await InsertStaff();
+      }
+      StateHasChanged();
+    }
+    private async Task OnSearchInput(string value)
+    {
+      newStaffFullName = value;
+      _searchString = value;
+      _debounceTimer.Stop();
+      _debounceTimer.Start();
+    }
+    private async Task DebounceTimerElapsed()
+    {
+      await InvokeAsync(async () =>
+      {
+        await SearchStaff(_searchString);
+        StateHasChanged();
+      });
+    }
+    private async Task SearchStaff(string searchTerm)
+    {
+      if (string.IsNullOrWhiteSpace(searchTerm))
+      {
+        await LoadStaffAsync(); // Load all staff if search term is empty
+      }
+      else
+      {
+        searchTerm = searchTerm.ToLower(); // Convert search term to lowercase
+        staffList = await appDbContext.Set<StaffModel>()
+            .Where(s => s.FullName.ToLower().Contains(searchTerm) ||
+                        s.Department.ToLower().Contains(searchTerm))
+            .OrderByDescending(s => s.Id)
+            .ToListAsync();
+      }
     }
   }
 }

@@ -19,7 +19,7 @@
       <DataAnnotationsValidator />
       <MudGrid Spacing="3" Justify="Justify.Center" AlignItems="AlignItems.Center">
         <MudItem xs="12" sm="4">
-          <MudTextField @bind-Value="newStaffFullName" T="string" Label="Full Name" HelperText="Enter staff full name" HelperTextOnFocus="true" Variant="Variant.Outlined" />
+          <MudTextField Value="@newStaffFullName" ValueChanged="@((string val) => OnSearchInput(val))" T="string" Label="Full Name / Search" HelperText="Type to search or add new staff" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" TextUpdateSuppression="false" Immediate="true" DebounceInterval="300" @onkeydown="@OnKeyDown" />
         </MudItem>
         <MudItem xs="12" sm="3">
           <MudTextField @bind-Value="newStaffDepartment" T="string" Label="Department" HelperText="Enter staff department" HelperTextOnFocus="true" Variant="Variant.Outlined" />
@@ -29,8 +29,6 @@
         </MudItem>
       </MudGrid>
     </EditForm>
-
-    <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-4"></MudTextField>
 
     <MudDataGrid T="StaffModel" Items="@staffList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Elevation="0" Class="custom-mudtable no-scroll pa6">
       <Columns>

@@ -15,6 +15,7 @@ namespace DC.Components.Pages
     private string _searchString = string.Empty;
     private bool _sortIdDescending = true;
     private List<string> _events = new();
+    private QuestionType selectedQuestionType = QuestionType.MultipleChoice; // Default value
 
     private Func<QuestionModel, object> _sortById => x =>
     {
@@ -37,6 +38,11 @@ namespace DC.Components.Pages
 
     protected override async Task OnInitializedAsync()
     {
+      await LoadQuestionsAsync();
+    }
+
+    private async Task LoadQuestionsAsync()
+    {
       try
       {
         questions = await appDbContext.Set<QuestionModel>().OrderByDescending(q => q.Id).ToListAsync();
@@ -53,7 +59,11 @@ namespace DC.Components.Pages
     {
       if (!string.IsNullOrWhiteSpace(newQuestionText))
       {
-        var newQuestion = new QuestionModel { QuestionContext = newQuestionText };
+        var newQuestion = new QuestionModel
+        {
+          QuestionContext = newQuestionText,
+          QuestionType = selectedQuestionType
+        };
         await appDbContext.Set<QuestionModel>().AddAsync(newQuestion);
         await appDbContext.SaveChangesAsync();
         questions.Add(newQuestion);
@@ -107,10 +117,10 @@ namespace DC.Components.Pages
     {
       var parameters = new DialogParameters
     {
-        { "QuestionText", questionToEdit.QuestionContext }
+        { "Question", questionToEdit }
     };
 
-      var options = new DialogOptions()
+      var options = new DialogOptions
       {
         MaxWidth = MaxWidth.Small,
         FullWidth = true,
@@ -122,19 +132,29 @@ namespace DC.Components.Pages
       var dialog = await dialogService.ShowAsync<QuestionEditDialog>("Edit Question", parameters, options);
       var result = await dialog.Result;
 
-      if (!result.Canceled)
+      if (!result.Canceled && result.Data is QuestionModel updatedQuestion)
       {
-        var editedText = result.Data.ToString();
-        await UpdateQuestion(questionToEdit, editedText);
+        await UpdateQuestion(updatedQuestion); // Update the question with the edited details
+        StateHasChanged();
       }
     }
 
-    private async Task UpdateQuestion(QuestionModel questionToUpdate, string newText)
+    private async Task UpdateQuestion(QuestionModel questionToUpdate)
     {
-      questionToUpdate.QuestionContext = newText;
+      var trackedQuestion = appDbContext.ChangeTracker.Entries<QuestionModel>()
+          .FirstOrDefault(e => e.Entity.Id == questionToUpdate.Id)?.Entity;
+
+      if (trackedQuestion != null)
+      {
+        appDbContext.Entry(trackedQuestion).State = EntityState.Detached;
+      }
+
       appDbContext.Set<QuestionModel>().Update(questionToUpdate);
       await appDbContext.SaveChangesAsync();
       sb.Add($"Question {questionToUpdate.Id} updated", Severity.Success);
+
+      // Refresh the questions list by calling LoadQuestionsAsync
+      await LoadQuestionsAsync();
       StateHasChanged();
     }
 

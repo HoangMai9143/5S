@@ -1,6 +1,13 @@
 <MudDialog>
   <DialogContent>
-    <MudTextField TextUpdateSuppression="false" @bind-Value="questionText" Label="Question" />
+    <MudTextField @bind-Value="question.QuestionContext" Label="Question" />
+    <MudSelect T="QuestionType" @bind-Value="question.QuestionType" Label="Question Type">
+      <MudSelectItem Value="@QuestionType.ShortAnswer">Short Answer</MudSelectItem>
+      <MudSelectItem Value="@QuestionType.MultipleChoice">Multiple Choice</MudSelectItem>
+      <MudSelectItem Value="@QuestionType.Checkboxes">Checkboxes</MudSelectItem>
+      <MudSelectItem Value="@QuestionType.Dropdown">Dropdown</MudSelectItem>
+      <MudSelectItem Value="@QuestionType.FileUpload">File Upload</MudSelectItem>
+    </MudSelect>
   </DialogContent>
   <DialogActions>
     <MudButton OnClick="Cancel">Cancel</MudButton>

@@ -1,0 +1,14 @@
+@using DC.Models
+@using MudBlazor
+
+<MudDialog>
+  <DialogContent>
+    <MudTextField @bind-Value="staff.FullName" Label="Full Name" />
+    <MudTextField @bind-Value="staff.Department" Label="Department" />
+    <MudSwitch @bind-Value="staff.IsActive" Label="Is Active?" />
+  </DialogContent>
+  <DialogActions>
+    <MudButton OnClick="Cancel">Cancel</MudButton>
+    <MudButton Color="Color.Primary" OnClick="Submit">Save</MudButton>
+  </DialogActions>
+</MudDialog>

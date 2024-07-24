@@ -7,7 +7,7 @@ using MudBlazor;
 
 namespace DC.Components.Dialog
 {
-  public partial class EditDialog
+  public partial class QuestionEditDialog
   {
     [CascadingParameter] MudDialogInstance mudDialog { get; set; }
 

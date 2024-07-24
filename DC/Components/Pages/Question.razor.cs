@@ -119,7 +119,7 @@ namespace DC.Components.Pages
         FullScreen = false,
       };
 
-      var dialog = await dialogService.ShowAsync<EditDialog>("Edit Question", parameters, options);
+      var dialog = await dialogService.ShowAsync<QuestionEditDialog>("Edit Question", parameters, options);
       var result = await dialog.Result;
 
       if (!result.Canceled)

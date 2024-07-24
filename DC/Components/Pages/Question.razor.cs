@@ -5,6 +5,7 @@ using DC.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Components.Web;
 using DC.Components.Dialog;
+using System.Timers;
 
 namespace DC.Components.Pages
 {
@@ -15,7 +16,8 @@ namespace DC.Components.Pages
     private string _searchString = string.Empty;
     private bool _sortIdDescending = true;
     private List<string> _events = new();
-    private Timer debounceTimer;
+    private System.Timers.Timer _debounceTimer;
+    private const int DebounceDelay = 300; // milliseconds
 
     private QuestionType selectedQuestionType = QuestionType.MultipleChoice; // Default value
 
@@ -41,6 +43,9 @@ namespace DC.Components.Pages
     protected override async Task OnInitializedAsync()
     {
       await LoadQuestionsAsync();
+      _debounceTimer = new System.Timers.Timer(DebounceDelay);
+      _debounceTimer.Elapsed += async (sender, e) => await DebounceTimerElapsed();
+      _debounceTimer.AutoReset = false;
     }
 
     private async Task LoadQuestionsAsync()
@@ -186,7 +191,18 @@ namespace DC.Components.Pages
     }
     private async Task OnSearchInput(string value)
     {
-      _searchString = value; // Update the search term
+      newQuestionText = value;
+      _searchString = value;
+      _debounceTimer.Stop();
+      _debounceTimer.Start();
+    }
+    private async Task DebounceTimerElapsed()
+    {
+      await InvokeAsync(async () =>
+      {
+        await SearchQuestions(_searchString);
+        StateHasChanged();
+      });
     }
     private async Task SearchQuestions(string searchTerm)
     {
@@ -196,8 +212,9 @@ namespace DC.Components.Pages
       }
       else
       {
+        searchTerm = searchTerm.ToLower(); // Convert search term to lowercase
         questions = await appDbContext.Set<QuestionModel>()
-            .Where(q => q.QuestionContext.Contains(searchTerm))
+            .Where(q => q.QuestionContext.ToLower().Contains(searchTerm))
             .OrderByDescending(q => q.Id)
             .ToListAsync();
       }

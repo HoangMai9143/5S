@@ -71,23 +71,35 @@ namespace DC.Components.Pages
     {
       if (!string.IsNullOrWhiteSpace(newStaffFullName) && !string.IsNullOrWhiteSpace(newStaffDepartment))
       {
-        var newStaff = new StaffModel
+        // Check for existing staff member with the same full name and department
+        var staffExists = await appDbContext.Set<StaffModel>()
+            .AnyAsync(s => s.FullName.ToLower() == newStaffFullName.ToLower()
+                        && s.Department.ToLower() == newStaffDepartment.ToLower());
+
+        if (staffExists)
         {
-          FullName = newStaffFullName,
-          Department = newStaffDepartment,
-          IsActive = newStaffIsActive
-        };
+          sb.Add("Staff already exist", Severity.Error);
+        }
+        else
+        {
+          var newStaff = new StaffModel
+          {
+            FullName = newStaffFullName,
+            Department = newStaffDepartment,
+            IsActive = newStaffIsActive
+          };
 
-        await appDbContext.Set<StaffModel>().AddAsync(newStaff);
-        await appDbContext.SaveChangesAsync();
+          await appDbContext.Set<StaffModel>().AddAsync(newStaff);
+          await appDbContext.SaveChangesAsync();
 
-        await LoadStaffAsync(); // Refresh the staff list
+          await LoadStaffAsync(); // Refresh the staff list
 
-        newStaffFullName = string.Empty;
-        newStaffDepartment = string.Empty;
-        newStaffIsActive = true;
-        sb.Add($"Staff member added successfully with ID: {newStaff.Id}", Severity.Success);
-        StateHasChanged();
+          newStaffFullName = string.Empty;
+          newStaffDepartment = string.Empty;
+          newStaffIsActive = true;
+          sb.Add($"Staff member added successfully with ID: {newStaff.Id}", Severity.Success);
+          StateHasChanged();
+        }
       }
     }
 
@@ -198,14 +210,13 @@ namespace DC.Components.Pages
     {
       if (string.IsNullOrWhiteSpace(searchTerm))
       {
-        await LoadStaffAsync(); // Load all staff if search term is empty
+        await LoadStaffAsync();
       }
       else
       {
-        searchTerm = searchTerm.ToLower(); // Convert search term to lowercase
+        searchTerm = searchTerm.ToLower();
         staffList = await appDbContext.Set<StaffModel>()
-            .Where(s => s.FullName.ToLower().Contains(searchTerm) ||
-                        s.Department.ToLower().Contains(searchTerm))
+            .Where(s => s.FullName.ToLower().Contains(searchTerm))
             .OrderByDescending(s => s.Id)
             .ToListAsync();
       }

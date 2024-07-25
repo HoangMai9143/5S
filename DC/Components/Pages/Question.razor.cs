@@ -19,14 +19,10 @@ namespace DC.Components.Pages
     private HashSet<int> originalExistingAnswerIds = new();
     private QuestionModel selectedQuestion;
 
-    private string newQuestionText = string.Empty;
     private string _searchString = string.Empty;
     private bool _sortIdDescending = true;
-    private List<string> _events = new();
     private System.Timers.Timer _debounceTimer;
     private const int DebounceDelay = 300; // milliseconds
-
-
 
     private Func<QuestionModel, object> _sortById => x =>
     {
@@ -51,13 +47,13 @@ namespace DC.Components.Pages
 
     protected override async Task OnInitializedAsync()
     {
-      await LoadQuestionsAsync();
+      await LoadQuestions();
       _debounceTimer = new System.Timers.Timer(DebounceDelay);
       _debounceTimer.Elapsed += async (sender, e) => await DebounceTimerElapsed();
       _debounceTimer.AutoReset = false;
     }
 
-    private async Task LoadQuestionsAsync()
+    private async Task LoadQuestions()
     {
       try
       {
@@ -75,30 +71,29 @@ namespace DC.Components.Pages
 
     private async Task InsertQuestion()
     {
-      if (!string.IsNullOrWhiteSpace(newQuestionText))
+      if (!string.IsNullOrWhiteSpace(_searchString))
       {
         var existingQuestion = await appDbContext.Set<QuestionModel>()
-            .FirstOrDefaultAsync(q => q.QuestionContext.ToLower() == newQuestionText.ToLower());
+            .FirstOrDefaultAsync(q => q.QuestionContext.ToLower() == _searchString.ToLower());
 
         if (existingQuestion != null)
         {
           sb.Add("This question already exists.", Severity.Warning);
-          _searchString = newQuestionText; // Set the search string to the new question text
-          await SearchQuestions(_searchString); // Filter the questions to show the existing one
-          StateHasChanged(); // Update the UI
+          await SearchQuestions(_searchString);
+          StateHasChanged();
           return;
         }
 
         var newQuestion = new QuestionModel
         {
-          QuestionContext = newQuestionText,
+          QuestionContext = _searchString,
         };
         await appDbContext.Set<QuestionModel>().AddAsync(newQuestion);
         await appDbContext.SaveChangesAsync();
 
-        await LoadQuestionsAsync(); // Refresh the questions list
+        await LoadQuestions();
 
-        newQuestionText = string.Empty;
+        _searchString = string.Empty;
         sb.Add($"Question added successfully with ID: {newQuestion.Id}", Severity.Success);
         StateHasChanged();
       }
@@ -147,9 +142,9 @@ namespace DC.Components.Pages
     private async Task OpenEditDialog(QuestionModel questionToEdit)
     {
       var parameters = new DialogParameters
-    {
+      {
         { "Question", questionToEdit }
-    };
+      };
 
       var options = new DialogOptions
       {
@@ -185,7 +180,7 @@ namespace DC.Components.Pages
       sb.Add($"Question {questionToUpdate.Id} updated", Severity.Success);
 
       // Refresh the questions list by calling LoadQuestionsAsync
-      await LoadQuestionsAsync();
+      await LoadQuestions();
       StateHasChanged();
     }
 
@@ -193,30 +188,39 @@ namespace DC.Components.Pages
     {
       if (e.Key == "Enter")
       {
-        await InsertQuestion();
+        _debounceTimer.Stop();
+        await DebounceTimerElapsed();
       }
-      StateHasChanged();
     }
-    private async Task OnSearchInput(string value)
+
+    private void OnSearchInput(string value)
     {
-      newQuestionText = value;
       _searchString = value;
       _debounceTimer.Stop();
       _debounceTimer.Start();
     }
+
     private async Task DebounceTimerElapsed()
     {
       await InvokeAsync(async () =>
       {
-        await SearchQuestions(_searchString);
+        if (string.IsNullOrWhiteSpace(_searchString))
+        {
+          await InsertQuestion();
+        }
+        else
+        {
+          await SearchQuestions(_searchString);
+        }
         StateHasChanged();
       });
     }
+
     private async Task SearchQuestions(string searchTerm)
     {
       if (string.IsNullOrWhiteSpace(searchTerm))
       {
-        await LoadQuestionsAsync(); // Load all questions if search term is empty
+        await LoadQuestions(); // Load all questions if search term is empty
       }
       else
       {
@@ -227,6 +231,7 @@ namespace DC.Components.Pages
             .ToListAsync();
       }
     }
+
     private async Task HandleTabChanged(int index)
     {
       // if (index == 1 && selectedQuestion == null)
@@ -246,6 +251,7 @@ namespace DC.Components.Pages
       }
       activeIndex = index;
     }
+
     private async Task LoadExistingAnswer()
     {
       var existingAnswerIdsList = await appDbContext.Set<QuestionAnswerModel>()
@@ -258,6 +264,47 @@ namespace DC.Components.Pages
       originalExistingAnswerIds = new HashSet<int>(originalExistingAnswerIds);
       selectedAnswers = new HashSet<AnswerModel>(answers.Where(q => existingAnswerIds.Contains(q.Id)));
       StateHasChanged();
+    }
+
+    private async Task CloneQuestion(QuestionModel questionToClone)
+    {
+      // Clone the question
+      var clonedQuestion = new QuestionModel
+      {
+        QuestionContext = questionToClone.QuestionContext
+      };
+
+      await appDbContext.Set<QuestionModel>().AddAsync(clonedQuestion);
+      await appDbContext.SaveChangesAsync();
+
+      // Clone the answers associated with the question
+      var questionAnswers = await appDbContext.Set<QuestionAnswerModel>()
+          .Where(qa => qa.QuestionId == questionToClone.Id)
+          .ToListAsync();
+
+      foreach (var qa in questionAnswers)
+      {
+        var clonedAnswer = new AnswerModel
+        {
+          QuestionId = clonedQuestion.Id,
+          AnswerText = qa.Answer.AnswerText,
+          Points = qa.Answer.Points,
+          AnswerType = qa.Answer.AnswerType
+        };
+
+        await appDbContext.Set<AnswerModel>().AddAsync(clonedAnswer);
+        await appDbContext.SaveChangesAsync();
+
+        await appDbContext.Set<QuestionAnswerModel>().AddAsync(new QuestionAnswerModel
+        {
+          QuestionId = clonedQuestion.Id,
+          AnswerId = clonedAnswer.Id
+        });
+      }
+
+      await appDbContext.SaveChangesAsync();
+      await LoadQuestions(); // Assuming you have a method to reload questions
+      sb.Add($"Question {questionToClone.Id} cloned successfully with ID: {clonedQuestion.Id}", Severity.Success);
     }
   }
 }

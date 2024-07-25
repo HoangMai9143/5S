@@ -21,7 +21,7 @@
                     <DataAnnotationsValidator />
                     <MudGrid Spacing="3" Justify="Justify.Center" AlignItems="AlignItems.Center">
                         <MudItem xs="14" sm="6">
-                            <MudTextField Value="@newQuestionText" ValueChanged="@((string val) => OnSearchInput(val))" T="string" Label="New Question / Search" HelperText="Type to search or add new question" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" TextUpdateSuppression="false" Immediate="true" DebounceInterval="300" @onkeydown="@OnKeyDown" Clearable="true" />
+                            <MudTextField Value="@_searchString" ValueChanged="@((string val) => OnSearchInput(val))" T="string" Label="New Question / Search" HelperText="Type to search or add new question" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" TextUpdateSuppression="false" Immediate="true" DebounceInterval="300" @onkeydown="@OnKeyDown" Clearable="true" />
                         </MudItem>
                         <MudItem xs="14" sm="1" Style="text-align: center;" Class="custom-button">
                             <MudButton Variant="Variant.Filled" Size="Size.Medium" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary" OnClick="@(() => InsertQuestion())">Add</MudButton>
@@ -38,6 +38,7 @@
                                 <MudStack Row>
                                     <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenEditDialog(cellContext.Item))" />
                                     <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="Size.Small" OnClick="@(() => DeleteQuestion(cellContext.Item))" />
+                                    <MudIconButton Label="Clone" Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Info" Size="Size.Small" OnClick="@(() => CloneQuestion(cellContext.Item))" />
                                 </MudStack>
                             </CellTemplate>
                         </TemplateColumn>

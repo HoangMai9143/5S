@@ -18,12 +18,6 @@ namespace DC.Models
     public int Id { get; set; }
 
     [Required]
-    [Column("question_id")]
-
-    [ForeignKey("question")]
-    public int QuestionId { get; set; }
-
-    [Required]
     [Column("answer_text", TypeName = "nvarchar(500)")]
     public string AnswerText { get; set; }
 
@@ -34,8 +28,5 @@ namespace DC.Models
     [Required]
     [Column("answer_type")]
     public AnswerType AnswerType { get; set; }
-
-    // Navigation property
-    public virtual QuestionModel Question { get; set; }
   }
 }

@@ -1,10 +1,12 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using MudBlazor;
+using DC.Components.Dialog;
 using DC.Models;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor;
 using Microsoft.AspNetCore.Components.Web;
-using DC.Components.Dialog;
 using System.Timers;
 
 namespace DC.Components.Pages
@@ -13,44 +15,67 @@ namespace DC.Components.Pages
   {
     private int activeIndex = 0;
     private List<QuestionModel> questions = new List<QuestionModel>();
-    private List<AnswerModel> answers = new();
-    private HashSet<AnswerModel> selectedAnswers = new();
-    private HashSet<int> existingAnswerIds = new();
-    private HashSet<int> originalExistingAnswerIds = new();
+    private List<AnswerModel> answers = new List<AnswerModel>();
+    private HashSet<AnswerModel> selectedAnswers = new HashSet<AnswerModel>();
+    private HashSet<int> existingAnswerIds = new HashSet<int>();
+    private HashSet<int> originalExistingAnswerIds = new HashSet<int>();
     private QuestionModel selectedQuestion;
-
-    private string _searchString = string.Empty;
-    private bool _sortIdDescending = true;
     private System.Timers.Timer _debounceTimer;
+    private string _searchString = string.Empty;
+    private string _answerSearchString = string.Empty;
+
+    private System.Timers.Timer _questionDebounceTimer;
+    private System.Timers.Timer _answerDebounceTimer;
     private const int DebounceDelay = 300; // milliseconds
 
-    private Func<QuestionModel, object> _sortById => x =>
-    {
-      if (_sortIdDescending)
-        return -x.Id;
-      else
-        return x.Id;
-    };
-
-    private Func<QuestionModel, bool> _quickFilter => x =>
+    // Filter questions
+    private Func<QuestionModel, bool> _questionQuickFilter => x =>
     {
       if (string.IsNullOrWhiteSpace(_searchString))
         return true;
+
+      if (x.Id.ToString().Contains(_searchString))
+        return true;
+
       if (x.QuestionContext.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
         return true;
-      if (x.Id.ToString().Contains(_searchString))
-      {
+
+      return false;
+    };
+
+    // Filter answers
+    private Func<AnswerModel, bool> _answerQuickFilter => x =>
+    {
+      if (string.IsNullOrWhiteSpace(_answerSearchString))
         return true;
-      }
+
+      if (x.Id.ToString().Contains(_answerSearchString))
+        return true;
+
+      if (x.AnswerText.Contains(_answerSearchString, StringComparison.OrdinalIgnoreCase))
+        return true;
+
+      if (x.Points.ToString().Contains(_answerSearchString))
+        return true;
+
+      if (x.AnswerType.ToString().Contains(_answerSearchString, StringComparison.OrdinalIgnoreCase))
+        return true;
+
       return false;
     };
 
     protected override async Task OnInitializedAsync()
     {
       await LoadQuestions();
-      _debounceTimer = new System.Timers.Timer(DebounceDelay);
-      _debounceTimer.Elapsed += async (sender, e) => await DebounceTimerElapsed();
-      _debounceTimer.AutoReset = false;
+      await LoadAnswers();
+
+      _questionDebounceTimer = new System.Timers.Timer(DebounceDelay);
+      _questionDebounceTimer.Elapsed += async (sender, e) => await QuestionDebounceTimerElapsed();
+      _questionDebounceTimer.AutoReset = false;
+
+      _answerDebounceTimer = new System.Timers.Timer(DebounceDelay);
+      _answerDebounceTimer.Elapsed += async (sender, e) => await AnswerDebounceTimerElapsed();
+      _answerDebounceTimer.AutoReset = false;
     }
 
     private async Task LoadQuestions()
@@ -68,7 +93,6 @@ namespace DC.Components.Pages
         questions = new List<QuestionModel>();
       }
     }
-
     private async Task InsertQuestion()
     {
       if (!string.IsNullOrWhiteSpace(_searchString))
@@ -98,55 +122,137 @@ namespace DC.Components.Pages
         StateHasChanged();
       }
     }
-
-    private async Task DeleteQuestion(QuestionModel questionToDelete)
+    private async Task LoadAnswers()
     {
-      if (questionToDelete != null)
+      try
       {
-        int questionToDeleteId = questionToDelete.Id;
-        var parameters = new DialogParameters
+        answers = await appDbContext.Set<AnswerModel>().ToListAsync();
+        if (selectedQuestion != null)
         {
-            { "ContentText", "Are you sure you want to delete this question?" },
-            { "ButtonText", "Delete" },
-            { "Color", Color.Error }
-        };
-
-        var options = new DialogOptions()
-        {
-          MaxWidth = MaxWidth.Small,
-          FullWidth = true,
-          Position = DialogPosition.Center,
-          CloseOnEscapeKey = true,
-          FullScreen = false,
-        };
-
-        var dialog = await dialogService.ShowAsync<ConfirmDialog>("Delete Question", parameters, options);
-        var result = await dialog.Result;
-
-        if (!result.Canceled)
-        {
-          await ConfirmedDelete(questionToDelete);
-          sb.Add($"Question {questionToDeleteId} deleted", Severity.Success);
+          await LoadExistingAnswers();
         }
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine($"Error loading answers: {ex.Message}");
+        sb.Add("Error loading answers", Severity.Error);
+        answers = new List<AnswerModel>();
       }
     }
 
-    private async Task ConfirmedDelete(QuestionModel questionToDelete)
+    private async Task LoadExistingAnswers()
     {
-      appDbContext.Set<QuestionModel>().Remove(questionToDelete);
-      await appDbContext.SaveChangesAsync();
-      questions.Remove(questionToDelete);
+      var existingAnswerIdsList = await appDbContext.Set<QuestionAnswerModel>()
+          .Where(qa => qa.QuestionId == selectedQuestion.Id)
+          .Select(qa => qa.AnswerId.Value)
+          .ToListAsync();
+
+      existingAnswerIds = new HashSet<int>(existingAnswerIdsList);
+      originalExistingAnswerIds = new HashSet<int>(existingAnswerIds);
+      selectedAnswers = new HashSet<AnswerModel>(answers.Where(a => existingAnswerIds.Contains(a.Id)));
       StateHasChanged();
     }
 
-    private async Task OpenEditDialog(QuestionModel questionToEdit)
+    private async Task HandleTabChanged(int index)
+    {
+      if (index == 1 && selectedQuestion == null)
+      {
+        sb.Add("Please select a question first.", Severity.Warning);
+        return;
+      }
+      if (index == 0 && selectedQuestion != null)
+      {
+        selectedQuestion = null;
+        selectedAnswers.Clear();
+      }
+      if (selectedQuestion != null)
+      {
+        await LoadExistingAnswers();
+      }
+      activeIndex = index;
+    }
+
+    private async Task OpenCreateQuestionDialog()
+    {
+      var dialog = dialogService.Show<QuestionCreateDialog>("Create New Question");
+      var result = await dialog.Result;
+
+      if (!result.Canceled && result.Data is QuestionModel newQuestion)
+      {
+        await LoadQuestions();
+        sb.Add($"Question created successfully with ID: {newQuestion.Id}.", Severity.Success);
+      }
+    }
+
+    private async Task SaveQuestionAnswers()
+    {
+      if (selectedQuestion == null || !selectedAnswers.Any())
+      {
+        sb.Add("Please select a question and at least one answer.", Severity.Warning);
+        return;
+      }
+
+      try
+      {
+        // Get current and existing answer IDs
+        var currentAnswerIds = selectedAnswers.Select(a => a.Id).ToHashSet();
+
+        // Determine answers to remove and add
+        var answersToRemove = existingAnswerIds.Except(currentAnswerIds).ToList();
+        var answersToAdd = currentAnswerIds.Except(existingAnswerIds).ToList();
+
+        // Update database
+        foreach (var answerId in answersToRemove)
+        {
+          var questionAnswer = await appDbContext.Set<QuestionAnswerModel>()
+              .FirstOrDefaultAsync(qa => qa.QuestionId == selectedQuestion.Id && qa.AnswerId == answerId);
+          if (questionAnswer != null)
+            appDbContext.Set<QuestionAnswerModel>().Remove(questionAnswer);
+        }
+
+        await appDbContext.Set<QuestionAnswerModel>().AddRangeAsync(
+            answersToAdd.Select(answerId => new QuestionAnswerModel { QuestionId = selectedQuestion.Id, AnswerId = answerId })
+        );
+
+        await appDbContext.SaveChangesAsync();
+
+        // Update existingAnswerIds to reflect the changes
+        existingAnswerIds = new HashSet<int>(currentAnswerIds);
+        originalExistingAnswerIds = new HashSet<int>(existingAnswerIds);
+
+        sb.Add("Question answers saved to database successfully.", Severity.Success);
+      }
+      catch (Exception ex)
+      {
+        sb.Add($"Error saving question answers: {ex.Message}", Severity.Error);
+      }
+      finally
+      {
+        StateHasChanged();
+      }
+    }
+
+    private void OnSelectionChanged(HashSet<AnswerModel> selectedItems)
+    {
+      selectedAnswers = selectedItems;
+      StateHasChanged();
+    }
+
+    private void OnSelectQuestion(QuestionModel question)
+    {
+      selectedQuestion = question;
+      LoadExistingAnswers();
+      activeIndex = 1;
+    }
+
+    private async Task OpenEditQuestionDialog(QuestionModel questionToEdit)
     {
       var parameters = new DialogParameters
       {
         { "Question", questionToEdit }
       };
 
-      var options = new DialogOptions
+      var options = new DialogOptions()
       {
         MaxWidth = MaxWidth.Small,
         FullWidth = true,
@@ -158,32 +264,75 @@ namespace DC.Components.Pages
       var dialog = await dialogService.ShowAsync<QuestionEditDialog>("Edit Question", parameters, options);
       var result = await dialog.Result;
 
-      if (!result.Canceled && result.Data is QuestionModel updatedQuestion)
+      if (!result.Canceled)
       {
-        await UpdateQuestion(updatedQuestion); // Update the question with the edited details
-        StateHasChanged();
+        await LoadQuestions();
+        sb.Add($"Question {questionToEdit.Id} updated successfully.", Severity.Success);
       }
     }
 
-    private async Task UpdateQuestion(QuestionModel questionToUpdate)
+    private async Task DeleteQuestion(QuestionModel questionToDelete)
     {
-      var trackedQuestion = appDbContext.ChangeTracker.Entries<QuestionModel>()
-          .FirstOrDefault(e => e.Entity.Id == questionToUpdate.Id)?.Entity;
-
-      if (trackedQuestion != null)
+      var parameters = new DialogParameters
       {
-        appDbContext.Entry(trackedQuestion).State = EntityState.Detached;
+        { "ContentText", "Are you sure you want to delete this question?" },
+        { "ButtonText", "Delete" },
+        { "Color", Color.Error }
+      };
+
+      var options = new DialogOptions()
+      {
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true,
+        Position = DialogPosition.Center,
+        CloseOnEscapeKey = true,
+        FullScreen = false,
+      };
+
+      var dialog = await dialogService.ShowAsync<ConfirmDialog>("Delete Question", parameters, options);
+      var result = await dialog.Result;
+
+      if (!result.Canceled)
+      {
+        await ConfirmedDeleteQuestion(questionToDelete);
+        sb.Add($"Question {questionToDelete.Id} deleted successfully.", Severity.Success);
       }
-
-      appDbContext.Set<QuestionModel>().Update(questionToUpdate);
-      await appDbContext.SaveChangesAsync();
-      sb.Add($"Question {questionToUpdate.Id} updated", Severity.Success);
-
-      // Refresh the questions list by calling LoadQuestionsAsync
-      await LoadQuestions();
-      StateHasChanged();
     }
 
+    private async Task ConfirmedDeleteQuestion(QuestionModel questionToDelete)
+    {
+      appDbContext.Set<QuestionModel>().Remove(questionToDelete);
+      await appDbContext.SaveChangesAsync();
+      await LoadQuestions();
+    }
+
+    private async Task CloneQuestion(QuestionModel questionToClone)
+    {
+      var clonedQuestion = new QuestionModel
+      {
+        QuestionContext = questionToClone.QuestionContext
+      };
+
+      await appDbContext.Set<QuestionModel>().AddAsync(clonedQuestion);
+      await appDbContext.SaveChangesAsync();
+
+      var questionAnswers = await appDbContext.Set<QuestionAnswerModel>()
+          .Where(qa => qa.QuestionId == questionToClone.Id)
+          .ToListAsync();
+
+      foreach (var answer in questionAnswers)
+      {
+        await appDbContext.Set<QuestionAnswerModel>().AddAsync(new QuestionAnswerModel
+        {
+          QuestionId = clonedQuestion.Id,
+          AnswerId = answer.AnswerId
+        });
+      }
+
+      await appDbContext.SaveChangesAsync();
+      await LoadQuestions();
+      sb.Add($"Question {questionToClone.Id} cloned successfully with ID: {clonedQuestion.Id}", Severity.Success);
+    }
     private async Task OnKeyDown(KeyboardEventArgs e)
     {
       if (e.Key == "Enter")
@@ -192,12 +341,71 @@ namespace DC.Components.Pages
         await DebounceTimerElapsed();
       }
     }
-
-    private void OnSearchInput(string value)
+    private async Task OnQuestionSearchInput(string value)
     {
       _searchString = value;
-      _debounceTimer.Stop();
-      _debounceTimer.Start();
+      _questionDebounceTimer.Stop();
+      _questionDebounceTimer.Start();
+    }
+
+    private async Task QuestionDebounceTimerElapsed()
+    {
+      await InvokeAsync(async () =>
+      {
+        await SearchQuestions(_searchString);
+        StateHasChanged();
+      });
+    }
+
+    private async Task SearchQuestions(string searchTerm)
+    {
+      if (string.IsNullOrWhiteSpace(searchTerm))
+      {
+        await LoadQuestions(); // Load all questions if search term is empty
+      }
+      else
+      {
+        searchTerm = searchTerm.ToLower(); // Convert search term to lowercase
+        questions = await appDbContext.Set<QuestionModel>()
+            .Where(q => q.Id.ToString().Contains(searchTerm) ||
+                        q.QuestionContext.ToLower().Contains(searchTerm))
+            .OrderByDescending(q => q.Id)
+            .ToListAsync();
+      }
+    }
+
+    private async Task OnAnswerSearchInput(string value)
+    {
+      _answerSearchString = value;
+      _answerDebounceTimer.Stop();
+      _answerDebounceTimer.Start();
+    }
+
+    private async Task AnswerDebounceTimerElapsed()
+    {
+      await InvokeAsync(async () =>
+      {
+        await SearchAnswers(_answerSearchString);
+        StateHasChanged();
+      });
+    }
+
+    private async Task SearchAnswers(string searchTerm)
+    {
+      if (string.IsNullOrWhiteSpace(searchTerm))
+      {
+        await LoadAnswers(); // Load all answers if search term is empty
+      }
+      else
+      {
+        searchTerm = searchTerm.ToLower(); // Convert search term to lowercase
+        answers = await appDbContext.Set<AnswerModel>()
+            .Where(a => a.Id.ToString().Contains(searchTerm) ||
+                        a.AnswerText.ToLower().Contains(searchTerm) ||
+                        a.Points.ToString().Contains(searchTerm) ||
+                        a.AnswerType.ToString().ToLower().Contains(searchTerm))
+            .ToListAsync();
+      }
     }
 
     private async Task DebounceTimerElapsed()
@@ -214,97 +422,6 @@ namespace DC.Components.Pages
         }
         StateHasChanged();
       });
-    }
-
-    private async Task SearchQuestions(string searchTerm)
-    {
-      if (string.IsNullOrWhiteSpace(searchTerm))
-      {
-        await LoadQuestions(); // Load all questions if search term is empty
-      }
-      else
-      {
-        searchTerm = searchTerm.ToLower(); // Convert search term to lowercase
-        questions = await appDbContext.Set<QuestionModel>()
-            .Where(q => q.QuestionContext.ToLower().Contains(searchTerm))
-            .OrderByDescending(q => q.Id)
-            .ToListAsync();
-      }
-    }
-
-    private async Task HandleTabChanged(int index)
-    {
-      // if (index == 1 && selectedQuestion == null)
-      // {
-      //   sb.Add("Please select a question first.", Severity.Warning);
-
-      //   return;
-      // }
-      if (index == 0 && selectedQuestion != null)
-      {
-        selectedQuestion = null;
-        selectedAnswers.Clear();
-      }
-      if (selectedQuestion != null)
-      {
-        await LoadExistingAnswer();
-      }
-      activeIndex = index;
-    }
-
-    private async Task LoadExistingAnswer()
-    {
-      var existingAnswerIdsList = await appDbContext.Set<QuestionAnswerModel>()
-          .Where(sq => sq.QuestionId == selectedQuestion.Id)
-          .Select(sq => sq.AnswerId)
-          .ToListAsync();
-
-      // Convert to hashset for faster lookup
-      existingAnswerIds = new HashSet<int>(existingAnswerIds);
-      originalExistingAnswerIds = new HashSet<int>(originalExistingAnswerIds);
-      selectedAnswers = new HashSet<AnswerModel>(answers.Where(q => existingAnswerIds.Contains(q.Id)));
-      StateHasChanged();
-    }
-
-    private async Task CloneQuestion(QuestionModel questionToClone)
-    {
-      // Clone the question
-      var clonedQuestion = new QuestionModel
-      {
-        QuestionContext = questionToClone.QuestionContext
-      };
-
-      await appDbContext.Set<QuestionModel>().AddAsync(clonedQuestion);
-      await appDbContext.SaveChangesAsync();
-
-      // Clone the answers associated with the question
-      var questionAnswers = await appDbContext.Set<QuestionAnswerModel>()
-          .Where(qa => qa.QuestionId == questionToClone.Id)
-          .ToListAsync();
-
-      foreach (var qa in questionAnswers)
-      {
-        var clonedAnswer = new AnswerModel
-        {
-          QuestionId = clonedQuestion.Id,
-          AnswerText = qa.Answer.AnswerText,
-          Points = qa.Answer.Points,
-          AnswerType = qa.Answer.AnswerType
-        };
-
-        await appDbContext.Set<AnswerModel>().AddAsync(clonedAnswer);
-        await appDbContext.SaveChangesAsync();
-
-        await appDbContext.Set<QuestionAnswerModel>().AddAsync(new QuestionAnswerModel
-        {
-          QuestionId = clonedQuestion.Id,
-          AnswerId = clonedAnswer.Id
-        });
-      }
-
-      await appDbContext.SaveChangesAsync();
-      await LoadQuestions(); // Assuming you have a method to reload questions
-      sb.Add($"Question {questionToClone.Id} cloned successfully with ID: {clonedQuestion.Id}", Severity.Success);
     }
   }
 }

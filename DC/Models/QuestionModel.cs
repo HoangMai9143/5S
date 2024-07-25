@@ -14,8 +14,5 @@ namespace DC.Models
     [Column("question_context")]
     [MaxLength(255)]
     public string? QuestionContext { get; set; }
-
-    // Navigation property for answers
-    public virtual ICollection<AnswerModel> Answers { get; set; } = new List<AnswerModel>();
   }
 }

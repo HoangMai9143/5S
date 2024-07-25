@@ -33,8 +33,6 @@
                     <ToolBarContent>
                         <MudText Typo="Typo.h6">Questions</MudText>
                         <MudSpacer />
-                        <MudTextField Value="@_searchString" ValueChanged="@((string val) => OnQuestionSearchInput(val))" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" DebounceInterval="300" Clearable="true">
-                        </MudTextField>
                     </ToolBarContent>
                     <Columns>
                         <PropertyColumn Property="x => x.Id" Title="ID" InitialDirection="SortDirection.Descending" Sortable="true" />

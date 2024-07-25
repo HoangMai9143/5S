@@ -11,13 +11,21 @@ namespace DC.Components.Pages
 {
   public partial class Question
   {
+    private int activeIndex = 0;
     private List<QuestionModel> questions = new List<QuestionModel>();
+    private List<AnswerModel> answers = new();
+    private HashSet<AnswerModel> selectedAnswers = new();
+    private HashSet<int> existingAnswerIds = new();
+    private HashSet<int> originalExistingAnswerIds = new();
+    private QuestionModel selectedQuestion;
+
     private string newQuestionText = string.Empty;
     private string _searchString = string.Empty;
     private bool _sortIdDescending = true;
     private List<string> _events = new();
     private System.Timers.Timer _debounceTimer;
     private const int DebounceDelay = 300; // milliseconds
+
 
 
     private Func<QuestionModel, object> _sortById => x =>
@@ -35,7 +43,9 @@ namespace DC.Components.Pages
       if (x.QuestionContext.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
         return true;
       if (x.Id.ToString().Contains(_searchString))
+      {
         return true;
+      }
       return false;
     };
 
@@ -216,6 +226,38 @@ namespace DC.Components.Pages
             .OrderByDescending(q => q.Id)
             .ToListAsync();
       }
+    }
+    private async Task HandleTabChanged(int index)
+    {
+      // if (index == 1 && selectedQuestion == null)
+      // {
+      //   sb.Add("Please select a question first.", Severity.Warning);
+
+      //   return;
+      // }
+      if (index == 0 && selectedQuestion != null)
+      {
+        selectedQuestion = null;
+        selectedAnswers.Clear();
+      }
+      if (selectedQuestion != null)
+      {
+        await LoadExistingAnswer();
+      }
+      activeIndex = index;
+    }
+    private async Task LoadExistingAnswer()
+    {
+      var existingAnswerIdsList = await appDbContext.Set<QuestionAnswerModel>()
+          .Where(sq => sq.QuestionId == selectedQuestion.Id)
+          .Select(sq => sq.AnswerId)
+          .ToListAsync();
+
+      // Convert to hashset for faster lookup
+      existingAnswerIds = new HashSet<int>(existingAnswerIds);
+      originalExistingAnswerIds = new HashSet<int>(originalExistingAnswerIds);
+      selectedAnswers = new HashSet<AnswerModel>(answers.Where(q => existingAnswerIds.Contains(q.Id)));
+      StateHasChanged();
     }
   }
 }

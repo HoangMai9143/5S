@@ -337,7 +337,7 @@ namespace DC.Components.Pages
     {
       if (e.Key == "Enter")
       {
-        _debounceTimer.Stop();
+        _questionDebounceTimer.Stop();
         await DebounceTimerElapsed();
       }
     }

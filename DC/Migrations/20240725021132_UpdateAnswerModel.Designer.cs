@@ -4,6 +4,7 @@ using DC.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DC.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240725021132_UpdateAnswerModel")]
+    partial class UpdateAnswerModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -26,27 +29,25 @@ namespace DC.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
+                        .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AnswerText")
                         .IsRequired()
                         .HasColumnType("nvarchar(500)")
-                        .HasColumnName("answer_text");
+                        .HasColumnName("AnswerText");
 
                     b.Property<int>("AnswerType")
                         .HasColumnType("int")
-                        .HasColumnName("answer_type");
+                        .HasColumnName("AnswerType");
 
                     b.Property<int>("Points")
                         .HasColumnType("int")
-                        .HasColumnName("points");
+                        .HasColumnName("Points");
 
                     b.Property<int>("QuestionId")
-                        .HasColumnType("int")
-                        .HasColumnName("question_id");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

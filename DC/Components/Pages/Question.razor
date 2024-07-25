@@ -19,15 +19,7 @@
             <DataAnnotationsValidator />
             <MudGrid Spacing="3" Justify="Justify.Center" AlignItems="AlignItems.Center">
                 <MudItem xs="14" sm="6">
-                    <MudTextField Value="@newQuestionText" ValueChanged="@((string val) => OnSearchInput(val))" T="string" Label="New Question / Search" HelperText="Type to search or add new question" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" TextUpdateSuppression="false" Immediate="true" DebounceInterval="300" @onkeydown="@OnKeyDown" Clearable="true"/>
-                </MudItem>
-                <MudItem xs="14" sm="4">
-                    <MudSelect T="QuestionType" Label="Question Type" @bind-Value="selectedQuestionType">
-                        @foreach (var type in Enum.GetValues<QuestionType>())
-                        {
-                            <MudSelectItem Value="@type" Content="@type.ToString()" />
-                        }
-                    </MudSelect>
+                    <MudTextField Value="@newQuestionText" ValueChanged="@((string val) => OnSearchInput(val))" T="string" Label="New Question / Search" HelperText="Type to search or add new question" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" TextUpdateSuppression="false" Immediate="true" DebounceInterval="300" @onkeydown="@OnKeyDown" Clearable="true" />
                 </MudItem>
                 <MudItem xs="14" sm="1" Style="text-align: center;" Class="custom-button">
                     <MudButton Variant="Variant.Filled" Size="Size.Medium" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary" OnClick="@(() => InsertQuestion())">Add</MudButton>
@@ -39,7 +31,6 @@
             <Columns>
                 <PropertyColumn Property="x => x.Id" Title="ID" InitialDirection="SortDirection.Descending" Sortable="true" />
                 <PropertyColumn Property="x => x.QuestionContext" Title="Question" />
-                <PropertyColumn Property="x => x.QuestionType" Title="Type" Filterable="true" />
                 <TemplateColumn CellClass="d-flex justify-end" Width="30px">
                     <CellTemplate Context="cellContext">
                         <MudStack Row>

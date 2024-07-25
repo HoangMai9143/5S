@@ -20,8 +20,8 @@ namespace DC.Models
     [Column("question_id")]
     public int QuestionId { get; set; }
 
-    [Column("grade")]
-    public int Grade { get; set; }
+    [Column("score")]
+    public double Score { get; set; } // Store score in the scale of 100
 
     [Column("note")]
     public string? Note { get; set; }

@@ -13,6 +13,6 @@ namespace DC.Data
     public DbSet<SurveyQuestionModel> SurveyQuestionModel { get; set; }
     public DbSet<SurveyResultModel> SurveyResultModel { get; set; }
     public DbSet<UserAccountModel> UserAccountModel { get; set; }
-
+    public DbSet<AnswerModel> AnswerModel { get; set; }
   }
 }

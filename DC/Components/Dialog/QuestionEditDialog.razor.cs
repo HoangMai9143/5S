@@ -20,7 +20,6 @@ namespace DC.Components.Dialog
       {
         Id = Question.Id,
         QuestionContext = Question.QuestionContext,
-        QuestionType = Question.QuestionType
       };
     }
 

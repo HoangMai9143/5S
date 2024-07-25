@@ -19,7 +19,6 @@ namespace DC.Components.Pages
     private System.Timers.Timer _debounceTimer;
     private const int DebounceDelay = 300; // milliseconds
 
-    private QuestionType selectedQuestionType = QuestionType.MultipleChoice; // Default value
 
     private Func<QuestionModel, object> _sortById => x =>
     {
@@ -83,7 +82,6 @@ namespace DC.Components.Pages
         var newQuestion = new QuestionModel
         {
           QuestionContext = newQuestionText,
-          QuestionType = selectedQuestionType
         };
         await appDbContext.Set<QuestionModel>().AddAsync(newQuestion);
         await appDbContext.SaveChangesAsync();

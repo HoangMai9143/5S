@@ -1,17 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
 
 namespace DC.Models
 {
-  public enum QuestionType
-  {
-    ShortAnswer = 1,
-    MultipleChoice = 2,
-    Checkboxes = 3,
-    Dropdown = 4,
-    FileUpload = 5
-  }
-
   [Table("Question")]
   public class QuestionModel
   {
@@ -23,7 +15,7 @@ namespace DC.Models
     [MaxLength(255)]
     public string? QuestionContext { get; set; }
 
-    [Column("question_type")]
-    public QuestionType QuestionType { get; set; }
+    // Navigation property for answers
+    public virtual ICollection<AnswerModel> Answers { get; set; } = new List<AnswerModel>();
   }
 }

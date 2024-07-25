@@ -392,20 +392,33 @@ namespace DC.Components.Pages
 
     private async Task SearchAnswers(string searchTerm)
     {
-      if (string.IsNullOrWhiteSpace(searchTerm))
-      {
-        await LoadAnswers(); // Load all answers if search term is empty
-      }
-      else
-      {
-        searchTerm = searchTerm.ToLower(); // Convert search term to lowercase
-        answers = await appDbContext.Set<AnswerModel>()
-            .Where(a => a.Id.ToString().Contains(searchTerm) ||
-                        a.AnswerText.ToLower().Contains(searchTerm) ||
-                        a.Points.ToString().Contains(searchTerm) ||
-                        a.AnswerType.ToString().ToLower().Contains(searchTerm))
-            .ToListAsync();
-      }
+    try
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            await LoadAnswers(); // Load all answers if search term is empty
+        }
+        else
+        {
+            searchTerm = searchTerm.ToLower(); // Convert search term to lowercase
+
+            // Fetch all answers from the database
+            var allAnswers = await appDbContext.Set<AnswerModel>().ToListAsync();
+
+            // Filter answers on the client side
+            answers = allAnswers.Where(a => a.Id.ToString().Contains(searchTerm) ||
+                                            a.AnswerText.ToLower().Contains(searchTerm) ||
+                                            a.Points.ToString().Contains(searchTerm) ||
+                                            a.AnswerType.ToString().ToLower().Contains(searchTerm))
+                                .ToList();
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error searching answers: {ex.Message}");
+        sb.Add("Error searching answers", Severity.Error);
+        answers = new List<AnswerModel>(); // Reset answers list on error
+    }
     }
 
     private async Task DebounceTimerElapsed()

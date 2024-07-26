@@ -134,15 +134,6 @@ namespace DC.Components.Pages
           }
         }
 
-        // Update IsCorrect for single-choice questions
-        if (currentQuestion.AnswerType == AnswerType.SingleChoice)
-        {
-          for (int i = 0; i < currentAnswers.Count; i++)
-          {
-            currentAnswers[i].IsCorrect = (i == selectedAnswerIndex);
-          }
-        }
-
         // Add or update current answers
         foreach (var answer in currentAnswers)
         {
@@ -315,10 +306,7 @@ namespace DC.Components.Pages
 
     private void UpdateSelectedAnswerIndex()
     {
-      if (currentQuestion.AnswerType == AnswerType.SingleChoice)
-      {
-        selectedAnswerIndex = currentAnswers.FindIndex(a => a.IsCorrect);
-      }
+      selectedAnswerIndex = currentAnswers.FindIndex(a => a.IsCorrect);
     }
 
     private void OnSelectedAnswerIndexChanged(int index)

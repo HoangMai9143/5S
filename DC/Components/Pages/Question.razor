@@ -74,6 +74,9 @@
                     <EditForm Model="@currentQuestion" OnValidSubmit="@(async () => await SaveQuestion())">
                         <DataAnnotationsValidator />
                         <MudCard>
+                            <MudCardActions>
+                                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Save Question</MudButton>
+                            </MudCardActions>
                             <MudCardContent>
                                 <MudTextField @bind-Value="currentQuestion.QuestionContext" Label="Question" Required="true" />
                                 <MudSelect @bind-Value="currentQuestion.AnswerType" Label="Answer Type" Required="true">
@@ -86,23 +89,21 @@
                                 @foreach (var answer in currentAnswers)
                                 {
                                     <MudGrid>
-                                        <MudItem xs="12" sm="8">
+                                        <MudItem xs="12" sm="7">
                                             <MudTextField @bind-Value="answer.AnswerText" Label="Answer Text" Required="true" FullWidth="true" />
                                         </MudItem>
                                         <MudItem xs="12" sm="4">
                                             <MudNumericField @bind-Value="answer.Points" Label="Point multiplier" FullWidth="true" />
                                         </MudItem>
+                                        <MudItem xs="12" sm="1">
+                                            <MudButton StartIcon="@Icons.Material.Filled.Delete" Variant="Variant.Filled" Color="Color.Error" OnClick="@(() => RemoveAnswer(answer))" Size="Size.Small" Class="custom-button-alignment">Delete</MudButton>
+                                        </MudItem>
                                     </MudGrid>
-                                    <MudItem xs="12" sm="3">
-                                        <MudButton OnClick="@(() => RemoveAnswer(answer))" Color="Color.Error">Remove</MudButton>
-                                    </MudItem>
                                 }
 
-                                <MudButton OnClick="AddNewAnswer" Color="Color.Primary" Class="mt-2">Add Answer</MudButton>
+                                <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" OnClick="AddNewAnswer" Color="Color.Primary" Class="mt-2">Add Answer</MudButton>
                             </MudCardContent>
-                            <MudCardActions>
-                                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Save Question</MudButton>
-                            </MudCardActions>
+
                         </MudCard>
                     </EditForm>
                 </MudTabPanel>
@@ -116,5 +117,9 @@
         flex-grow: 0;
         align-content: space-around;
         padding-bottom: 15px;
+    }
+
+    .custom-button-alignment {
+        margin-top: 23px;
     }
 </style>

@@ -16,10 +16,6 @@ namespace DC.Models
     public string AnswerText { get; set; }
 
     [Required]
-    [Column("is_correct")]
-    public bool IsCorrect { get; set; }
-
-    [Required]
     [Column("points")]
     public int Points { get; set; }
 

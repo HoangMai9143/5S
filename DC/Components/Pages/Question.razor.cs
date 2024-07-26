@@ -203,7 +203,6 @@ namespace DC.Components.Pages
       if (currentQuestion != null)
       {
         currentAnswers = currentQuestion.Answers.ToList();
-        UpdateSelectedAnswerIndex();
       }
       else
       {
@@ -297,7 +296,6 @@ namespace DC.Components.Pages
         var clonedAnswer = new AnswerModel
         {
           AnswerText = answer.AnswerText,
-          IsCorrect = answer.IsCorrect,
           Points = answer.Points,
           QuestionId = clonedQuestion.Id
         };
@@ -308,28 +306,6 @@ namespace DC.Components.Pages
       await LoadQuestions();
       sb.Add($"Question {questionToClone.Id} cloned successfully with ID: {clonedQuestion.Id}", Severity.Success);
     }
-    protected override void OnParametersSet()
-    {
-      base.OnParametersSet();
-      UpdateSelectedAnswerIndex();
-    }
 
-    private void UpdateSelectedAnswerIndex()
-    {
-      selectedAnswerIndex = currentAnswers.FindIndex(a => a.IsCorrect);
-    }
-
-    private void OnSelectedAnswerIndexChanged(int index)
-    {
-      selectedAnswerIndex = index;
-      if (index >= 0 && index < currentAnswers.Count)
-      {
-        for (int i = 0; i < currentAnswers.Count; i++)
-        {
-          currentAnswers[i].IsCorrect = (i == index);
-        }
-      }
-      StateHasChanged();
-    }
   }
 }

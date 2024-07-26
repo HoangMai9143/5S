@@ -14,14 +14,14 @@
     <NotAuthorized>
         <MudText Typo="Typo.h6">You are not authorized to view this page.</MudText>
     </NotAuthorized>
-    <Authorized>
+    <Authorized Context="authContext">
         <MudTabs Elevation="0" ApplyEffectsToContainer="true" PanelClass="pa-6" ActivePanelIndex="activeIndex" ActivePanelIndexChanged="HandleTabChanged">
             <MudTabPanel Text="Choose/Create Question" Icon="@Icons.Material.Filled.QuestionMark">
-                <EditForm Context="cellContext" Model="@this" OnValidSubmit="@InsertQuestion">
+                <EditForm Model="@this" OnValidSubmit="@InsertQuestion" Context="editFormContext">
                     <DataAnnotationsValidator />
                     <MudGrid Spacing="3" Justify="Justify.Center" AlignItems="AlignItems.Center">
                         <MudItem xs="14" sm="6">
-                            <MudTextField Value="@_searchString" ValueChanged="@((string val) => OnQuestionSearchInput(val))" T="string" Label="New Question / Search" HelperText="Type to search or add new question" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" TextUpdateSuppression="false" Immediate="true" DebounceInterval="300" @onkeydown="@OnKeyDown" Clearable="true" />
+                            <MudTextField Value="@_searchString" ValueChanged="@((string val) => OnQuestionSearchInput(val))" T="string" Label="New Question / Search" HelperText="Type to search or add new question" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" TextUpdateSuppression="false" Immediate="true" DebounceInterval="300" Clearable="true" />
                         </MudItem>
                         <MudItem xs="14" sm="1" Style="text-align: center;" Class="custom-button">
                             <MudButton Variant="Variant.Filled" Size="Size.Medium" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary" OnClick="@(() => InsertQuestion())">Add</MudButton>
@@ -37,13 +37,13 @@
                     <Columns>
                         <PropertyColumn Property="x => x.Id" Title="ID" InitialDirection="SortDirection.Descending" Sortable="true" />
                         <PropertyColumn Property="x => x.QuestionContext" Title="Question" />
+                        <PropertyColumn Property="x => x.AnswerType" Title="Answer Type" />
                         <TemplateColumn CellClass="d-flex justify-end" Width="150px">
                             <CellTemplate Context="cellContext">
                                 <MudStack Row>
-                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OnSelectQuestion(cellContext.Item))">
-                                        Select
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" OnClick="@(() => LoadQuestion(cellContext.Item.Id))">
+                                        Edit
                                     </MudButton>
-                                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenEditQuestionDialog(cellContext.Item))" />
                                     <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="Size.Small" OnClick="@(() => DeleteQuestion(cellContext.Item))" />
                                     <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Info" Size="Size.Small" OnClick="@(() => CloneQuestion(cellContext.Item))" />
                                 </MudStack>
@@ -57,70 +57,40 @@
                 <MudText Typo="Typo.body2">Questions in List: @questions.Count</MudText>
             </MudTabPanel>
 
-            <MudTabPanel Text="Choose Answers" Icon="@Icons.Material.Filled.QuestionAnswer">
-                <MudCard>
-                    <MudCardActions>
-                        <MudGrid>
-                            <MudItem xs="12">
-                                <MudText Typo="Typo.h6">Choose Answers for Question: @selectedQuestion?.Id</MudText>
-                            </MudItem>
-                            <MudItem xs="12">
-                                <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SaveQuestionAnswers" Disabled="@(selectedQuestion == null)">
-                                    Save to Database
-                                </MudButton>
-                            </MudItem>
-                        </MudGrid>
-                    </MudCardActions>
-                    <MudCardContent>
-                        <MudDataGrid T="AnswerModel" Items="@answers" MultiSelection="true" @bind-SelectedItems="selectedAnswers" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_answerQuickFilter" Elevation="0">
-                            <ToolBarContent>
-                                <MudText Typo="Typo.h6">Answers</MudText>
-                                <MudSpacer />
-                                <MudTextField Value="@_answerSearchString" ValueChanged="@((string val) => OnAnswerSearchInput(val))" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" DebounceInterval="300" Clearable="true">
-                                </MudTextField>
-                            </ToolBarContent>
-                            <Columns>
-                                <SelectColumn T="AnswerModel" />
-                                <PropertyColumn Property="x => x.Id" Title="ID" />
-                                <PropertyColumn Property="x => x.AnswerText" Title="Answer" />
-                                <PropertyColumn Property="x => x.Points" Title="Points" />
-                                <PropertyColumn Property="x => x.AnswerType" Title="Type" />
-                                <TemplateColumn Title="Status">
-                                    <CellTemplate Context="cellContext">
-                                        @{
-                                            var answer = cellContext.Item;
-                                            if (existingAnswerIds.Contains(answer.Id))
-                                            {
-                                                <MudChip Color="Color.Success" Icon="@Icons.Material.Filled.Check" Size="Size.Small">Saved</MudChip>
-                                            }
-                                            else if (selectedAnswers.Contains(answer))
-                                            {
-                                                <MudChip Color="Color.Warning" Icon="@Icons.Material.Filled.AddCircle" Size="Size.Small">Not saved</MudChip>
-                                            }
-                                            else
-                                            {
-                                                <MudChip Color="Color.Default" Icon="@Icons.Material.Filled.RadioButtonUnchecked" Size="Size.Small">Not Selected</MudChip>
-                                            }
-                                        }
-                                    </CellTemplate>
-                                </TemplateColumn>
-                            </Columns>
-                            <PagerContent>
-                                <MudDataGridPager T="AnswerModel" />
-                            </PagerContent>
-                        </MudDataGrid>
-                    </MudCardContent>
-                </MudCard>
+            <MudTabPanel Text="Edit Question" Icon="@Icons.Material.Filled.Edit">
+                <EditForm Model="@currentQuestion" OnValidSubmit="SaveQuestion">
+                    <DataAnnotationsValidator />
+                    <MudCard>
+                        <MudCardContent>
+                            <MudTextField @bind-Value="currentQuestion.QuestionContext" Label="Question" Required="true" />
+                            <MudSelect @bind-Value="currentQuestion.AnswerType" Label="Answer Type" Required="true">
+                                <MudSelectItem Value="@AnswerType.SingleChoice">Single Choice</MudSelectItem>
+                                <MudSelectItem Value="@AnswerType.MultipleChoice">Multiple Choice</MudSelectItem>
+                            </MudSelect>
+
+                            <MudText Typo="Typo.h6" Class="mt-4">Answers</MudText>
+                            @foreach (var answer in currentAnswers)
+                            {
+                                <MudPaper Class="pa-4 mt-2">
+                                    <MudTextField @bind-Value="answer.AnswerText" Label="Answer Text" Required="true" />
+                                    <MudCheckBox T="bool" @bind-Checked="answer.IsCorrect" Label="Is Correct" />
+                                    <MudNumericField @bind-Value="answer.Points" Label="Points" />
+                                    <MudButton OnClick="@(() => RemoveAnswer(answer))" Color="Color.Error">Remove</MudButton>
+                                </MudPaper>
+                            }
+                            <MudButton OnClick="AddNewAnswer" Color="Color.Primary" Class="mt-2">Add Answer</MudButton>
+                        </MudCardContent>
+                        <MudCardActions>
+                            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Save Question</MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                </EditForm>
             </MudTabPanel>
         </MudTabs>
     </Authorized>
 </AuthorizeView>
 
 <style>
-    .custom-mudtable .mud-table-container {
-        overflow-y: unset !important;
-    }
-
     .custom-button {
         flex-grow: 0;
         align-content: space-around;

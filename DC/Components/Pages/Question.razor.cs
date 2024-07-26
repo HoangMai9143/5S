@@ -15,17 +15,11 @@ namespace DC.Components.Pages
   {
     private int activeIndex = 0;
     private List<QuestionModel> questions = new List<QuestionModel>();
-    private List<AnswerModel> answers = new List<AnswerModel>();
-    private HashSet<AnswerModel> selectedAnswers = new HashSet<AnswerModel>();
-    private HashSet<int> existingAnswerIds = new HashSet<int>();
-    private HashSet<int> originalExistingAnswerIds = new HashSet<int>();
-    private QuestionModel selectedQuestion;
-    private System.Timers.Timer _debounceTimer;
+    private QuestionModel currentQuestion = new QuestionModel();
+    private List<AnswerModel> currentAnswers = new List<AnswerModel>();
     private string _searchString = string.Empty;
-    private string _answerSearchString = string.Empty;
 
     private System.Timers.Timer _questionDebounceTimer;
-    private System.Timers.Timer _answerDebounceTimer;
     private const int DebounceDelay = 300; // milliseconds
 
     // Filter questions
@@ -43,39 +37,13 @@ namespace DC.Components.Pages
       return false;
     };
 
-    // Filter answers
-    private Func<AnswerModel, bool> _answerQuickFilter => x =>
-    {
-      if (string.IsNullOrWhiteSpace(_answerSearchString))
-        return true;
-
-      if (x.Id.ToString().Contains(_answerSearchString))
-        return true;
-
-      if (x.AnswerText.Contains(_answerSearchString, StringComparison.OrdinalIgnoreCase))
-        return true;
-
-      if (x.Points.ToString().Contains(_answerSearchString))
-        return true;
-
-      if (x.AnswerType.ToString().Contains(_answerSearchString, StringComparison.OrdinalIgnoreCase))
-        return true;
-
-      return false;
-    };
-
     protected override async Task OnInitializedAsync()
     {
       await LoadQuestions();
-      await LoadAnswers();
 
       _questionDebounceTimer = new System.Timers.Timer(DebounceDelay);
       _questionDebounceTimer.Elapsed += async (sender, e) => await QuestionDebounceTimerElapsed();
       _questionDebounceTimer.AutoReset = false;
-
-      _answerDebounceTimer = new System.Timers.Timer(DebounceDelay);
-      _answerDebounceTimer.Elapsed += async (sender, e) => await AnswerDebounceTimerElapsed();
-      _answerDebounceTimer.AutoReset = false;
     }
 
     private async Task LoadQuestions()
@@ -83,6 +51,7 @@ namespace DC.Components.Pages
       try
       {
         questions = await appDbContext.Set<QuestionModel>()
+            .Include(q => q.Answers)
             .OrderByDescending(q => q.Id)
             .ToListAsync();
       }
@@ -93,6 +62,7 @@ namespace DC.Components.Pages
         questions = new List<QuestionModel>();
       }
     }
+
     private async Task InsertQuestion()
     {
       if (!string.IsNullOrWhiteSpace(_searchString))
@@ -111,6 +81,7 @@ namespace DC.Components.Pages
         var newQuestion = new QuestionModel
         {
           QuestionContext = _searchString,
+          AnswerType = AnswerType.SingleChoice // Default to single choice
         };
         await appDbContext.Set<QuestionModel>().AddAsync(newQuestion);
         await appDbContext.SaveChangesAsync();
@@ -122,152 +93,121 @@ namespace DC.Components.Pages
         StateHasChanged();
       }
     }
-    private async Task LoadAnswers()
-    {
-      try
-      {
-        answers = await appDbContext.Set<AnswerModel>().ToListAsync();
-        if (selectedQuestion != null)
-        {
-          await LoadExistingAnswers();
-        }
-      }
-      catch (Exception ex)
-      {
-        Console.WriteLine($"Error loading answers: {ex.Message}");
-        sb.Add("Error loading answers", Severity.Error);
-        answers = new List<AnswerModel>();
-      }
-    }
-
-    private async Task LoadExistingAnswers()
-    {
-      var existingAnswerIdsList = await appDbContext.Set<QuestionAnswerModel>()
-          .Where(qa => qa.QuestionId == selectedQuestion.Id)
-          .Select(qa => qa.AnswerId.Value)
-          .ToListAsync();
-
-      existingAnswerIds = new HashSet<int>(existingAnswerIdsList);
-      originalExistingAnswerIds = new HashSet<int>(existingAnswerIds);
-      selectedAnswers = new HashSet<AnswerModel>(answers.Where(a => existingAnswerIds.Contains(a.Id)));
-      StateHasChanged();
-    }
 
     private async Task HandleTabChanged(int index)
     {
-      if (index == 1 && selectedQuestion == null)
+      if (index == 1 && currentQuestion.Id == 0)
       {
         sb.Add("Please select a question first.", Severity.Warning);
         return;
       }
-      if (index == 0 && selectedQuestion != null)
-      {
-        selectedQuestion = null;
-        selectedAnswers.Clear();
-      }
-      if (selectedQuestion != null)
-      {
-        await LoadExistingAnswers();
-      }
       activeIndex = index;
     }
 
-    private async Task OpenCreateQuestionDialog()
+    private async Task SaveQuestion()
     {
-      var dialog = dialogService.Show<QuestionCreateDialog>("Create New Question");
-      var result = await dialog.Result;
-
-      if (!result.Canceled && result.Data is QuestionModel newQuestion)
-      {
-        await LoadQuestions();
-        sb.Add($"Question created successfully with ID: {newQuestion.Id}.", Severity.Success);
-      }
-    }
-
-    private async Task SaveQuestionAnswers()
-    {
-      if (selectedQuestion == null || !selectedAnswers.Any())
-      {
-        sb.Add("Please select a question and at least one answer.", Severity.Warning);
-        return;
-      }
-
       try
       {
-        // Get current and existing answer IDs
-        var currentAnswerIds = selectedAnswers.Select(a => a.Id).ToHashSet();
-
-        // Determine answers to remove and add
-        var answersToRemove = existingAnswerIds.Except(currentAnswerIds).ToList();
-        var answersToAdd = currentAnswerIds.Except(existingAnswerIds).ToList();
-
-        // Update database
-        foreach (var answerId in answersToRemove)
+        if (currentQuestion.Id == 0)
         {
-          var questionAnswer = await appDbContext.Set<QuestionAnswerModel>()
-              .FirstOrDefaultAsync(qa => qa.QuestionId == selectedQuestion.Id && qa.AnswerId == answerId);
-          if (questionAnswer != null)
-            appDbContext.Set<QuestionAnswerModel>().Remove(questionAnswer);
+          await appDbContext.Set<QuestionModel>().AddAsync(currentQuestion);
         }
-
-        await appDbContext.Set<QuestionAnswerModel>().AddRangeAsync(
-            answersToAdd.Select(answerId => new QuestionAnswerModel { QuestionId = selectedQuestion.Id, AnswerId = answerId })
-        );
+        else
+        {
+          appDbContext.QuestionModel.Update(currentQuestion);
+        }
 
         await appDbContext.SaveChangesAsync();
 
-        // Update existingAnswerIds to reflect the changes
-        existingAnswerIds = new HashSet<int>(currentAnswerIds);
-        originalExistingAnswerIds = new HashSet<int>(existingAnswerIds);
+        foreach (var answer in currentAnswers)
+        {
+          answer.QuestionId = currentQuestion.Id;
+          if (answer.Id == 0)
+          {
+            await appDbContext.AnswerModel.AddAsync(answer);
+          }
+          else
+          {
+            appDbContext.AnswerModel.Update(answer);
+          }
+        }
 
-        sb.Add("Question answers saved to database successfully.", Severity.Success);
+        await appDbContext.SaveChangesAsync();
+        sb.Add("Question and answers saved successfully.", Severity.Success);
+        await LoadQuestions();
+
+        // Reset current question and answers
+        currentQuestion = new QuestionModel();
+        currentAnswers = new List<AnswerModel>();
       }
       catch (Exception ex)
       {
-        sb.Add($"Error saving question answers: {ex.Message}", Severity.Error);
+        sb.Add($"Error saving question: {ex.Message}", Severity.Error);
       }
-      finally
+    }
+
+    private void AddNewAnswer()
+    {
+      currentAnswers.Add(new AnswerModel { QuestionId = currentQuestion.Id });
+    }
+
+    private void RemoveAnswer(AnswerModel answer)
+    {
+      currentAnswers.Remove(answer);
+      if (answer.Id != 0)
       {
-        StateHasChanged();
+        appDbContext.AnswerModel.Remove(answer);
       }
     }
 
-    private void OnSelectionChanged(HashSet<AnswerModel> selectedItems)
+    private async Task LoadQuestion(int questionId)
     {
-      selectedAnswers = selectedItems;
-      StateHasChanged();
-    }
+      currentQuestion = await appDbContext.QuestionModel
+          .Include(q => q.Answers)
+          .FirstOrDefaultAsync(q => q.Id == questionId);
 
-    private void OnSelectQuestion(QuestionModel question)
-    {
-      selectedQuestion = question;
-      LoadExistingAnswers();
+      if (currentQuestion != null)
+      {
+        currentAnswers = currentQuestion.Answers.ToList();
+      }
+      else
+      {
+        currentQuestion = new QuestionModel();
+        currentAnswers = new List<AnswerModel>();
+      }
       activeIndex = 1;
     }
 
-    private async Task OpenEditQuestionDialog(QuestionModel questionToEdit)
+    private async Task OnQuestionSearchInput(string value)
     {
-      var parameters = new DialogParameters
+      _searchString = value;
+      _questionDebounceTimer.Stop();
+      _questionDebounceTimer.Start();
+    }
+
+    private async Task QuestionDebounceTimerElapsed()
+    {
+      await InvokeAsync(async () =>
       {
-        { "Question", questionToEdit }
-      };
+        await SearchQuestions(_searchString);
+        StateHasChanged();
+      });
+    }
 
-      var options = new DialogOptions()
-      {
-        MaxWidth = MaxWidth.Small,
-        FullWidth = true,
-        Position = DialogPosition.Center,
-        CloseOnEscapeKey = true,
-        FullScreen = false,
-      };
-
-      var dialog = await dialogService.ShowAsync<QuestionEditDialog>("Edit Question", parameters, options);
-      var result = await dialog.Result;
-
-      if (!result.Canceled)
+    private async Task SearchQuestions(string searchTerm)
+    {
+      if (string.IsNullOrWhiteSpace(searchTerm))
       {
         await LoadQuestions();
-        sb.Add($"Question {questionToEdit.Id} updated successfully.", Severity.Success);
+      }
+      else
+      {
+        searchTerm = searchTerm.ToLower();
+        questions = await appDbContext.Set<QuestionModel>()
+            .Where(q => q.Id.ToString().Contains(searchTerm) ||
+                        q.QuestionContext.ToLower().Contains(searchTerm))
+            .OrderByDescending(q => q.Id)
+            .ToListAsync();
       }
     }
 
@@ -310,131 +250,28 @@ namespace DC.Components.Pages
     {
       var clonedQuestion = new QuestionModel
       {
-        QuestionContext = questionToClone.QuestionContext
+        QuestionContext = questionToClone.QuestionContext,
+        AnswerType = questionToClone.AnswerType
       };
 
       await appDbContext.Set<QuestionModel>().AddAsync(clonedQuestion);
       await appDbContext.SaveChangesAsync();
 
-      var questionAnswers = await appDbContext.Set<QuestionAnswerModel>()
-          .Where(qa => qa.QuestionId == questionToClone.Id)
-          .ToListAsync();
-
-      foreach (var answer in questionAnswers)
+      foreach (var answer in questionToClone.Answers)
       {
-        await appDbContext.Set<QuestionAnswerModel>().AddAsync(new QuestionAnswerModel
+        var clonedAnswer = new AnswerModel
         {
-          QuestionId = clonedQuestion.Id,
-          AnswerId = answer.AnswerId
-        });
+          AnswerText = answer.AnswerText,
+          IsCorrect = answer.IsCorrect,
+          Points = answer.Points,
+          QuestionId = clonedQuestion.Id
+        };
+        await appDbContext.Set<AnswerModel>().AddAsync(clonedAnswer);
       }
 
       await appDbContext.SaveChangesAsync();
       await LoadQuestions();
       sb.Add($"Question {questionToClone.Id} cloned successfully with ID: {clonedQuestion.Id}", Severity.Success);
-    }
-    private async Task OnKeyDown(KeyboardEventArgs e)
-    {
-      if (e.Key == "Enter")
-      {
-        _questionDebounceTimer.Stop();
-        await DebounceTimerElapsed();
-      }
-    }
-    private async Task OnQuestionSearchInput(string value)
-    {
-      _searchString = value;
-      _questionDebounceTimer.Stop();
-      _questionDebounceTimer.Start();
-    }
-
-    private async Task QuestionDebounceTimerElapsed()
-    {
-      await InvokeAsync(async () =>
-      {
-        await SearchQuestions(_searchString);
-        StateHasChanged();
-      });
-    }
-
-    private async Task SearchQuestions(string searchTerm)
-    {
-      if (string.IsNullOrWhiteSpace(searchTerm))
-      {
-        await LoadQuestions(); // Load all questions if search term is empty
-      }
-      else
-      {
-        searchTerm = searchTerm.ToLower(); // Convert search term to lowercase
-        questions = await appDbContext.Set<QuestionModel>()
-            .Where(q => q.Id.ToString().Contains(searchTerm) ||
-                        q.QuestionContext.ToLower().Contains(searchTerm))
-            .OrderByDescending(q => q.Id)
-            .ToListAsync();
-      }
-    }
-
-    private async Task OnAnswerSearchInput(string value)
-    {
-      _answerSearchString = value;
-      _answerDebounceTimer.Stop();
-      _answerDebounceTimer.Start();
-    }
-
-    private async Task AnswerDebounceTimerElapsed()
-    {
-      await InvokeAsync(async () =>
-      {
-        await SearchAnswers(_answerSearchString);
-        StateHasChanged();
-      });
-    }
-
-    private async Task SearchAnswers(string searchTerm)
-    {
-    try
-    {
-        if (string.IsNullOrWhiteSpace(searchTerm))
-        {
-            await LoadAnswers(); // Load all answers if search term is empty
-        }
-        else
-        {
-            searchTerm = searchTerm.ToLower(); // Convert search term to lowercase
-
-            // Fetch all answers from the database
-            var allAnswers = await appDbContext.Set<AnswerModel>().ToListAsync();
-
-            // Filter answers on the client side
-            answers = allAnswers.Where(a => a.Id.ToString().Contains(searchTerm) ||
-                                            a.AnswerText.ToLower().Contains(searchTerm) ||
-                                            a.Points.ToString().Contains(searchTerm) ||
-                                            a.AnswerType.ToString().ToLower().Contains(searchTerm))
-                                .ToList();
-        }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error searching answers: {ex.Message}");
-        sb.Add("Error searching answers", Severity.Error);
-        answers = new List<AnswerModel>(); // Reset answers list on error
-    }
-    }
-
-    private async Task DebounceTimerElapsed()
-    {
-      await InvokeAsync(async () =>
-      {
-        if (string.IsNullOrWhiteSpace(_searchString))
-        {
-          await InsertQuestion();
-        }
-        else
-        {
-          await SearchQuestions(_searchString);
-        }
-        StateHasChanged();
-      });
     }
   }
 }

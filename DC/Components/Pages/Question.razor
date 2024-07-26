@@ -85,11 +85,17 @@
 
                                 @foreach (var answer in currentAnswers)
                                 {
-                                    <MudPaper Class="pa-4 mt-2">
-                                        <MudTextField @bind-Value="answer.AnswerText" Label="Answer Text" Required="true" />
-                                        <MudNumericField @bind-Value="answer.Points" Label="Point multiplier" />
+                                    <MudGrid>
+                                        <MudItem xs="12" sm="8">
+                                            <MudTextField @bind-Value="answer.AnswerText" Label="Answer Text" Required="true" FullWidth="true" />
+                                        </MudItem>
+                                        <MudItem xs="12" sm="4">
+                                            <MudNumericField @bind-Value="answer.Points" Label="Point multiplier" FullWidth="true" />
+                                        </MudItem>
+                                    </MudGrid>
+                                    <MudItem xs="12" sm="3">
                                         <MudButton OnClick="@(() => RemoveAnswer(answer))" Color="Color.Error">Remove</MudButton>
-                                    </MudPaper>
+                                    </MudItem>
                                 }
 
                                 <MudButton OnClick="AddNewAnswer" Color="Color.Primary" Class="mt-2">Add Answer</MudButton>

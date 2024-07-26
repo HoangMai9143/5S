@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DC.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240725085037_AppDbMigration")]
+    [Migration("20240726013337_AppDbMigration")]
     partial class AppDbMigration
     {
         /// <inheritdoc />
@@ -29,27 +29,33 @@ namespace DC.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
+                        .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AnswerText")
                         .IsRequired()
+                        .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)")
                         .HasColumnName("answer_text");
 
-                    b.Property<int>("AnswerType")
-                        .HasColumnType("int")
-                        .HasColumnName("answer_type");
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_correct");
 
                     b.Property<int>("Points")
                         .HasColumnType("int")
                         .HasColumnName("points");
 
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int")
+                        .HasColumnName("question_id");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Answers");
+                    b.HasIndex("QuestionId");
+
+                    b.ToTable("Answer");
                 });
 
             modelBuilder.Entity("DC.Models.QuestionAnswerModel", b =>
@@ -87,9 +93,14 @@ namespace DC.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("AnswerType")
+                        .HasColumnType("int")
+                        .HasColumnName("answer_type");
+
                     b.Property<string>("QuestionContext")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
                         .HasColumnName("question_context");
 
                     b.HasKey("Id");
@@ -287,6 +298,17 @@ namespace DC.Migrations
                     b.ToTable("UserAccount");
                 });
 
+            modelBuilder.Entity("DC.Models.AnswerModel", b =>
+                {
+                    b.HasOne("DC.Models.QuestionModel", "Question")
+                        .WithMany("Answers")
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Question");
+                });
+
             modelBuilder.Entity("DC.Models.QuestionAnswerModel", b =>
                 {
                     b.HasOne("DC.Models.AnswerModel", "Answer")
@@ -365,6 +387,11 @@ namespace DC.Migrations
                     b.Navigation("Staff");
 
                     b.Navigation("Survey");
+                });
+
+            modelBuilder.Entity("DC.Models.QuestionModel", b =>
+                {
+                    b.Navigation("Answers");
                 });
 #pragma warning restore 612, 618
         }

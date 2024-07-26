@@ -12,27 +12,13 @@ namespace DC.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Answers",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    answer_text = table.Column<string>(type: "nvarchar(500)", nullable: false),
-                    points = table.Column<int>(type: "int", nullable: false),
-                    answer_type = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Answers", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Question",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    question_context = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true)
+                    question_context = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    answer_type = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -87,27 +73,25 @@ namespace DC.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "QuestionAnswer",
+                name: "Answer",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    question_id = table.Column<int>(type: "int", maxLength: 255, nullable: true),
-                    answer_id = table.Column<int>(type: "int", maxLength: 255, nullable: true)
+                    answer_text = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    is_correct = table.Column<bool>(type: "bit", nullable: false),
+                    points = table.Column<int>(type: "int", nullable: false),
+                    question_id = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_QuestionAnswer", x => x.Id);
+                    table.PrimaryKey("PK_Answer", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_QuestionAnswer_Answers_answer_id",
-                        column: x => x.answer_id,
-                        principalTable: "Answers",
-                        principalColumn: "id");
-                    table.ForeignKey(
-                        name: "FK_QuestionAnswer_Question_question_id",
+                        name: "FK_Answer_Question_question_id",
                         column: x => x.question_id,
                         principalTable: "Question",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -199,6 +183,35 @@ namespace DC.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "QuestionAnswer",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    question_id = table.Column<int>(type: "int", maxLength: 255, nullable: true),
+                    answer_id = table.Column<int>(type: "int", maxLength: 255, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuestionAnswer", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_QuestionAnswer_Answer_answer_id",
+                        column: x => x.answer_id,
+                        principalTable: "Answer",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_QuestionAnswer_Question_question_id",
+                        column: x => x.question_id,
+                        principalTable: "Question",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Answer_question_id",
+                table: "Answer",
+                column: "question_id");
+
             migrationBuilder.CreateIndex(
                 name: "IX_QuestionAnswer_answer_id",
                 table: "QuestionAnswer",
@@ -264,16 +277,16 @@ namespace DC.Migrations
                 name: "UserAccount");
 
             migrationBuilder.DropTable(
-                name: "Answers");
-
-            migrationBuilder.DropTable(
-                name: "Question");
+                name: "Answer");
 
             migrationBuilder.DropTable(
                 name: "Staff");
 
             migrationBuilder.DropTable(
                 name: "Survey");
+
+            migrationBuilder.DropTable(
+                name: "Question");
         }
     }
 }

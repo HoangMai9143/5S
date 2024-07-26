@@ -18,7 +18,7 @@ namespace DC.Components.Pages
     private QuestionModel currentQuestion = new QuestionModel();
     private List<AnswerModel> currentAnswers = new List<AnswerModel>();
     private string _searchString = string.Empty;
-
+    private AnswerType _selectedAnswerType = AnswerType.SingleChoice;
     private System.Timers.Timer _questionDebounceTimer;
     private const int DebounceDelay = 300; // milliseconds
 
@@ -89,7 +89,7 @@ namespace DC.Components.Pages
         var newQuestion = new QuestionModel
         {
           QuestionContext = _searchString,
-          AnswerType = AnswerType.SingleChoice // Default to single choice
+          AnswerType = _selectedAnswerType
         };
         await appDbContext.Set<QuestionModel>().AddAsync(newQuestion);
         await appDbContext.SaveChangesAsync();

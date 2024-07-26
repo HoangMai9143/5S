@@ -18,7 +18,7 @@ namespace DC.Components.Pages.Account
       if (httpContext.User.Identity.IsAuthenticated)
       {
         await httpContext.SignOutAsync();
-        navigationManager.NavigateTo("/logout", true);
+        navigationManager.NavigateTo("/home", true);
       }
     }
   }

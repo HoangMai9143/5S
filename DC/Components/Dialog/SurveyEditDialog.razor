@@ -7,6 +7,9 @@
 <MudDialog>
   <DialogContent>
     <MudStack>
+      <MudTextField @bind-Value="_title" Label="Title" Variant="Variant.Outlined" FullWidth="true" />
+    </MudStack>
+    <MudStack>
       <MudDateRangePicker @bind-DateRange="_dateRange" Margin="Margin.Dense" PlaceholderStart="Start Date" PlaceholderEnd="End Date" MinDate="@DateTime.Today.AddYears(-1)" MaxDate="@DateTime.Today.AddYears(1)" />
       <MudSwitch @bind-Value="_isActive" Color="Color.Success" UncheckedColor="Color.Error">Is Active</MudSwitch>
     </MudStack>
@@ -21,11 +24,13 @@
   [CascadingParameter] MudDialogInstance MudDialog { get; set; }
   [Parameter] public SurveyModel Survey { get; set; }
 
+  private string _title;
   private DateRange _dateRange;
   private bool _isActive;
 
   protected override void OnInitialized()
   {
+    _title = Survey.Title;
     _dateRange = new DateRange(Survey.StartDate, Survey.EndDate);
     _isActive = Survey.IsActive;
   }
@@ -45,6 +50,7 @@
         return;
       }
 
+      Survey.Title = _title;
       Survey.StartDate = _dateRange.Start.Value;
       Survey.EndDate = _dateRange.End.Value;
       Survey.IsActive = _isActive;

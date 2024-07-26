@@ -37,7 +37,8 @@ namespace DC.Components.Pages
 
       if (x.Id.ToString().Contains(_searchString, StringComparison.OrdinalIgnoreCase))
         return true;
-
+      if (x.Title.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        return true;
       if (x.StartDate.ToString("dd/MM/yyyy HH:mm").Contains(_searchString, StringComparison.OrdinalIgnoreCase))
         return true;
 

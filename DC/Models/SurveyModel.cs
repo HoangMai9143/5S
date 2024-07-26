@@ -14,6 +14,10 @@ namespace DC.Models
     [Column("id")]
     public int Id { get; set; }
 
+    [Column("title")]
+    [MaxLength(500)]
+    public string Title { get; set; }
+
     [Column("start_date", TypeName = "datetime")]
     public DateTime StartDate { get; set; }
 

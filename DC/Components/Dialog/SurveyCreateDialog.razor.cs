@@ -15,6 +15,7 @@ namespace DC.Components.Dialog
     [CascadingParameter] MudDialogInstance mudDialog { get; set; }
 
     private DateRange _dateRange = new DateRange(DateTime.Today, DateTime.Today);
+    private string _title = string.Empty;
 
     private void Cancel()
     {
@@ -36,6 +37,7 @@ namespace DC.Components.Dialog
 
         var newSurvey = new SurveyModel
         {
+          Title = _title,
           StartDate = startDate,
           EndDate = endDate,
           CreatedDate = DateTime.UtcNow,

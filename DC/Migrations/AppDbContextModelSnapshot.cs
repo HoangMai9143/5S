@@ -36,10 +36,6 @@ namespace DC.Migrations
                         .HasColumnType("nvarchar(500)")
                         .HasColumnName("answer_text");
 
-                    b.Property<bool>("IsCorrect")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_correct");
-
                     b.Property<int>("Points")
                         .HasColumnType("int")
                         .HasColumnName("points");
@@ -53,33 +49,6 @@ namespace DC.Migrations
                     b.HasIndex("QuestionId");
 
                     b.ToTable("Answer");
-                });
-
-            modelBuilder.Entity("DC.Models.QuestionAnswerModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("AnswerId")
-                        .HasMaxLength(255)
-                        .HasColumnType("int")
-                        .HasColumnName("answer_id");
-
-                    b.Property<int?>("QuestionId")
-                        .HasMaxLength(255)
-                        .HasColumnType("int")
-                        .HasColumnName("question_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AnswerId");
-
-                    b.HasIndex("QuestionId");
-
-                    b.ToTable("QuestionAnswer");
                 });
 
             modelBuilder.Entity("DC.Models.QuestionModel", b =>
@@ -197,6 +166,12 @@ namespace DC.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("start_date");
 
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("title");
+
                     b.HasKey("Id");
 
                     b.ToTable("Survey");
@@ -302,21 +277,6 @@ namespace DC.Migrations
                         .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Question");
-                });
-
-            modelBuilder.Entity("DC.Models.QuestionAnswerModel", b =>
-                {
-                    b.HasOne("DC.Models.AnswerModel", "Answer")
-                        .WithMany()
-                        .HasForeignKey("AnswerId");
-
-                    b.HasOne("DC.Models.QuestionModel", "Question")
-                        .WithMany()
-                        .HasForeignKey("QuestionId");
-
-                    b.Navigation("Answer");
 
                     b.Navigation("Question");
                 });

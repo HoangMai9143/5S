@@ -31,7 +31,7 @@
               </MudStack>
             </MudCardActions>
           </MudCard>
-          <MudDataGrid T="SurveyModel" Items="@surveys" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_surveyQuickFilter">
+          <MudDataGrid T="SurveyModel" Items="@surveys" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_surveyQuickFilter" Elevation="0" >
             <ToolBarContent>
               <MudText Typo="Typo.h6">Surveys</MudText>
               <MudSpacer />
@@ -40,6 +40,7 @@
             </ToolBarContent>
             <Columns>
               <PropertyColumn T="SurveyModel" TProperty="int" Property="x => x.Id" Title="ID" />
+              <PropertyColumn T="SurveyModel" TProperty="string" Property="x => x.Title" Title="Title" />
               <PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.StartDate" Title="Start Date" Format="dd/MM/yyyy" />
               <PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.EndDate" Title="End Date" Format="dd/MM/yyyy" />
               <PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.CreatedDate" Title="Created Date" Format="dd/MM/yyyy HH:mm" />
@@ -79,7 +80,7 @@
             <MudCardActions>
               <MudGrid>
                 <MudItem xs="12">
-                  <MudText Typo="Typo.h6">Choose Questions for Survey: @selectedSurvey?.Id</MudText>
+                  <MudText Typo="Typo.h6">Choose Questions for Survey: @selectedSurvey?.Title</MudText>
                 </MudItem>
                 <MudItem xs="12">
                   <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SaveSurveyQuestions" Disabled="@(selectedSurvey == null)">

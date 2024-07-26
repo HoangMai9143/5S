@@ -172,7 +172,11 @@ namespace DC.Components.Pages
 
     private void AddNewAnswer()
     {
-      currentAnswers.Add(new AnswerModel { QuestionId = currentQuestion.Id });
+      currentAnswers.Add(new AnswerModel
+      {
+        QuestionId = currentQuestion.Id,
+        Points = 1
+      });
     }
 
     private void RemoveAnswer(AnswerModel answer)

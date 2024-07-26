@@ -76,7 +76,7 @@
                                 <MudPaper Class="pa-4 mt-2">
                                     <MudTextField @bind-Value="answer.AnswerText" Label="Answer Text" Required="true" />
                                     <MudSwitch @bind-Value="answer.IsCorrect" Color="Color.Success" UncheckedColor="Color.Error">Is Correct</MudSwitch>
-                                    <MudNumericField @bind-Value="answer.Points" Label="Points" />
+                                    <MudNumericField @bind-Value="answer.Points" Label="Point multiplier" />
                                     <MudButton OnClick="@(() => RemoveAnswer(answer))" Color="Color.Error">Remove</MudButton>
                                 </MudPaper>
                             }

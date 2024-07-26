@@ -15,42 +15,50 @@
     <MudText Typo="Typo.h6">You are not authorized to view this page.</MudText>
   </NotAuthorized>
   <Authorized>
-    <EditForm Context="cellContext" Model="@this" OnValidSubmit="@InsertStaff">
-      <DataAnnotationsValidator />
-      <MudGrid Spacing="3" Justify="Justify.Center" AlignItems="AlignItems.Center">
-        <MudItem xs="12" sm="4">
-          <MudTextField Value="@newStaffFullName" ValueChanged="@((string val) => OnSearchInput(val))" T="string" Label="Full Name / Search" HelperText="Type to search or add new staff" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" TextUpdateSuppression="false" Immediate="true" DebounceInterval="300" @onkeydown="@OnKeyDown" Clearable="true" />
-        </MudItem>
-        <MudItem xs="12" sm="3">
-          <MudTextField @bind-Value="newStaffDepartment" T="string" Label="Department" HelperText="Enter staff department" HelperTextOnFocus="true" Variant="Variant.Outlined" Clearable="true" />
-        </MudItem>
-        <MudItem xs="12" sm="1" Style="text-align: center;" Class="custom-button">
-          <MudButton Variant="Variant.Filled" Size="Size.Medium" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary" OnClick="@(() => InsertStaff())">Add</MudButton>
-        </MudItem>
-      </MudGrid>
-    </EditForm>
+    @if (isLoading)
+    {
+      <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+    }
+    else
+    {
 
-    <MudDataGrid T="StaffModel" Items="@staffList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Elevation="0" Class="custom-mudtable no-scroll pa6">
-      <Columns>
-        <PropertyColumn Property="x => x.Id" Title="ID" InitialDirection="SortDirection.Descending" Sortable="true" />
-        <PropertyColumn Property="x => x.FullName" Title="Full Name" />
-        <PropertyColumn Property="x => x.Department" Title="Department" />
-        <PropertyColumn Property="x => x.IsActive" Title="Is Active" />
-        <TemplateColumn CellClass="d-flex justify-end" Width="30px">
-          <CellTemplate Context="cellContext">
-            <MudStack Row>
-              <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenEditDialog(cellContext.Item))" />
-              <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="Size.Small" OnClick="@(() => DeleteStaff(cellContext.Item))" />
-            </MudStack>
-          </CellTemplate>
-        </TemplateColumn>
-      </Columns>
-      <PagerContent>
-        <MudDataGridPager T="StaffModel" />
-      </PagerContent>
-    </MudDataGrid>
+      <EditForm Context="cellContext" Model="@this" OnValidSubmit="@InsertStaff">
+        <DataAnnotationsValidator />
+        <MudGrid Spacing="3" Justify="Justify.Center" AlignItems="AlignItems.Center">
+          <MudItem xs="12" sm="4">
+            <MudTextField Value="@newStaffFullName" ValueChanged="@((string val) => OnSearchInput(val))" T="string" Label="Full Name / Search" HelperText="Type to search or add new staff" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" TextUpdateSuppression="false" Immediate="true" DebounceInterval="300" @onkeydown="@OnKeyDown" Clearable="true" />
+          </MudItem>
+          <MudItem xs="12" sm="3">
+            <MudTextField @bind-Value="newStaffDepartment" T="string" Label="Department" HelperText="Enter staff department" HelperTextOnFocus="true" Variant="Variant.Outlined" Clearable="true" />
+          </MudItem>
+          <MudItem xs="12" sm="1" Style="text-align: center;" Class="custom-button">
+            <MudButton Variant="Variant.Filled" Size="Size.Medium" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary" OnClick="@(() => InsertStaff())">Add</MudButton>
+          </MudItem>
+        </MudGrid>
+      </EditForm>
 
-    <MudText Typo="Typo.body2">Staff Members: @staffList.Count</MudText>
+      <MudDataGrid T="StaffModel" Items="@staffList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Elevation="0" Class="custom-mudtable no-scroll pa6">
+        <Columns>
+          <PropertyColumn Property="x => x.Id" Title="ID" InitialDirection="SortDirection.Descending" Sortable="true" />
+          <PropertyColumn Property="x => x.FullName" Title="Full Name" />
+          <PropertyColumn Property="x => x.Department" Title="Department" />
+          <PropertyColumn Property="x => x.IsActive" Title="Is Active" />
+          <TemplateColumn CellClass="d-flex justify-end" Width="30px">
+            <CellTemplate Context="cellContext">
+              <MudStack Row>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenEditDialog(cellContext.Item))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="Size.Small" OnClick="@(() => DeleteStaff(cellContext.Item))" />
+              </MudStack>
+            </CellTemplate>
+          </TemplateColumn>
+        </Columns>
+        <PagerContent>
+          <MudDataGridPager T="StaffModel" />
+        </PagerContent>
+      </MudDataGrid>
+
+      <MudText Typo="Typo.body2">Staff Members: @staffList.Count</MudText>
+    }
   </Authorized>
 </AuthorizeView>
 

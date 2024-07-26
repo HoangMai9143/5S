@@ -26,6 +26,8 @@ namespace DC.Components.Pages
     private System.Timers.Timer _surveyDebounceTimer;
     private System.Timers.Timer _questionDebounceTimer;
     private const int DebounceDelay = 300; // milliseconds
+    private bool isLoading = true;
+
 
     // Filter surveys
     private Func<SurveyModel, bool> _surveyQuickFilter => x =>
@@ -66,18 +68,24 @@ namespace DC.Components.Pages
       return false;
     };
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-      await LoadSurveys();
-      await LoadQuestions();
+      if (firstRender)
+      {
+        await LoadSurveys();
+        await LoadQuestions();
 
-      _surveyDebounceTimer = new System.Timers.Timer(DebounceDelay);
-      _surveyDebounceTimer.Elapsed += async (sender, e) => await SurveyDebounceTimerElapsed();
-      _surveyDebounceTimer.AutoReset = false;
+        _surveyDebounceTimer = new System.Timers.Timer(DebounceDelay);
+        _surveyDebounceTimer.Elapsed += async (sender, e) => await SurveyDebounceTimerElapsed();
+        _surveyDebounceTimer.AutoReset = false;
 
-      _questionDebounceTimer = new System.Timers.Timer(DebounceDelay);
-      _questionDebounceTimer.Elapsed += async (sender, e) => await QuestionDebounceTimerElapsed();
-      _questionDebounceTimer.AutoReset = false;
+        _questionDebounceTimer = new System.Timers.Timer(DebounceDelay);
+        _questionDebounceTimer.Elapsed += async (sender, e) => await QuestionDebounceTimerElapsed();
+        _questionDebounceTimer.AutoReset = false;
+
+        isLoading = false;
+        StateHasChanged();
+      }
     }
 
     private async Task LoadSurveys()

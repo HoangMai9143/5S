@@ -23,6 +23,8 @@ namespace DC.Components.Pages
     private const int DebounceDelay = 300; // milliseconds
 
     private int selectedAnswerIndex = -1;
+    private bool isLoading = true;
+
 
     // Filter questions
     private Func<QuestionModel, bool> _questionQuickFilter => x =>
@@ -39,15 +41,19 @@ namespace DC.Components.Pages
       return false;
     };
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-      await LoadQuestions();
+      if (firstRender)
+      {
+        await LoadQuestions();
+        _questionDebounceTimer = new System.Timers.Timer(DebounceDelay);
+        _questionDebounceTimer.Elapsed += async (sender, e) => await QuestionDebounceTimerElapsed();
+        _questionDebounceTimer.AutoReset = false;
 
-      _questionDebounceTimer = new System.Timers.Timer(DebounceDelay);
-      _questionDebounceTimer.Elapsed += async (sender, e) => await QuestionDebounceTimerElapsed();
-      _questionDebounceTimer.AutoReset = false;
+        isLoading = false;
+        StateHasChanged();
+      }
     }
-
     private async Task LoadQuestions()
     {
       try

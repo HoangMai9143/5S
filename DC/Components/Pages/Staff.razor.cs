@@ -22,6 +22,8 @@ namespace DC.Components.Pages
     private string _searchString = string.Empty;
     private System.Timers.Timer _debounceTimer;
     private const int DebounceDelay = 300; // milliseconds
+    private bool isLoading = true;
+
 
     private Func<StaffModel, bool> _quickFilter => x =>
     {
@@ -43,15 +45,21 @@ namespace DC.Components.Pages
       return false;
     };
 
-    protected override async Task OnInitializedAsync()
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-      await LoadStaffAsync();
-      _debounceTimer = new System.Timers.Timer(DebounceDelay);
-      _debounceTimer.Elapsed += async (sender, e) => await DebounceTimerElapsed();
-      _debounceTimer.AutoReset = false;
+      if (firstRender)
+      {
+        await LoadStaff();
+        _debounceTimer = new System.Timers.Timer(DebounceDelay);
+        _debounceTimer.Elapsed += async (sender, e) => await DebounceTimerElapsed();
+        _debounceTimer.AutoReset = false;
+        isLoading = false;
+        StateHasChanged();
+      }
     }
 
-    private async Task LoadStaffAsync()
+    private async Task LoadStaff()
     {
       try
       {
@@ -92,7 +100,7 @@ namespace DC.Components.Pages
           await appDbContext.Set<StaffModel>().AddAsync(newStaff);
           await appDbContext.SaveChangesAsync();
 
-          await LoadStaffAsync(); // Refresh the staff list
+          await LoadStaff(); // Refresh the staff list
 
           newStaffFullName = string.Empty;
           newStaffDepartment = string.Empty;
@@ -180,7 +188,7 @@ namespace DC.Components.Pages
       await appDbContext.SaveChangesAsync();
       sb.Add($"Staff member {staffToUpdate.Id} updated", Severity.Success);
 
-      await LoadStaffAsync();
+      await LoadStaff();
       StateHasChanged();
     }
     private async Task OnKeyDown(KeyboardEventArgs e)
@@ -210,7 +218,7 @@ namespace DC.Components.Pages
     {
       if (string.IsNullOrWhiteSpace(searchTerm))
       {
-        await LoadStaffAsync();
+        await LoadStaff();
       }
       else
       {

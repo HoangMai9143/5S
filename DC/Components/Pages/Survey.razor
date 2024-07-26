@@ -13,114 +13,121 @@
     <MudText Typo="Typo.h6">You are not authorized to view this page.</MudText>
   </NotAuthorized>
   <Authorized>
-    <MudTabs Elevation="0" ApplyEffectsToContainer="true" PanelClass="pa-6" ActivePanelIndex="activeIndex" ActivePanelIndexChanged="HandleTabChanged">
-      <MudTabPanel Text="Choose/Create Survey" Icon="@Icons.Material.Filled.EventNote">
-        <MudCard>
-          <MudCardContent>
-            <MudText Typo="Typo.h6">Select or Create Survey</MudText>
-          </MudCardContent>
-          <MudCardActions>
-            <MudStack Spacing="2" Row="true">
-              <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="OpenCreateSurveyDialog">Create New Survey</MudButton>
-            </MudStack>
-          </MudCardActions>
-        </MudCard>
-        <MudDataGrid T="SurveyModel" Items="@surveys" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_surveyQuickFilter">
-          <ToolBarContent>
-            <MudText Typo="Typo.h6">Surveys</MudText>
-            <MudSpacer />
-            <MudTextField Value="@_searchString" ValueChanged="@((string val) => OnSurveySearchInput(val))" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" DebounceInterval="300" Clearable="true">
-            </MudTextField>
-          </ToolBarContent>
-          <Columns>
-            <PropertyColumn T="SurveyModel" TProperty="int" Property="x => x.Id" Title="ID" />
-            <PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.StartDate" Title="Start Date" Format="dd/MM/yyyy" />
-            <PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.EndDate" Title="End Date" Format="dd/MM/yyyy" />
-            <PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.CreatedDate" Title="Created Date" Format="dd/MM/yyyy HH:mm" />
-            <PropertyColumn T="SurveyModel" TProperty="bool" Property="x => x.IsActive" Title="Status">
-              <CellTemplate Context="cellContext">
-                @if (cellContext.Item.IsActive)
-                {
-                  <MudChip Color="Color.Success" Size="Size.Small">On going</MudChip>
-                }
-                else
-                {
-                  <MudChip Size="Size.Small">Ended</MudChip>
-                }
-              </CellTemplate>
-            </PropertyColumn>
-            <TemplateColumn CellClass="d-flex justify-end" Width="150px">
-              <CellTemplate Context="cellContext">
-                <MudStack Row>
-                  <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OnSelectSurvey(cellContext.Item))">
-                    Select this
+    @if (isLoading)
+    {
+      <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+    }
+    else
+    {
+      <MudTabs Elevation="0" ApplyEffectsToContainer="true" PanelClass="pa-6" ActivePanelIndex="activeIndex" ActivePanelIndexChanged="HandleTabChanged">
+        <MudTabPanel Text="Choose/Create Survey" Icon="@Icons.Material.Filled.EventNote">
+          <MudCard>
+            <MudCardContent>
+              <MudText Typo="Typo.h6">Select or Create Survey</MudText>
+            </MudCardContent>
+            <MudCardActions>
+              <MudStack Spacing="2" Row="true">
+                <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="OpenCreateSurveyDialog">Create New Survey</MudButton>
+              </MudStack>
+            </MudCardActions>
+          </MudCard>
+          <MudDataGrid T="SurveyModel" Items="@surveys" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_surveyQuickFilter">
+            <ToolBarContent>
+              <MudText Typo="Typo.h6">Surveys</MudText>
+              <MudSpacer />
+              <MudTextField Value="@_searchString" ValueChanged="@((string val) => OnSurveySearchInput(val))" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" DebounceInterval="300" Clearable="true">
+              </MudTextField>
+            </ToolBarContent>
+            <Columns>
+              <PropertyColumn T="SurveyModel" TProperty="int" Property="x => x.Id" Title="ID" />
+              <PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.StartDate" Title="Start Date" Format="dd/MM/yyyy" />
+              <PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.EndDate" Title="End Date" Format="dd/MM/yyyy" />
+              <PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.CreatedDate" Title="Created Date" Format="dd/MM/yyyy HH:mm" />
+              <PropertyColumn T="SurveyModel" TProperty="bool" Property="x => x.IsActive" Title="Status">
+                <CellTemplate Context="cellContext">
+                  @if (cellContext.Item.IsActive)
+                  {
+                    <MudChip Color="Color.Success" Size="Size.Small">On going</MudChip>
+                  }
+                  else
+                  {
+                    <MudChip Size="Size.Small">Ended</MudChip>
+                  }
+                </CellTemplate>
+              </PropertyColumn>
+              <TemplateColumn CellClass="d-flex justify-end" Width="150px">
+                <CellTemplate Context="cellContext">
+                  <MudStack Row>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OnSelectSurvey(cellContext.Item))">
+                      Select this
+                    </MudButton>
+                    <MudIconButton Label="Edit" Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenEditSurveyDialog(cellContext.Item))" />
+                    <MudIconButton Label="Delete" Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="Size.Small" OnClick="@(() => DeleteSurvey(cellContext.Item))" />
+                    <MudIconButton Label="Clone" Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Info" Size="Size.Small" OnClick="@(() => CloneSurvey(cellContext.Item))" />
+                  </MudStack>
+                </CellTemplate>
+              </TemplateColumn>
+            </Columns>
+            <PagerContent>
+              <MudDataGridPager T="SurveyModel" />
+            </PagerContent>
+          </MudDataGrid>
+          <MudText Typo="Typo.body2">Surveys in List: @surveys.Count</MudText>
+        </MudTabPanel>
+        <MudTabPanel Text="Choose Questions" Icon="@Icons.Material.Filled.QuestionMark">
+          <MudCard>
+            <MudCardActions>
+              <MudGrid>
+                <MudItem xs="12">
+                  <MudText Typo="Typo.h6">Choose Questions for Survey: @selectedSurvey?.Id</MudText>
+                </MudItem>
+                <MudItem xs="12">
+                  <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SaveSurveyQuestions" Disabled="@(selectedSurvey == null)">
+                    Save to Database
                   </MudButton>
-                  <MudIconButton Label="Edit" Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenEditSurveyDialog(cellContext.Item))" />
-                  <MudIconButton Label="Delete" Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="Size.Small" OnClick="@(() => DeleteSurvey(cellContext.Item))" />
-                  <MudIconButton Label="Clone" Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Info" Size="Size.Small" OnClick="@(() => CloneSurvey(cellContext.Item))" />
-                </MudStack>
-              </CellTemplate>
-            </TemplateColumn>
-          </Columns>
-          <PagerContent>
-            <MudDataGridPager T="SurveyModel" />
-          </PagerContent>
-        </MudDataGrid>
-        <MudText Typo="Typo.body2">Surveys in List: @surveys.Count</MudText>
-      </MudTabPanel>
-      <MudTabPanel Text="Choose Questions" Icon="@Icons.Material.Filled.QuestionMark">
-        <MudCard>
-          <MudCardActions>
-            <MudGrid>
-              <MudItem xs="12">
-                <MudText Typo="Typo.h6">Choose Questions for Survey: @selectedSurvey?.Id</MudText>
-              </MudItem>
-              <MudItem xs="12">
-                <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SaveSurveyQuestions" Disabled="@(selectedSurvey == null)">
-                  Save to Database
-                </MudButton>
-              </MudItem>
-            </MudGrid>
-          </MudCardActions>
-          <MudCardContent>
-            <MudDataGrid T="QuestionModel" Items="@questions" MultiSelection="true" @bind-SelectedItems="selectedQuestions" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_questionQuickFilter" Elevation="0">
-              <ToolBarContent>
-                <MudText Typo="Typo.h6">Questions</MudText>
-                <MudSpacer />
-                <MudTextField Value="@_questionSearchString" ValueChanged="@((string val) => OnQuestionSearchInput(val))" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" DebounceInterval="300" Clearable="true">
-                </MudTextField>
-              </ToolBarContent>
-              <Columns>
-                <SelectColumn T="QuestionModel" />
-                <PropertyColumn Property="x => x.Id" Title="ID" InitialDirection="SortDirection.Descending" Sortable="true" />
-                <PropertyColumn Property="x => x.QuestionContext" Title="Question" />
-                <TemplateColumn Title="Status">
-                  <CellTemplate Context="cellContext">
-                    @{
-                      var question = cellContext.Item;
-                      if (existingQuestionIds.Contains(question.Id))
-                      {
-                        <MudChip Color="Color.Success" Icon="@Icons.Material.Filled.Check" Size="Size.Small">Saved</MudChip>
+                </MudItem>
+              </MudGrid>
+            </MudCardActions>
+            <MudCardContent>
+              <MudDataGrid T="QuestionModel" Items="@questions" MultiSelection="true" @bind-SelectedItems="selectedQuestions" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_questionQuickFilter" Elevation="0">
+                <ToolBarContent>
+                  <MudText Typo="Typo.h6">Questions</MudText>
+                  <MudSpacer />
+                  <MudTextField Value="@_questionSearchString" ValueChanged="@((string val) => OnQuestionSearchInput(val))" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" DebounceInterval="300" Clearable="true">
+                  </MudTextField>
+                </ToolBarContent>
+                <Columns>
+                  <SelectColumn T="QuestionModel" />
+                  <PropertyColumn Property="x => x.Id" Title="ID" InitialDirection="SortDirection.Descending" Sortable="true" />
+                  <PropertyColumn Property="x => x.QuestionContext" Title="Question" />
+                  <TemplateColumn Title="Status">
+                    <CellTemplate Context="cellContext">
+                      @{
+                        var question = cellContext.Item;
+                        if (existingQuestionIds.Contains(question.Id))
+                        {
+                          <MudChip Color="Color.Success" Icon="@Icons.Material.Filled.Check" Size="Size.Small">Saved</MudChip>
+                        }
+                        else if (selectedQuestions.Contains(question))
+                        {
+                          <MudChip Color="Color.Warning" Icon="@Icons.Material.Filled.AddCircle" Size="Size.Small">Not save</MudChip>
+                        }
+                        else
+                        {
+                          <MudChip Color="Color.Default" Icon="@Icons.Material.Filled.RadioButtonUnchecked" Size="Size.Small">Not Selected</MudChip>
+                        }
                       }
-                      else if (selectedQuestions.Contains(question))
-                      {
-                        <MudChip Color="Color.Warning" Icon="@Icons.Material.Filled.AddCircle" Size="Size.Small">Not save</MudChip>
-                      }
-                      else
-                      {
-                        <MudChip Color="Color.Default" Icon="@Icons.Material.Filled.RadioButtonUnchecked" Size="Size.Small">Not Selected</MudChip>
-                      }
-                    }
-                  </CellTemplate>
-                </TemplateColumn>
-              </Columns>
-              <PagerContent>
-                <MudDataGridPager T="QuestionModel" />
-              </PagerContent>
-            </MudDataGrid>
-          </MudCardContent>
-        </MudCard>
-      </MudTabPanel>
-    </MudTabs>
+                    </CellTemplate>
+                  </TemplateColumn>
+                </Columns>
+                <PagerContent>
+                  <MudDataGridPager T="QuestionModel" />
+                </PagerContent>
+              </MudDataGrid>
+            </MudCardContent>
+          </MudCard>
+        </MudTabPanel>
+      </MudTabs>
+    }
   </Authorized>
 </AuthorizeView>

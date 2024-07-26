@@ -22,6 +22,8 @@ namespace DC.Components.Pages
     private System.Timers.Timer _questionDebounceTimer;
     private const int DebounceDelay = 300; // milliseconds
 
+    private int selectedAnswerIndex = -1;
+
     // Filter questions
     private Func<QuestionModel, bool> _questionQuickFilter => x =>
     {
@@ -119,6 +121,29 @@ namespace DC.Components.Pages
 
         await appDbContext.SaveChangesAsync();
 
+        // Remove answers that are no longer in the list
+        var existingAnswers = await appDbContext.AnswerModel
+            .Where(a => a.QuestionId == currentQuestion.Id)
+            .ToListAsync();
+
+        foreach (var existingAnswer in existingAnswers)
+        {
+          if (!currentAnswers.Exists(a => a.Id == existingAnswer.Id))
+          {
+            appDbContext.AnswerModel.Remove(existingAnswer);
+          }
+        }
+
+        // Update IsCorrect for single-choice questions
+        if (currentQuestion.AnswerType == AnswerType.SingleChoice)
+        {
+          for (int i = 0; i < currentAnswers.Count; i++)
+          {
+            currentAnswers[i].IsCorrect = (i == selectedAnswerIndex);
+          }
+        }
+
+        // Add or update current answers
         foreach (var answer in currentAnswers)
         {
           answer.QuestionId = currentQuestion.Id;
@@ -133,17 +158,25 @@ namespace DC.Components.Pages
         }
 
         await appDbContext.SaveChangesAsync();
-        sb.Add("Question and answers saved successfully.", Severity.Success);
+        sb.Add("Saved successfully.", Severity.Success);
         await LoadQuestions();
 
         // Reset current question and answers
         currentQuestion = new QuestionModel();
-        currentAnswers = new List<AnswerModel>();
+        currentAnswers.Clear(); // Simplified collection initialization
+
+        // Go back to the question list
+        activeIndex = 0;
       }
       catch (Exception ex)
       {
         sb.Add($"Error saving question: {ex.Message}", Severity.Error);
       }
+    }
+
+    private void OnMultipleChoiceChanged(AnswerModel changedAnswer)
+    {
+      StateHasChanged();
     }
 
     private void AddNewAnswer()
@@ -169,6 +202,7 @@ namespace DC.Components.Pages
       if (currentQuestion != null)
       {
         currentAnswers = currentQuestion.Answers.ToList();
+        UpdateSelectedAnswerIndex();
       }
       else
       {
@@ -272,6 +306,32 @@ namespace DC.Components.Pages
       await appDbContext.SaveChangesAsync();
       await LoadQuestions();
       sb.Add($"Question {questionToClone.Id} cloned successfully with ID: {clonedQuestion.Id}", Severity.Success);
+    }
+    protected override void OnParametersSet()
+    {
+      base.OnParametersSet();
+      UpdateSelectedAnswerIndex();
+    }
+
+    private void UpdateSelectedAnswerIndex()
+    {
+      if (currentQuestion.AnswerType == AnswerType.SingleChoice)
+      {
+        selectedAnswerIndex = currentAnswers.FindIndex(a => a.IsCorrect);
+      }
+    }
+
+    private void OnSelectedAnswerIndexChanged(int index)
+    {
+      selectedAnswerIndex = index;
+      if (index >= 0 && index < currentAnswers.Count)
+      {
+        for (int i = 0; i < currentAnswers.Count; i++)
+        {
+          currentAnswers[i].IsCorrect = (i == index);
+        }
+      }
+      StateHasChanged();
     }
   }
 }

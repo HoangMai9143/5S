@@ -5,6 +5,7 @@
 @inject AppDbContext appDbContext
 @inject IDialogService dialogService
 @inject ISnackbar sb
+@inject IServiceProvider serviceProvider
 
 @rendermode InteractiveServer
 
@@ -58,7 +59,7 @@
             </MudTabPanel>
 
             <MudTabPanel Text="Edit Question" Icon="@Icons.Material.Filled.Edit">
-                <EditForm Model="@currentQuestion" OnValidSubmit="SaveQuestion">
+                <EditForm Model="@currentQuestion" OnValidSubmit="@(async () => await SaveQuestion())">
                     <DataAnnotationsValidator />
                     <MudCard>
                         <MudCardContent>
@@ -69,14 +70,33 @@
                             </MudSelect>
 
                             <MudText Typo="Typo.h6" Class="mt-4">Answers</MudText>
-                            @foreach (var answer in currentAnswers)
+                            @if (currentQuestion.AnswerType == AnswerType.SingleChoice)
                             {
-                                <MudPaper Class="pa-4 mt-2">
-                                    <MudTextField @bind-Value="answer.AnswerText" Label="Answer Text" Required="true" />
-                                    <MudCheckBox T="bool" @bind-Checked="answer.IsCorrect" Label="Is Correct" />
-                                    <MudNumericField @bind-Value="answer.Points" Label="Points" />
-                                    <MudButton OnClick="@(() => RemoveAnswer(answer))" Color="Color.Error">Remove</MudButton>
-                                </MudPaper>
+                                <MudRadioGroup T="int" SelectedOptionChanged="OnSelectedAnswerIndexChanged" SelectedOption="@selectedAnswerIndex">
+                                    @for (int i = 0; i < currentAnswers.Count; i++)
+                                    {
+                                        var index = i;
+                                        var answer = currentAnswers[i];
+                                        <MudPaper Class="pa-4 mt-2">
+                                            <MudTextField @bind-Value="answer.AnswerText" Label="Answer Text" Required="true" />
+                                            <MudRadio T="int" Option="@index" Color="Color.Primary">Is Correct</MudRadio>
+                                            <MudNumericField @bind-Value="answer.Points" Label="Points" />
+                                            <MudButton OnClick="@(() => RemoveAnswer(answer))" Color="Color.Error">Remove</MudButton>
+                                        </MudPaper>
+                                    }
+                                </MudRadioGroup>
+                            }
+                            else
+                            {
+                                @foreach (var answer in currentAnswers)
+                                {
+                                    <MudPaper Class="pa-4 mt-2">
+                                        <MudTextField @bind-Value="answer.AnswerText" Label="Answer Text" Required="true" />
+                                        <MudCheckBox T="bool" @bind-Checked="answer.IsCorrect" Label="Is Correct" Color="Color.Primary" />
+                                        <MudNumericField @bind-Value="answer.Points" Label="Points" />
+                                        <MudButton OnClick="@(() => RemoveAnswer(answer))" Color="Color.Error">Remove</MudButton>
+                                    </MudPaper>
+                                }
                             }
                             <MudButton OnClick="AddNewAnswer" Color="Color.Primary" Class="mt-2">Add Answer</MudButton>
                         </MudCardContent>

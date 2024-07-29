@@ -116,7 +116,7 @@ namespace DC.Components.Pages
       catch (Exception ex)
       {
         Console.WriteLine($"Error loading surveys: {ex.Message}");
-        sb.Add("Error loading surveys", Severity.Error);
+        sb.Add("Error loading surveys, please reload page!", Severity.Error);
         surveys = new List<SurveyModel>();
       }
     }
@@ -136,7 +136,7 @@ namespace DC.Components.Pages
       catch (Exception ex)
       {
         Console.WriteLine($"Error loading question(s): {ex.Message}");
-        sb.Add("Error loading question(s)", Severity.Error);
+        sb.Add("Error loading question(s), please reload page!", Severity.Error);
         questions = new List<QuestionModel>();
       }
     }

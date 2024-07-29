@@ -70,7 +70,7 @@ namespace DC.Components.Pages
       catch (Exception ex)
       {
         Console.WriteLine($"Error loading staff: {ex.Message}");
-        sb.Add("Error loading staff", Severity.Error);
+        sb.Add("Error loading staff, please reload page!", Severity.Error);
         staffList = new List<StaffModel>();
       }
     }

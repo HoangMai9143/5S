@@ -9,6 +9,18 @@ namespace DC.Components.Pages
   {
     private bool isLoading = true;
     private int activeIndex = 0;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+      if (firstRender)
+      {
+        isLoading = false;
+        StateHasChanged();
+      }
+    }
+    private async Task HandleTabChanged(int index)
+    {
 
+      activeIndex = index;
+    }
   }
 }

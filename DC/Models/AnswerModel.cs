@@ -23,6 +23,9 @@ namespace DC.Models
     [Column("question_id")]
     public int QuestionId { get; set; }
 
+    [Column("is_selected")]
+    public bool IsSelected { get; set; }
+
     [ForeignKey("QuestionId")]
     public virtual QuestionModel Question { get; set; }
   }

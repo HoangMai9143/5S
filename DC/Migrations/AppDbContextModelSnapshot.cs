@@ -36,6 +36,10 @@ namespace DC.Migrations
                         .HasColumnType("nvarchar(500)")
                         .HasColumnName("answer_text");
 
+                    b.Property<bool>("IsSelected")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_selected");
+
                     b.Property<int>("Points")
                         .HasColumnType("int")
                         .HasColumnName("points");

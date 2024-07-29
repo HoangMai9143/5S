@@ -81,7 +81,8 @@ namespace DC.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     answer_text = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     points = table.Column<int>(type: "int", nullable: false),
-                    question_id = table.Column<int>(type: "int", nullable: false)
+                    question_id = table.Column<int>(type: "int", nullable: false),
+                    is_selected = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {

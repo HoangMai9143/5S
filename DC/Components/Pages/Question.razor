@@ -1,6 +1,4 @@
 @page "/question"
-@using DC.Models
-@using MudBlazor
 
 @inject AppDbContext appDbContext
 @inject IDialogService dialogService
@@ -74,6 +72,7 @@
                     <EditForm Model="@currentQuestion" OnValidSubmit="@(async () => await SaveQuestion())">
                         <DataAnnotationsValidator />
                         <MudCard>
+                            <MudText Typo="Typo.h6">Editing question: @currentQuestion.Id</MudText>
                             <MudCardActions>
                                 <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Save Question</MudButton>
                             </MudCardActions>

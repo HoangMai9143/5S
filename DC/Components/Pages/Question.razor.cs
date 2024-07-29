@@ -14,16 +14,16 @@ namespace DC.Components.Pages
   public partial class Question
   {
     private int activeIndex = 0;
-    private List<QuestionModel> questions = new List<QuestionModel>();
-    private QuestionModel currentQuestion = new QuestionModel();
-    private List<AnswerModel> currentAnswers = new List<AnswerModel>();
+    private bool isLoading = true;
+    private List<QuestionModel> questions = new();
+    private QuestionModel currentQuestion = new();
+    private List<AnswerModel> currentAnswers = [];
     private string _searchString = string.Empty;
     private AnswerType _selectedAnswerType = AnswerType.SingleChoice;
     private System.Timers.Timer _questionDebounceTimer;
     private const int DebounceDelay = 300; // milliseconds
 
     private int selectedAnswerIndex = -1;
-    private bool isLoading = true;
 
 
     // Filter questions
@@ -282,30 +282,36 @@ namespace DC.Components.Pages
 
     private async Task CloneQuestion(QuestionModel questionToClone)
     {
-      var clonedQuestion = new QuestionModel
+      try
       {
-        QuestionContext = questionToClone.QuestionContext,
-        AnswerType = questionToClone.AnswerType
-      };
-
-      await appDbContext.Set<QuestionModel>().AddAsync(clonedQuestion);
-      await appDbContext.SaveChangesAsync();
-
-      foreach (var answer in questionToClone.Answers)
-      {
-        var clonedAnswer = new AnswerModel
+        var clonedQuestion = new QuestionModel
         {
-          AnswerText = answer.AnswerText,
-          Points = answer.Points,
-          QuestionId = clonedQuestion.Id
+          QuestionContext = questionToClone.QuestionContext,
+          AnswerType = questionToClone.AnswerType
         };
-        await appDbContext.Set<AnswerModel>().AddAsync(clonedAnswer);
+
+        await appDbContext.Set<QuestionModel>().AddAsync(clonedQuestion);
+        await appDbContext.SaveChangesAsync();
+
+        foreach (var answer in questionToClone.Answers)
+        {
+          var clonedAnswer = new AnswerModel
+          {
+            AnswerText = answer.AnswerText,
+            Points = answer.Points,
+            QuestionId = clonedQuestion.Id
+          };
+          await appDbContext.Set<AnswerModel>().AddAsync(clonedAnswer);
+        }
+
+        await appDbContext.SaveChangesAsync();
+        await LoadQuestions();
+        sb.Add($"Question {questionToClone.Id} cloned successfully with ID: {clonedQuestion.Id}", Severity.Success);
       }
-
-      await appDbContext.SaveChangesAsync();
-      await LoadQuestions();
-      sb.Add($"Question {questionToClone.Id} cloned successfully with ID: {clonedQuestion.Id}", Severity.Success);
+      catch (Exception ex)
+      {
+        sb.Add($"Error cloning question: {ex.Message}", Severity.Error);
+      }
     }
-
   }
 }

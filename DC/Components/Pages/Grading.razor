@@ -1,5 +1,26 @@
 ﻿@page "/grading"
 
+@inject AppDbContext appDbContext
+@inject IDialogService dialogService
+@inject ISnackbar sb
+@inject IServiceProvider serviceProvider
+
+@rendermode InteractiveServer
+
 <PageTitle>Grading</PageTitle>
 
-<p>Currently Cooking</p>
+<AuthorizeView>
+  <NotAuthorized>
+    <MudText Typo="Typo.h6">You are not authorized to view this page.</MudText>
+  </NotAuthorized>
+  <Authorized>
+    @if (isLoading)
+    {
+      <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+    }
+    else
+    {
+
+    }
+  </Authorized>
+</AuthorizeView>

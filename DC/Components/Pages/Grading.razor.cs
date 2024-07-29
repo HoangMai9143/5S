@@ -69,6 +69,11 @@ namespace DC.Components.Pages
 
     private void HandleTabChanged(int index)
     {
+      if (index == 1 && selectedSurvey == null)
+      {
+        sb.Add("Please select a survey first", Severity.Error);
+        return;
+      }
       activeIndex = index;
     }
 

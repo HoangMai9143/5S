@@ -63,21 +63,31 @@
         <MudTabPanel Text="Staff by Department" Icon="@Icons.Material.Filled.People">
           @if (selectedSurvey != null)
           {
-            <MudText Typo="Typo.h6" Class="mb-4">Selected Survey: @selectedSurvey.Title</MudText>
+            <MudText Typo="Typo.h6" Class="mb-4">Current Survey: @selectedSurvey.Title</MudText>
           }
-          @foreach (var department in staffByDepartment.Keys)
-          {
-            <MudExpansionPanel Text="@department">
-              <MudList T="@StaffModel">
-                @foreach (var staff in staffByDepartment[department])
-                {
-                  <MudListItem T="@StaffModel">
-                    <MudText>@staff.FullName</MudText>
-                  </MudListItem>
-                }
-              </MudList>
-            </MudExpansionPanel>
-          }
+          <MudExpansionPanels Elevation="4" MultiExpansion="true">
+
+            @foreach (var department in staffByDepartment.Keys)
+            {
+              <MudExpansionPanel Text="@department">
+                <MudList T="@StaffModel">
+                  @foreach (var staff in staffByDepartment[department])
+                  {
+                    <MudList Elevation="1" Outlined="true">
+                      <MudListItem T="@StaffModel">
+                        <div class="d-flex">
+                          <MudText>@staff.FullName</MudText>
+                          <MudBadge Content="3" Color="Color.Primary" Overlap="true" Class="d-flex ml-auto">
+                            <MudIcon Icon="@Icons.Material.Filled.Email" Color="Color.Default" />
+                          </MudBadge>
+                        </div>
+                      </MudListItem>
+                    </MudList>
+                  }
+                </MudList>
+              </MudExpansionPanel>
+            }
+          </MudExpansionPanels>
         </MudTabPanel>
       </MudTabs>
     }

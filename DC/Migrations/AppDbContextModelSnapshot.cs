@@ -55,6 +55,48 @@ namespace DC.Migrations
                     b.ToTable("Answer");
                 });
 
+            modelBuilder.Entity("DC.Models.QuestionAnswerModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AnswerId")
+                        .HasColumnType("int")
+                        .HasColumnName("answer_id");
+
+                    b.Property<bool>("IsSelected")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_selected");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int")
+                        .HasColumnName("question_id");
+
+                    b.Property<int>("StaffId")
+                        .HasColumnType("int")
+                        .HasColumnName("staff_id");
+
+                    b.Property<int>("SurveyId")
+                        .HasColumnType("int")
+                        .HasColumnName("survey_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnswerId");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("StaffId");
+
+                    b.HasIndex("SurveyId");
+
+                    b.ToTable("QuestionAnswer");
+                });
+
             modelBuilder.Entity("DC.Models.QuestionModel", b =>
                 {
                     b.Property<int>("Id")
@@ -94,10 +136,6 @@ namespace DC.Migrations
                     b.Property<int>("QuestionId")
                         .HasColumnType("int")
                         .HasColumnName("question_id");
-
-                    b.Property<double>("Score")
-                        .HasColumnType("float")
-                        .HasColumnName("score");
 
                     b.Property<int>("StaffId")
                         .HasColumnType("int")
@@ -283,6 +321,38 @@ namespace DC.Migrations
                         .IsRequired();
 
                     b.Navigation("Question");
+                });
+
+            modelBuilder.Entity("DC.Models.QuestionAnswerModel", b =>
+                {
+                    b.HasOne("DC.Models.AnswerModel", "Answer")
+                        .WithMany()
+                        .HasForeignKey("AnswerId")
+                        .IsRequired();
+
+                    b.HasOne("DC.Models.QuestionModel", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .IsRequired();
+
+                    b.HasOne("DC.Models.StaffModel", "Staff")
+                        .WithMany()
+                        .HasForeignKey("StaffId")
+                        .IsRequired();
+
+                    b.HasOne("DC.Models.SurveyModel", "Survey")
+                        .WithMany()
+                        .HasForeignKey("SurveyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Answer");
+
+                    b.Navigation("Question");
+
+                    b.Navigation("Staff");
+
+                    b.Navigation("Survey");
                 });
 
             modelBuilder.Entity("DC.Models.ResultModel", b =>

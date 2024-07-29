@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DC.Migrations
 {
     /// <inheritdoc />
-    public partial class AppDbMigration : Migration
+    public partial class AppDbMigrationFixed : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -102,9 +102,8 @@ namespace DC.Migrations
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     survey_id = table.Column<int>(type: "int", nullable: false),
-                    staff_id = table.Column<int>(type: "int", nullable: false),
                     question_id = table.Column<int>(type: "int", nullable: false),
-                    score = table.Column<double>(type: "float", nullable: false),
+                    staff_id = table.Column<int>(type: "int", nullable: false),
                     note = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
@@ -184,10 +183,68 @@ namespace DC.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "QuestionAnswer",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    survey_id = table.Column<int>(type: "int", nullable: false),
+                    question_id = table.Column<int>(type: "int", nullable: false),
+                    staff_id = table.Column<int>(type: "int", nullable: false),
+                    answer_id = table.Column<int>(type: "int", nullable: false),
+                    is_selected = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuestionAnswer", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_QuestionAnswer_Answer_answer_id",
+                        column: x => x.answer_id,
+                        principalTable: "Answer",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_QuestionAnswer_Question_question_id",
+                        column: x => x.question_id,
+                        principalTable: "Question",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_QuestionAnswer_Staff_staff_id",
+                        column: x => x.staff_id,
+                        principalTable: "Staff",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_QuestionAnswer_Survey_survey_id",
+                        column: x => x.survey_id,
+                        principalTable: "Survey",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Answer_question_id",
                 table: "Answer",
                 column: "question_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuestionAnswer_answer_id",
+                table: "QuestionAnswer",
+                column: "answer_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuestionAnswer_question_id",
+                table: "QuestionAnswer",
+                column: "question_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuestionAnswer_staff_id",
+                table: "QuestionAnswer",
+                column: "staff_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuestionAnswer_survey_id",
+                table: "QuestionAnswer",
+                column: "survey_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Result_question_id",
@@ -229,7 +286,7 @@ namespace DC.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Answer");
+                name: "QuestionAnswer");
 
             migrationBuilder.DropTable(
                 name: "Result");
@@ -244,13 +301,16 @@ namespace DC.Migrations
                 name: "UserAccount");
 
             migrationBuilder.DropTable(
-                name: "Question");
+                name: "Answer");
 
             migrationBuilder.DropTable(
                 name: "Staff");
 
             migrationBuilder.DropTable(
                 name: "Survey");
+
+            migrationBuilder.DropTable(
+                name: "Question");
         }
     }
 }

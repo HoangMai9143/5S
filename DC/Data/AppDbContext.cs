@@ -7,6 +7,7 @@ namespace DC.Data
   {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
     public DbSet<AnswerModel> AnswerModel { get; set; }
+    public DbSet<QuestionAnswerModel> QuestionAnswerModel { get; set; }
     public DbSet<QuestionModel> QuestionModel { get; set; }
     public DbSet<ResultModel> ResultModel { get; set; }
     public DbSet<StaffModel> StaffModel { get; set; }

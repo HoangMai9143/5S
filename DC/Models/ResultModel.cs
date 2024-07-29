@@ -14,15 +14,12 @@ namespace DC.Models
     [Column("survey_id")]
     public int SurveyId { get; set; }
 
-    [Column("staff_id")]
-    public int StaffId { get; set; }
-
     [Column("question_id")]
     public int QuestionId { get; set; }
 
-    [Column("score")]
-    public double Score { get; set; } // Store score in the scale of 100
-
+    [Column("staff_id")]
+    public int StaffId { get; set; }
+    
     [Column("note")]
     public string? Note { get; set; }
 

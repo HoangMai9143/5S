@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DC.Components.Dialog;
 using DC.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 
@@ -99,7 +100,7 @@ namespace DC.Components.Pages
       };
 
       var options = new DialogOptions { FullScreen = true, CloseButton = true };
-      var dialog = await dialogService.ShowAsync<StaffGradingDialog>("Grade Staff", parameters, options);
+      var dialog = await dialogService.ShowAsync<GradingDialog>("Grade Staff", parameters, options);
       var result = await dialog.Result;
 
       if (!result.Canceled)
@@ -111,11 +112,38 @@ namespace DC.Components.Pages
 
     private async Task SaveGradingResult(List<QuestionAnswerModel> gradingResult)
     {
-      if (gradingResult != null)
+      if (gradingResult != null && gradingResult.Any())
       {
-        appDbContext.QuestionAnswerModel.AddRange(gradingResult);
-        await appDbContext.SaveChangesAsync();
-        sb.Add("Grading saved successfully", Severity.Success);
+        try
+        {
+          appDbContext.QuestionAnswerModel.AddRange(gradingResult);
+          await appDbContext.SaveChangesAsync();
+          sb.Add("Grading saved successfully", Severity.Success);
+        }
+        catch (DbUpdateException ex)
+        {
+          // Log the full exception details
+          Console.WriteLine(ex.ToString());
+
+          // Show a user-friendly error message
+          sb.Add("Error saving grading results. Please try again or contact support.", Severity.Error);
+
+          // Optionally, you can add more detailed error handling here
+          if (ex.InnerException is SqlException sqlEx)
+          {
+            switch (sqlEx.Number)
+            {
+              case 547: // Foreign key constraint violation
+                sb.Add("One or more answers are no longer valid. Please refresh and try again.", Severity.Error);
+                break;
+                // Add other specific SQL error cases as needed
+            }
+          }
+        }
+      }
+      else
+      {
+        sb.Add("No grading results to save", Severity.Warning);
       }
     }
   }

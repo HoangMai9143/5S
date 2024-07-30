@@ -124,11 +124,17 @@ namespace DC.Components.Pages
       {
         var dialogResult = (dynamic)result.Data;
         await SaveGradingResult(dialogResult.GradingResult, dialogResult.Changes);
+        await CalculateAndSaveScores(selectedSurvey.Id);
       }
     }
 
     private async Task SaveGradingResult(List<QuestionAnswerModel> gradingResult, bool changes)
     {
+      if (!changes)
+      {
+        sb.Add("No changes were made", Severity.Info);
+        return;
+      }
       if (changes)
       {
         if (gradingResult != null && gradingResult.Any())
@@ -141,7 +147,8 @@ namespace DC.Components.Pages
           await appDbContext.SaveChangesAsync();
           sb.Add("Changes saved successfully", Severity.Success);
 
-          await CalculateAndSaveScores(selectedSurvey.Id);
+          await LoadStaff(); // Refresh staffScores after saving
+          StateHasChanged(); // Update the UI to reflect the changes
         }
         catch (DbUpdateException ex)
         {
@@ -175,6 +182,7 @@ namespace DC.Components.Pages
         sb.Add("No changes were made", Severity.Info);
       }
     }
+
     private async Task CalculateAndSaveScores(int surveyId)
     {
       try

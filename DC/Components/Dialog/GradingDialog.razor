@@ -1,6 +1,12 @@
 @using Microsoft.EntityFrameworkCore
 @inject AppDbContext appDbContext
 
+<style>
+  .horizontal-stack {
+    display: flex;
+    flex-wrap: wrap;
+  }
+</style>
 
 <MudDialog>
   <DialogContent>
@@ -28,12 +34,14 @@
                 }
             else if (question.Question.AnswerType == AnswerType.MultipleChoice)
             {
-              @foreach (var answer in question.Question.Answers)
-              {
-                <MudCheckBox T="bool" @bind-Value="@selectedMultipleAnswers[question.QuestionId][answer.Id]" CheckedChanged="@((bool newValue) => OnMultipleChoiceChanged(question.QuestionId, answer.Id, newValue))">
-                  @answer.AnswerText
-                </MudCheckBox>
-              }
+              <div class="horizontal-stack">
+                @foreach (var answer in question.Question.Answers)
+                {
+                  <MudCheckBox T="bool" @bind-Value="@selectedMultipleAnswers[question.QuestionId][answer.Id]" CheckedChanged="@((bool newValue) => OnMultipleChoiceChanged(question.QuestionId, answer.Id, newValue))">
+                    @answer.AnswerText
+                  </MudCheckBox>
+                }
+              </div>
             }
           </MudCardContent>
         </MudCard>

@@ -225,12 +225,10 @@ namespace DC.Components.Pages
         }
 
         await appDbContext.SaveChangesAsync();
-        sb.Add("Scores calculated and saved successfully", Severity.Success);
 
         foreach (var kvp in staffScores)
         {
           var staff = await appDbContext.StaffModel.FindAsync(kvp.Key);
-          sb.Add($"Staff: {staff?.FullName ?? "Unknown"}, Score: {kvp.Value:F2}%", Severity.Info);
         }
       }
       catch (DbUpdateException ex)

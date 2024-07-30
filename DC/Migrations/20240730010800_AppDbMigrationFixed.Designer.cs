@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DC.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240729084915_AppDbMigrationFixed")]
+    [Migration("20240730010800_AppDbMigrationFixed")]
     partial class AppDbMigrationFixed
     {
         /// <inheritdoc />
@@ -38,10 +38,6 @@ namespace DC.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)")
                         .HasColumnName("answer_text");
-
-                    b.Property<bool>("IsSelected")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_selected");
 
                     b.Property<int>("Points")
                         .HasColumnType("int")
@@ -70,10 +66,6 @@ namespace DC.Migrations
                     b.Property<int>("AnswerId")
                         .HasColumnType("int")
                         .HasColumnName("answer_id");
-
-                    b.Property<bool>("IsSelected")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_selected");
 
                     b.Property<int>("QuestionId")
                         .HasColumnType("int")

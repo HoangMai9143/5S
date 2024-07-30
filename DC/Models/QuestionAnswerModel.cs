@@ -24,9 +24,6 @@ namespace DC.Models
         [Column("answer_id")]
         public int AnswerId { get; set; }
 
-        [Column("is_selected")]
-        public bool IsSelected { get; set; }
-
         [ForeignKey("SurveyId")]
         public SurveyModel? Survey { get; set; }
 
@@ -40,6 +37,6 @@ namespace DC.Models
 
         [ForeignKey("AnswerId")]
         [DeleteBehavior(DeleteBehavior.ClientSetNull)]
-        public AnswerModel? Answer { get; set;}
+        public AnswerModel? Answer { get; set; }
     }
 }

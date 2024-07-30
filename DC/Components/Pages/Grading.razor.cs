@@ -43,6 +43,7 @@ namespace DC.Components.Pages
         StateHasChanged();
       }
     }
+
     private async Task LoadSurveys()
     {
       try
@@ -107,45 +108,44 @@ namespace DC.Components.Pages
 
       if (!result.Canceled)
       {
-        // Handle the grading result, e.g., save to database
-        await SaveGradingResult(result.Data as List<QuestionAnswerModel>);
+        var dialogResult = (dynamic)result.Data;
+        await SaveGradingResult(dialogResult.GradingResult, dialogResult.Changes);
       }
     }
 
-    private async Task SaveGradingResult(List<QuestionAnswerModel> gradingResult)
+    private async Task SaveGradingResult(List<QuestionAnswerModel> gradingResult, bool changes)
     {
-      if (gradingResult != null && gradingResult.Any())
+      if (changes)
       {
-        try
+        if (gradingResult != null && gradingResult.Any())
         {
           appDbContext.QuestionAnswerModel.AddRange(gradingResult);
+        }
+
+        try
+        {
           await appDbContext.SaveChangesAsync();
-          sb.Add("Grading saved successfully", Severity.Success);
+          sb.Add("Changes saved successfully", Severity.Success);
         }
         catch (DbUpdateException ex)
         {
-          // Log the full exception details
           Console.WriteLine(ex.ToString());
+          sb.Add("Error saving changes. Please try again or contact support.", Severity.Error);
 
-          // Show a user-friendly error message
-          sb.Add("Error saving grading results. Please try again or contact support.", Severity.Error);
-
-          // Optionally, you can add more detailed error handling here
           if (ex.InnerException is SqlException sqlEx)
           {
             switch (sqlEx.Number)
             {
-              case 547: // Foreign key constraint violation
+              case 547:
                 sb.Add("One or more answers are no longer valid. Please refresh and try again.", Severity.Error);
                 break;
-                // Add other specific SQL error cases as needed
             }
           }
         }
       }
       else
       {
-        sb.Add("No grading results to save", Severity.Warning);
+        sb.Add("No changes were made", Severity.Info);
       }
     }
   }

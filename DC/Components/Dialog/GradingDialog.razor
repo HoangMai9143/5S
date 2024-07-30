@@ -1,45 +1,50 @@
 @using Microsoft.EntityFrameworkCore
 @inject AppDbContext appDbContext
 
+@rendermode InteractiveServer
+
 <MudDialog>
-  <DialogContent>
-    <MudText Typo="Typo.h5" Class="mb-4">Grading @Staff.FullName for @Survey.Title</MudText>
-    @if (isLoading)
-    {
-      <MudProgressCircular Color="Color.Default" Indeterminate="true" />
-    }
-    else
-    {
-      @foreach (var question in surveyQuestions)
-      {
-        <MudCard Elevation="3" Class="mb-4">
-          <MudCardContent>
-            <MudText Typo="Typo.h6">@question.Question.QuestionContext</MudText>
-            @if (question.Question.AnswerType == AnswerType.SingleChoice)
+    <DialogContent>
+        <MudText Typo="Typo.h5" Class="mb-4">Grading @Staff.FullName for @Survey.Title</MudText>
+
+        @if (isLoading)
+        {
+            <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+        }
+        else
+        {
+            @foreach (var question in surveyQuestions)
             {
-              <MudRadioGroup T="int" @bind-Value="@selectedAnswers[question.QuestionId]">
-                @foreach (var answer in question.Question.Answers)
-                {
-                  <MudRadio T="int" Option="@answer.Id" Color="Color.Primary">@answer.AnswerText</MudRadio>
-                }
-              </MudRadioGroup>
+                <MudCard Elevation="3" Class="mb-4">
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6">@question.Question.QuestionContext</MudText>
+                        @if (question.Question.AnswerType == AnswerType.SingleChoice)
+                        {
+                            <MudRadioGroup T="int" @bind-SelectedValue="@selectedAnswers[question.QuestionId]"> 
+                                @foreach (var answer in question.Question.Answers)
+                                {
+                                    <MudRadio T="int" Option="@answer.Id" Color="Color.Primary">@answer.AnswerText</MudRadio>
+                                }
+                            </MudRadioGroup>
+                        }
+                        else if (question.Question.AnswerType == AnswerType.MultipleChoice)
+                        {
+                            @foreach (var answer in question.Question.Answers)
+                            {
+                                <MudCheckBox T="bool" 
+                                            Checked="@selectedMultipleAnswers[question.QuestionId][answer.Id]" 
+                                            CheckedChanged="@((bool newValue) => OnMultipleChoiceChanged(question.QuestionId, answer.Id, newValue))">
+                                    @answer.AnswerText
+                                </MudCheckBox>
+                            }
+                        }
+                    </MudCardContent>
+                </MudCard>
             }
-            else if (question.Question.AnswerType == AnswerType.MultipleChoice)
-            {
-              @foreach (var answer in question.Question.Answers)
-              {
-                <MudCheckBox T="bool" Checked="@selectedMultipleAnswers[question.QuestionId][answer.Id]" CheckedChanged="@((bool newValue) => OnMultipleChoiceChanged(question.QuestionId, answer.Id, newValue))">
-                  @answer.AnswerText
-                </MudCheckBox>
-              }
-            }
-          </MudCardContent>
-        </MudCard>
-      }
-    }
-  </DialogContent>
-  <DialogActions>
-    <MudButton OnClick="Cancel">Cancel</MudButton>
-    <MudButton Color="Color.Primary" OnClick="Submit">Submit</MudButton>
-  </DialogActions>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Submit</MudButton>
+    </DialogActions>
 </MudDialog>

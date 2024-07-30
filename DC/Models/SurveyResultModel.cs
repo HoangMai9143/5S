@@ -18,7 +18,7 @@ namespace DC.Models
     public int StaffId { get; set; }
 
     [Column("final_grade")]
-    public int FinalGrade { get; set; }
+    public double FinalGrade { get; set; }
 
     [Column("note")]
     public string? Note { get; set; }

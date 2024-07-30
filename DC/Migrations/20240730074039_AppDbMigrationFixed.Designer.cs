@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DC.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240730010800_AppDbMigrationFixed")]
+    [Migration("20240730074039_AppDbMigrationFixed")]
     partial class AppDbMigrationFixed
     {
         /// <inheritdoc />
@@ -29,7 +29,8 @@ namespace DC.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
@@ -249,8 +250,8 @@ namespace DC.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("FinalGrade")
-                        .HasColumnType("int")
+                    b.Property<double>("FinalGrade")
+                        .HasColumnType("float")
                         .HasColumnName("final_grade");
 
                     b.Property<string>("Note")

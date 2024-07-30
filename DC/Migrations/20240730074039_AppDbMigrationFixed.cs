@@ -77,7 +77,7 @@ namespace DC.Migrations
                 name: "Answer",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     answer_text = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     points = table.Column<int>(type: "int", nullable: false),
@@ -85,7 +85,7 @@ namespace DC.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Answer", x => x.Id);
+                    table.PrimaryKey("PK_Answer", x => x.id);
                     table.ForeignKey(
                         name: "FK_Answer_Question_question_id",
                         column: x => x.question_id,
@@ -162,7 +162,7 @@ namespace DC.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     survey_id = table.Column<int>(type: "int", nullable: false),
                     staff_id = table.Column<int>(type: "int", nullable: false),
-                    final_grade = table.Column<int>(type: "int", nullable: false),
+                    final_grade = table.Column<double>(type: "float", nullable: false),
                     note = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
@@ -200,7 +200,7 @@ namespace DC.Migrations
                         name: "FK_QuestionAnswer_Answer_answer_id",
                         column: x => x.answer_id,
                         principalTable: "Answer",
-                        principalColumn: "Id");
+                        principalColumn: "id");
                     table.ForeignKey(
                         name: "FK_QuestionAnswer_Question_question_id",
                         column: x => x.question_id,

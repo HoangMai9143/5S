@@ -230,18 +230,26 @@ namespace DC.Components.Pages
 
     private async Task SearchQuestions(string searchTerm)
     {
-      if (string.IsNullOrWhiteSpace(searchTerm))
+      try
       {
-        await LoadQuestions();
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+          await LoadQuestions();
+        }
+        else
+        {
+          searchTerm = searchTerm.ToLower();
+          questions = await appDbContext.Set<QuestionModel>()
+              .Where(q => q.Id.ToString().Contains(searchTerm) ||
+                          q.QuestionContext.ToLower().Contains(searchTerm))
+              .OrderByDescending(q => q.Id)
+              .ToListAsync();
+        }
       }
-      else
+      catch (Exception ex)
       {
-        searchTerm = searchTerm.ToLower();
-        questions = await appDbContext.Set<QuestionModel>()
-            .Where(q => q.Id.ToString().Contains(searchTerm) ||
-                        q.QuestionContext.ToLower().Contains(searchTerm))
-            .OrderByDescending(q => q.Id)
-            .ToListAsync();
+        Console.WriteLine($"Error searching questions: {ex.Message}");
+        sb.Add("An error occurred while searching questions. Please try again later.", Severity.Error);
       }
     }
 

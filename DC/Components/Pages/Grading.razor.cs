@@ -17,6 +17,7 @@ namespace DC.Components.Pages
     private List<SurveyModel> surveys = new List<SurveyModel>();
     private SurveyModel selectedSurvey;
     private Dictionary<string, List<StaffModel>> staffByDepartment = new Dictionary<string, List<StaffModel>>();
+    private Dictionary<int, double> staffScores = new Dictionary<int, double>();
     private string _searchString = "";
     private Func<SurveyModel, bool> _surveyQuickFilter => x =>
     {
@@ -31,7 +32,6 @@ namespace DC.Components.Pages
 
       return false;
     };
-
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -65,6 +65,20 @@ namespace DC.Components.Pages
         var allStaff = await appDbContext.StaffModel.Where(s => s.IsActive).ToListAsync();
         staffByDepartment = allStaff.GroupBy(s => s.Department ?? "Unassigned")
                                     .ToDictionary(g => g.Key, g => g.ToList());
+
+        if (selectedSurvey != null)
+        {
+          // Load scores
+          var scores = await appDbContext.SurveyResultModel
+              .Where(sr => sr.SurveyId == selectedSurvey.Id)
+              .ToListAsync();
+
+          staffScores = scores.ToDictionary(sr => sr.StaffId, sr => sr.FinalGrade);
+        }
+        else
+        {
+          staffScores.Clear();
+        }
       }
       catch (Exception ex)
       {
@@ -126,6 +140,8 @@ namespace DC.Components.Pages
         {
           await appDbContext.SaveChangesAsync();
           sb.Add("Changes saved successfully", Severity.Success);
+
+          await CalculateAndSaveScores(selectedSurvey.Id);
         }
         catch (DbUpdateException ex)
         {
@@ -157,6 +173,86 @@ namespace DC.Components.Pages
       else
       {
         sb.Add("No changes were made", Severity.Info);
+      }
+    }
+    private async Task CalculateAndSaveScores(int surveyId)
+    {
+      try
+      {
+        var surveyQuestions = await appDbContext.SurveyQuestionModel
+            .Where(sq => sq.SurveyId == surveyId)
+            .Select(sq => sq.QuestionId)
+            .ToListAsync();
+
+        var totalPossiblePoints = await appDbContext.AnswerModel
+            .Where(a => surveyQuestions.Contains(a.QuestionId))
+            .SumAsync(a => a.Points);
+
+        var staffAnswerGroups = await appDbContext.QuestionAnswerModel
+            .Where(qa => qa.SurveyId == surveyId && qa.Answer != null)
+            .Include(qa => qa.Answer)
+            .GroupBy(qa => qa.StaffId)
+            .ToListAsync();
+
+        var staffScores = new Dictionary<int, double>();
+
+        foreach (var staffGroup in staffAnswerGroups)
+        {
+          int staffId = staffGroup.Key;
+          double totalPoints = staffGroup.Sum(qa => qa.Answer.Points);
+
+          double scorePercentage = totalPossiblePoints > 0 ? (totalPoints / totalPossiblePoints) * 100 : 0;
+          staffScores[staffId] = scorePercentage;
+
+          var surveyResult = await appDbContext.SurveyResultModel
+              .FirstOrDefaultAsync(r => r.SurveyId == surveyId && r.StaffId == staffId)
+              ?? new SurveyResultModel
+              {
+                SurveyId = surveyId,
+                StaffId = staffId
+              };
+
+          surveyResult.FinalGrade = scorePercentage;
+          appDbContext.Update(surveyResult);
+        }
+
+        await appDbContext.SaveChangesAsync();
+        sb.Add("Scores calculated and saved successfully", Severity.Success);
+
+        foreach (var kvp in staffScores)
+        {
+          var staff = await appDbContext.StaffModel.FindAsync(kvp.Key);
+          sb.Add($"Staff: {staff?.FullName ?? "Unknown"}, Score: {kvp.Value:F2}%", Severity.Info);
+        }
+      }
+      catch (DbUpdateException ex)
+      {
+        if (ex.InnerException is SqlException sqlEx)
+        {
+          HandleSqlException(sqlEx);
+        }
+        else
+        {
+          sb.Add("Error saving changes. Please try again.", Severity.Error);
+        }
+      }
+      catch (Exception ex)
+      {
+        sb.Add($"An error occurred while calculating scores: {ex.Message}", Severity.Error);
+      }
+    }
+
+
+    private void HandleSqlException(SqlException sqlEx)
+    {
+      switch (sqlEx.Number)
+      {
+        case 547: // Foreign key constraint violation
+          sb.Add("One or more answers are no longer valid. Please refresh and try again.", Severity.Error);
+          break;
+        default:
+          sb.Add($"Database error occurred: {sqlEx.Message}", Severity.Error);
+          break;
       }
     }
   }

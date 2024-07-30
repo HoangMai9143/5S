@@ -245,10 +245,7 @@ namespace DC.Components.Pages
     }
     private async Task OpenEditSurveyDialog(SurveyModel surveyToEdit)
     {
-      var parameters = new DialogParameters
-    {
-        { "Survey", surveyToEdit }
-    };
+      var parameters = new DialogParameters { { "Survey", surveyToEdit } };
 
       var options = new DialogOptions()
       {
@@ -266,8 +263,10 @@ namespace DC.Components.Pages
       {
         await LoadSurveys();
         sb.Add($"Survey {surveyToEdit.Id} updated successfully.", Severity.Success);
+        StateHasChanged();
       }
     }
+
     private async Task DeleteSurvey(SurveyModel surveyToDelete)
     {
       var parameters = new DialogParameters
@@ -307,6 +306,7 @@ namespace DC.Components.Pages
     {
       var clonedSurvey = new SurveyModel
       {
+        Title = surveyToClone.Title,
         StartDate = surveyToClone.StartDate,
         EndDate = surveyToClone.EndDate,
         CreatedDate = DateTime.Now
@@ -331,6 +331,7 @@ namespace DC.Components.Pages
       await appDbContext.SaveChangesAsync();
       await LoadSurveys();
       sb.Add($"Survey {surveyToClone.Id} cloned successfully with ID: {clonedSurvey.Id}", Severity.Success);
+      OpenEditSurveyDialog(clonedSurvey);
     }
     private async Task OnSurveySearchInput(string value)
     {

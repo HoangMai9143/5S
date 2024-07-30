@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DC.Components.Dialog;
 using DC.Models;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
@@ -87,6 +88,35 @@ namespace DC.Components.Pages
       selectedSurvey = survey;
       activeIndex = 1; // Switch to the second tab
       StateHasChanged();
+    }
+
+    private async Task OpenStaffGradingDialog(StaffModel staff)
+    {
+      var parameters = new DialogParameters
+      {
+        ["Staff"] = staff,
+        ["Survey"] = selectedSurvey
+      };
+
+      var options = new DialogOptions { FullScreen = true, CloseButton = true };
+      var dialog = await dialogService.ShowAsync<StaffGradingDialog>("Grade Staff", parameters, options);
+      var result = await dialog.Result;
+
+      if (!result.Canceled)
+      {
+        // Handle the grading result, e.g., save to database
+        await SaveGradingResult(result.Data as List<QuestionAnswerModel>);
+      }
+    }
+
+    private async Task SaveGradingResult(List<QuestionAnswerModel> gradingResult)
+    {
+      if (gradingResult != null)
+      {
+        appDbContext.QuestionAnswerModel.AddRange(gradingResult);
+        await appDbContext.SaveChangesAsync();
+        sb.Add("Grading saved successfully", Severity.Success);
+      }
     }
   }
 }

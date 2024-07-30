@@ -73,13 +73,14 @@
                 <MudList T="@StaffModel">
                   @foreach (var staff in staffByDepartment[department])
                   {
-                    <MudList Elevation="1" Outlined="true">
-                      <MudListItem T="@StaffModel">
-                        <div class="d-flex">
-                          <MudText>@staff.FullName</MudText>
-                        </div>
-                      </MudListItem>
-                    </MudList>
+                    <MudListItem T="@StaffModel">
+                      <div class="d-flex justify-space-between align-center">
+                        <MudText>@staff.FullName</MudText>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenStaffGradingDialog(staff))">
+                          Grade
+                        </MudButton>
+                      </div>
+                    </MudListItem>
                   }
                 </MudList>
               </MudExpansionPanel>

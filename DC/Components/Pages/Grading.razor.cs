@@ -130,7 +130,6 @@ namespace DC.Components.Pages
         catch (DbUpdateException ex)
         {
           Console.WriteLine(ex.ToString());
-          sb.Add("Error saving changes. Please try again or contact support.", Severity.Error);
 
           if (ex.InnerException is SqlException sqlEx)
           {
@@ -139,8 +138,20 @@ namespace DC.Components.Pages
               case 547:
                 sb.Add("One or more answers are no longer valid. Please refresh and try again.", Severity.Error);
                 break;
+              default:
+                sb.Add($"Database error occurred: {sqlEx.Message}", Severity.Error);
+                break;
             }
           }
+          else
+          {
+            sb.Add("Error saving changes. Please try again.", Severity.Error);
+          }
+        }
+        catch (Exception ex)
+        {
+          Console.WriteLine(ex.ToString());
+          sb.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
         }
       }
       else

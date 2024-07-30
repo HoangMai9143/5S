@@ -26,7 +26,15 @@ namespace DC.Components.Dialog
       existingAnswers = await appDbContext.QuestionAnswerModel
           .Where(qa => qa.StaffId == Staff.Id && qa.SurveyId == Survey.Id)
           .ToListAsync();
+
       await LoadSurveyQuestions();
+
+      foreach (var question in surveyQuestions)
+      {
+        var existingAnswer = existingAnswers.FirstOrDefault(a => a.QuestionId == question.QuestionId);
+        selectedAnswers[question.QuestionId] = existingAnswer?.AnswerId ?? 0;
+      }
+
       isLoading = false;
     }
 
@@ -63,79 +71,104 @@ namespace DC.Components.Dialog
 
       foreach (var sq in surveyQuestions)
       {
+        var questionExistingAnswers = existingAnswers.Where(a => a.QuestionId == sq.QuestionId).ToList();
+
         if (sq.Question.AnswerType == AnswerType.SingleChoice)
         {
-          if (selectedAnswers.TryGetValue(sq.QuestionId, out int answerId))
-          {
-            var existingAnswer = existingAnswers.FirstOrDefault(a => a.QuestionId == sq.QuestionId);
-            if (existingAnswer != null)
-            {
-              if (existingAnswer.AnswerId != answerId)
-              {
-                existingAnswer.AnswerId = answerId;
-                appDbContext.QuestionAnswerModel.Update(existingAnswer);
-                changes = true;
-              }
-            }
-            else if (answerId != 0)
-            {
-              gradingResult.Add(new QuestionAnswerModel
-              {
-                SurveyId = Survey.Id,
-                QuestionId = sq.QuestionId,
-                StaffId = Staff.Id,
-                AnswerId = answerId
-              });
-              changes = true;
-            }
-          }
-          else
-          {
-            var existingAnswer = existingAnswers.FirstOrDefault(a => a.QuestionId == sq.QuestionId);
-            if (existingAnswer != null)
-            {
-              appDbContext.QuestionAnswerModel.Remove(existingAnswer);
-              changes = true;
-            }
-          }
+          changes |= HandleSingleChoiceQuestion(sq, questionExistingAnswers, gradingResult);
         }
         else if (sq.Question.AnswerType == AnswerType.MultipleChoice)
         {
-          foreach (var answer in sq.Question.Answers)
-          {
-            var existingAnswer = existingAnswers.FirstOrDefault(a => a.QuestionId == sq.QuestionId && a.AnswerId == answer.Id);
-            if (selectedMultipleAnswers[sq.QuestionId][answer.Id])
-            {
-              if (existingAnswer == null)
-              {
-                gradingResult.Add(new QuestionAnswerModel
-                {
-                  SurveyId = Survey.Id,
-                  QuestionId = sq.QuestionId,
-                  StaffId = Staff.Id,
-                  AnswerId = answer.Id
-                });
-                changes = true;
-              }
-            }
-            else
-            {
-              if (existingAnswer != null)
-              {
-                appDbContext.QuestionAnswerModel.Remove(existingAnswer);
-                changes = true;
-              }
-            }
-          }
+          changes |= HandleMultipleChoiceQuestion(sq, questionExistingAnswers, gradingResult);
         }
+      }
+
+      if (changes)
+      {
+        await appDbContext.SaveChangesAsync();
       }
 
       MudDialog.Close(DialogResult.Ok(new { GradingResult = gradingResult, Changes = changes }));
     }
 
+    private bool HandleSingleChoiceQuestion(SurveyQuestionModel sq, List<QuestionAnswerModel> questionExistingAnswers, List<QuestionAnswerModel> gradingResult)
+    {
+      bool changed = false;
+
+      if (selectedAnswers.TryGetValue(sq.QuestionId, out int answerId) && answerId != 0)
+      {
+        // Remove all existing answers for this question
+        foreach (var existingAnswer in questionExistingAnswers)
+        {
+          appDbContext.QuestionAnswerModel.Remove(existingAnswer);
+        }
+
+        // Add the new answer
+        gradingResult.Add(new QuestionAnswerModel
+        {
+          SurveyId = Survey.Id,
+          QuestionId = sq.QuestionId,
+          StaffId = Staff.Id,
+          AnswerId = answerId
+        });
+
+        changed = true;
+      }
+      else if (questionExistingAnswers.Any())
+      {
+        // If no answer is selected but there were existing answers, remove them
+        foreach (var existingAnswer in questionExistingAnswers)
+        {
+          appDbContext.QuestionAnswerModel.Remove(existingAnswer);
+        }
+        changed = true;
+      }
+
+      return changed;
+    }
+
+    private bool HandleMultipleChoiceQuestion(SurveyQuestionModel sq, List<QuestionAnswerModel> questionExistingAnswers, List<QuestionAnswerModel> gradingResult)
+    {
+      bool changed = false;
+
+      foreach (var answer in sq.Question.Answers)
+      {
+        var existingAnswer = questionExistingAnswers.FirstOrDefault(a => a.AnswerId == answer.Id);
+        if (selectedMultipleAnswers[sq.QuestionId][answer.Id])
+        {
+          if (existingAnswer == null)
+          {
+            gradingResult.Add(new QuestionAnswerModel
+            {
+              SurveyId = Survey.Id,
+              QuestionId = sq.QuestionId,
+              StaffId = Staff.Id,
+              AnswerId = answer.Id
+            });
+            changed = true;
+          }
+        }
+        else
+        {
+          if (existingAnswer != null)
+          {
+            appDbContext.QuestionAnswerModel.Remove(existingAnswer);
+            changed = true;
+          }
+        }
+      }
+
+      return changed;
+    }
+
     private void OnMultipleChoiceChanged(int questionId, int answerId, bool newValue)
     {
       selectedMultipleAnswers[questionId][answerId] = newValue;
+      StateHasChanged();
+    }
+    private void OnSingleChoiceChanged(int questionId, int newValue)
+    {
+      selectedAnswers[questionId] = newValue;
       StateHasChanged();
     }
   }

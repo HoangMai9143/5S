@@ -17,7 +17,7 @@ namespace DC.Components.Dialog
 
     private bool isLoading = true;
     private List<SurveyQuestionModel> surveyQuestions = new List<SurveyQuestionModel>();
-    private Dictionary<int, int> selectedAnswers = new Dictionary<int, int>();
+    private Dictionary<int, int> selectedAnswer = new Dictionary<int, int>();
     private Dictionary<int, Dictionary<int, bool>> selectedMultipleAnswers = new Dictionary<int, Dictionary<int, bool>>();
     private List<QuestionAnswerModel> existingAnswers = new List<QuestionAnswerModel>();
 
@@ -32,7 +32,7 @@ namespace DC.Components.Dialog
       foreach (var question in surveyQuestions)
       {
         var existingAnswer = existingAnswers.FirstOrDefault(a => a.QuestionId == question.QuestionId);
-        selectedAnswers[question.QuestionId] = existingAnswer?.AnswerId ?? 0;
+        selectedAnswer[question.QuestionId] = existingAnswer?.AnswerId ?? 0;
       }
 
       isLoading = false;
@@ -48,7 +48,7 @@ namespace DC.Components.Dialog
 
       foreach (var question in surveyQuestions)
       {
-        selectedAnswers[question.QuestionId] = existingAnswers.FirstOrDefault(a => a.QuestionId == question.QuestionId)?.AnswerId ?? 0;
+        selectedAnswer[question.QuestionId] = existingAnswers.FirstOrDefault(a => a.QuestionId == question.QuestionId)?.AnswerId ?? 0;
 
         selectedMultipleAnswers[question.QuestionId] = new Dictionary<int, bool>();
         foreach (var answer in question.Question.Answers)
@@ -95,7 +95,7 @@ namespace DC.Components.Dialog
     {
       bool changed = false;
 
-      if (selectedAnswers.TryGetValue(sq.QuestionId, out int answerId) && answerId != 0)
+      if (selectedAnswer.TryGetValue(sq.QuestionId, out int answerId) && answerId != 0)
       {
         // Remove all existing answers for this question
         foreach (var existingAnswer in questionExistingAnswers)
@@ -168,7 +168,7 @@ namespace DC.Components.Dialog
     }
     private void OnSingleChoiceChanged(int questionId, int newValue)
     {
-      selectedAnswers[questionId] = newValue;
+      selectedAnswer[questionId] = newValue;
       StateHasChanged();
     }
   }

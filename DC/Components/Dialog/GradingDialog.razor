@@ -1,7 +1,6 @@
 @using Microsoft.EntityFrameworkCore
 @inject AppDbContext appDbContext
 
-@rendermode InteractiveServer
 
 <MudDialog>
   <DialogContent>
@@ -20,7 +19,7 @@
             <MudText Typo="Typo.h6">@question.Question.QuestionContext</MudText>
             @if (question.Question.AnswerType == AnswerType.SingleChoice)
             {
-              <MudRadioGroup T="int" @bind-Value="@selectedAnswers[question.QuestionId]" SelectedValueChanged="@((int val) => OnSingleChoiceChanged(question.QuestionId, val))">
+              <MudRadioGroup T="int" @bind-Value="@selectedAnswer[question.QuestionId]" SelectedValueChanged="@((int val) => OnSingleChoiceChanged(question.QuestionId, val))">
                 @foreach (var answer in question.Question.Answers)
                 {
                   <MudRadio T="int" Option="@answer.Id" Color="Color.Primary">@answer.AnswerText</MudRadio>

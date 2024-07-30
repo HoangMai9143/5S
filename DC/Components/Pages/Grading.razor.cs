@@ -47,7 +47,9 @@ namespace DC.Components.Pages
     {
       try
       {
-        surveys = await appDbContext.SurveyModel.ToListAsync();
+        surveys = await appDbContext.SurveyModel
+            .OrderByDescending(s => s.Id)
+            .ToListAsync();
       }
       catch (Exception ex)
       {

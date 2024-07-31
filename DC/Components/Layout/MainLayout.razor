@@ -7,28 +7,28 @@
 <MudSnackbarProvider @rendermode="InteractiveServer" />
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-    <main>
-        <div class="top-row px-4">
-            <AuthorizeView>
-                <NotAuthorized>
-                    <a href="/login">Log in</a>
-                </NotAuthorized>
-                <Authorized>
-                    <a href="/logout"> Log out</a>
-                </Authorized>
-            </AuthorizeView>
-        </div>
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
+	<div class="sidebar">
+		<NavMenu />
+	</div>
+	<main>
+		<div class="top-row px-4">
+			<AuthorizeView>
+				<NotAuthorized>
+					<a href="/login">Log in</a>
+				</NotAuthorized>
+				<Authorized>
+					<a href="/logout"> Log out</a>
+				</Authorized>
+			</AuthorizeView>
+		</div>
+		<article class="content px-4">
+			@Body
+		</article>
+	</main>
 </div>
 
 <div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
+	An unhandled error has occurred.
+	<a href="" class="reload">Reload</a>
+	<a class="dismiss">🗙</a>
 </div>

@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components;
-using MudBlazor;
 using DC.Models;
+using Microsoft.AspNetCore.Components;
+using Microsoft.EntityFrameworkCore;
+using MudBlazor;
 
 namespace DC.Components.Dialog
 {
@@ -10,24 +13,106 @@ namespace DC.Components.Dialog
   {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
-    [Parameter] public QuestionModel Question { get; set; } = new QuestionModel();
+    [Parameter] public int QuestionId { get; set; }
 
-    private QuestionModel question = new QuestionModel();
+    private QuestionModel currentQuestion = new();
+    private List<AnswerModel> currentAnswers = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-      question = new QuestionModel
+      await LoadQuestion(QuestionId);
+    }
+    private async Task SaveQuestion()
+    {
+      try
       {
-        Id = Question.Id,
-        QuestionContext = Question.QuestionContext,
-      };
+        if (currentQuestion.Id == 0)
+        {
+          await appDbContext.Set<QuestionModel>().AddAsync(currentQuestion);
+        }
+        else
+        {
+          appDbContext.QuestionModel.Update(currentQuestion);
+        }
+
+        await appDbContext.SaveChangesAsync();
+
+        // Remove answers that are no longer in the list
+        var existingAnswers = await appDbContext.AnswerModel
+        .Where(a => a.QuestionId == currentQuestion.Id)
+        .ToListAsync();
+
+        foreach (var existingAnswer in existingAnswers)
+        {
+          if (!currentAnswers.Exists(a => a.Id == existingAnswer.Id))
+          {
+            appDbContext.AnswerModel.Remove(existingAnswer);
+          }
+        }
+
+        // Add or update current answers
+        foreach (var answer in currentAnswers)
+        {
+          answer.QuestionId = currentQuestion.Id;
+          if (answer.Id == 0)
+          {
+            await appDbContext.AnswerModel.AddAsync(answer);
+          }
+          else
+          {
+            appDbContext.AnswerModel.Update(answer);
+          }
+        }
+
+        await appDbContext.SaveChangesAsync();
+        sb.Add("Saved successfully.", Severity.Success);
+
+        // Close the dialog
+        MudDialog.Close(DialogResult.Ok(true));
+      }
+      catch (Exception ex)
+      {
+        sb.Add($"Error saving question: {ex.Message}", Severity.Error);
+      }
     }
 
-    private void Submit()
+    private void AddNewAnswer()
     {
-      MudDialog.Close(DialogResult.Ok(question));
+      currentAnswers.Add(new AnswerModel
+      {
+        QuestionId = currentQuestion.Id,
+        Points = 1
+      });
     }
 
-    private void Cancel() => MudDialog.Cancel();
+    private void RemoveAnswer(AnswerModel answer)
+    {
+      currentAnswers.Remove(answer);
+      if (answer.Id != 0)
+      {
+        appDbContext.AnswerModel.Remove(answer);
+      }
+    }
+
+    private async Task LoadQuestion(int questionId)
+    {
+      currentQuestion = await appDbContext.QuestionModel
+      .Include(q => q.Answers)
+      .FirstOrDefaultAsync(q => q.Id == questionId);
+
+      if (currentQuestion != null)
+      {
+        currentAnswers = currentQuestion.Answers.ToList();
+      }
+      else
+      {
+        currentQuestion = new QuestionModel();
+        currentAnswers = new List<AnswerModel>();
+      }
+    }
+    // Add comment: "Moved from Question.razor.cs"
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancel() => MudDialog.Cancel();
   }
 }

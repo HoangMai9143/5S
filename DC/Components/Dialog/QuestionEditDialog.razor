@@ -1,9 +1,44 @@
+@using Microsoft.EntityFrameworkCore
+@inject AppDbContext appDbContext
+@inject ISnackbar sb
+
 <MudDialog>
   <DialogContent>
-    <MudTextField @bind-Value="question.QuestionContext" Label="Question" />
+    <EditForm Model="@currentQuestion" OnValidSubmit="@SaveQuestion">
+      <DataAnnotationsValidator />
+      <MudCard>
+        <MudText Typo="Typo.h6">Editing question: @currentQuestion.Id</MudText>
+        <MudCardContent>
+          <MudTextField @bind-Value="currentQuestion.QuestionContext" Label="Question" Required="true" />
+          <MudSelect @bind-Value="currentQuestion.AnswerType" Label="Answer Type" Required="true">
+            <MudSelectItem Value="@AnswerType.SingleChoice">Single Choice</MudSelectItem>
+            <MudSelectItem Value="@AnswerType.MultipleChoice">Multiple Choice</MudSelectItem>
+          </MudSelect>
+
+          <MudText Typo="Typo.h6" Class="mt-4">Answers</MudText>
+
+          @foreach (var answer in currentAnswers)
+          {
+            <MudGrid>
+              <MudItem xs="12" sm="7">
+                <MudTextField @bind-Value="answer.AnswerText" Label="Answer Text" Required="true" FullWidth="true" />
+              </MudItem>
+              <MudItem xs="12" sm="4">
+                <MudNumericField @bind-Value="answer.Points" Label="Point multiplier" FullWidth="true" />
+              </MudItem>
+              <MudItem xs="12" sm="1">
+                <MudButton StartIcon="@Icons.Material.Filled.Delete" Variant="Variant.Filled" Color="Color.Error" OnClick="@(() => RemoveAnswer(answer))" Size="Size.Small" Class="custom-button-alignment">Delete</MudButton>
+              </MudItem>
+            </MudGrid>
+          }
+
+          <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" OnClick="AddNewAnswer" Color="Color.Primary" Class="mt-2">Add Answer</MudButton>
+        </MudCardContent>
+      </MudCard>
+    </EditForm>
   </DialogContent>
   <DialogActions>
     <MudButton OnClick="Cancel">Cancel</MudButton>
-    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit">Save</MudButton>
+    <MudButton Color="Color.Primary" OnClick="Submit">Save</MudButton>
   </DialogActions>
 </MudDialog>

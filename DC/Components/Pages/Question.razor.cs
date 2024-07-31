@@ -112,104 +112,11 @@ namespace DC.Components.Pages
       activeIndex = index;
     }
 
-    private async Task SaveQuestion()
-    {
-      try
-      {
-        if (currentQuestion.Id == 0)
-        {
-          await appDbContext.Set<QuestionModel>().AddAsync(currentQuestion);
-        }
-        else
-        {
-          appDbContext.QuestionModel.Update(currentQuestion);
-        }
 
-        await appDbContext.SaveChangesAsync();
-
-        // Remove answers that are no longer in the list
-        var existingAnswers = await appDbContext.AnswerModel
-            .Where(a => a.QuestionId == currentQuestion.Id)
-            .ToListAsync();
-
-        foreach (var existingAnswer in existingAnswers)
-        {
-          if (!currentAnswers.Exists(a => a.Id == existingAnswer.Id))
-          {
-            appDbContext.AnswerModel.Remove(existingAnswer);
-          }
-        }
-
-        // Add or update current answers
-        foreach (var answer in currentAnswers)
-        {
-          answer.QuestionId = currentQuestion.Id;
-          if (answer.Id == 0)
-          {
-            await appDbContext.AnswerModel.AddAsync(answer);
-          }
-          else
-          {
-            appDbContext.AnswerModel.Update(answer);
-          }
-        }
-
-        await appDbContext.SaveChangesAsync();
-        sb.Add("Saved successfully.", Severity.Success);
-        await LoadQuestions();
-
-        // Reset current question and answers
-        currentQuestion = new QuestionModel();
-        currentAnswers.Clear(); // Simplified collection initialization
-
-        // Go back to the question list
-        activeIndex = 0;
-      }
-      catch (Exception ex)
-      {
-        sb.Add($"Error saving question: {ex.Message}", Severity.Error);
-      }
-    }
 
     private void OnMultipleChoiceChanged(AnswerModel changedAnswer)
     {
       StateHasChanged();
-    }
-
-    private void AddNewAnswer()
-    {
-      currentAnswers.Add(new AnswerModel
-      {
-        QuestionId = currentQuestion.Id,
-        Points = 1
-      });
-    }
-
-    private void RemoveAnswer(AnswerModel answer)
-    {
-      currentAnswers.Remove(answer);
-      if (answer.Id != 0)
-      {
-        appDbContext.AnswerModel.Remove(answer);
-      }
-    }
-
-    private async Task LoadQuestion(int questionId)
-    {
-      currentQuestion = await appDbContext.QuestionModel
-          .Include(q => q.Answers)
-          .FirstOrDefaultAsync(q => q.Id == questionId);
-
-      if (currentQuestion != null)
-      {
-        currentAnswers = currentQuestion.Answers.ToList();
-      }
-      else
-      {
-        currentQuestion = new QuestionModel();
-        currentAnswers = new List<AnswerModel>();
-      }
-      activeIndex = 1;
     }
 
     private async Task OnQuestionSearchInput(string value)
@@ -319,6 +226,23 @@ namespace DC.Components.Pages
       catch (Exception ex)
       {
         sb.Add($"Error cloning question: {ex.Message}", Severity.Error);
+      }
+    }
+    private async Task OpenQuestionEditDialog(int questionId)
+    {
+      var parameters = new DialogParameters
+        {
+            { "QuestionId", questionId }
+        };
+
+      var options = new DialogOptions { CloseOnEscapeKey = true, FullScreen = true, CloseButton = true };
+      var dialog = await dialogService.ShowAsync<QuestionEditDialog>("Edit Question", parameters, options);
+      var result = await dialog.Result;
+
+      if (!result.Canceled)
+      {
+        await LoadQuestions();
+        StateHasChanged();
       }
     }
   }

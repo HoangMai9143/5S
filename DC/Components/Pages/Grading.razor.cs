@@ -19,7 +19,9 @@ namespace DC.Components.Pages
 		private SurveyModel selectedSurvey;
 		private Dictionary<string, List<StaffModel>> staffByDepartment = new Dictionary<string, List<StaffModel>>();
 		private Dictionary<int, double> staffScores = new Dictionary<int, double>();
+		private List<StaffModel> allStaff = new List<StaffModel>();
 		private string _searchString = "";
+		private string _staffSearchString = "";
 		private Func<SurveyModel, bool> _surveyQuickFilter => x =>
 		{
 			if (string.IsNullOrWhiteSpace(_searchString))
@@ -33,6 +35,19 @@ namespace DC.Components.Pages
 
 			return false;
 		};
+		private Func<StaffModel, bool> _staffQuickFilter => x =>
+{
+	if (string.IsNullOrWhiteSpace(_staffSearchString))
+		return true;
+
+	if (x.FullName.Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase))
+		return true;
+
+	if (x.Department?.Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase) == true)
+		return true;
+
+	return false;
+};
 
 		protected override async Task OnAfterRenderAsync(bool firstRender)
 		{
@@ -63,16 +78,14 @@ namespace DC.Components.Pages
 		{
 			try
 			{
-				var allStaff = await appDbContext.StaffModel.Where(s => s.IsActive).ToListAsync();
-				staffByDepartment = allStaff.GroupBy(s => s.Department ?? "Unassigned")
-																		.ToDictionary(g => g.Key, g => g.ToList());
+				allStaff = await appDbContext.StaffModel.Where(s => s.IsActive).ToListAsync();
 
 				if (selectedSurvey != null)
 				{
 					// Load scores
 					var scores = await appDbContext.SurveyResultModel
-							.Where(sr => sr.SurveyId == selectedSurvey.Id)
-							.ToListAsync();
+									.Where(sr => sr.SurveyId == selectedSurvey.Id)
+									.ToListAsync();
 
 					staffScores = scores.ToDictionary(sr => sr.StaffId, sr => sr.FinalGrade);
 				}

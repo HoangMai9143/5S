@@ -37,8 +37,8 @@
 							<PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.EndDate" Title="End Date" Format="dd/MM/yyyy" />
 							<PropertyColumn T="SurveyModel" TProperty="DateTime" Property="x => x.CreatedDate" Title="Created Date" Format="dd/MM/yyyy HH:mm" />
 							<PropertyColumn T="SurveyModel" TProperty="bool" Property="x => x.IsActive" Title="Status">
-								<CellTemplate Context="cellContext">
-									@if (cellContext.Item.IsActive)
+								<CellTemplate Context="surveyContext">
+									@if (surveyContext.Item.IsActive)
 									{
 										<MudChip Color="Color.Success" Size="Size.Small">On going</MudChip>
 									}
@@ -48,9 +48,9 @@
 									}
 								</CellTemplate>
 							</PropertyColumn>
-							<TemplateColumn CellClass="d-flex justify-end">
-								<CellTemplate Context="cellContext">
-									<MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OnSelectSurvey(cellContext.Item))">
+							<TemplateColumn CellClass="justify-end">
+								<CellTemplate Context="surveyContext">
+									<MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OnSelectSurvey(surveyContext.Item))">
 										Choose
 									</MudButton>
 								</CellTemplate>
@@ -66,34 +66,40 @@
 					{
 						<MudText Typo="Typo.h6" Class="mb-4">Current Survey: @selectedSurvey.Title</MudText>
 					}
-					<MudExpansionPanels Elevation="4" MultiExpansion="true">
-						@foreach (var (department, staffs) in staffByDepartment)
-						{
-							<MudExpansionPanel Text="@department">
-								@foreach (var staff in staffs)
-								{
-									<MudListItem T="@StaffModel" OnClick="@(() => OpenStaffGradingDialog(staff))" Clickable="true">
-										<MudGrid>
-											<MudItem xs="12" sm="6">
-												<MudText>@staff.FullName</MudText>
-											</MudItem>
-											<MudItem xs="12" sm="6">
-												@if (staffScores.TryGetValue(staff.Id, out var score))
-												{
-													<MudProgressLinear Size="Size.Large" Rounded="true" Value="@score" Min="0" Max="100" Color="Color.Primary" />
-													<MudText>Score: @score.ToString("F0")</MudText>
-												}
-												else
-												{
-													<MudText Color="Color.Primary">Not graded yet</MudText>
-												}
-											</MudItem>
-										</MudGrid>
-									</MudListItem>
-								}
-							</MudExpansionPanel>
-						}
-					</MudExpansionPanels>
+					<MudDataGrid T="StaffModel" Items="@allStaff" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_staffQuickFilter">
+						<ToolBarContent>
+							<MudText Typo="Typo.h6">Staff</MudText>
+							<MudSpacer />
+							<MudTextField @bind-Value="_staffSearchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+						</ToolBarContent>
+						<Columns>
+							<PropertyColumn Property="x => x.FullName" Title="Full Name" />
+							<PropertyColumn Property="x => x.Department" Title="Department" />
+							<TemplateColumn Title="Score" CellStyle="text-align:center">
+								<CellTemplate Context="staffContext">
+									@if (staffScores.TryGetValue(staffContext.Item.Id, out var score))
+									{
+										<MudProgressLinear Size="Size.Small" Rounded="true" Value="@score" Min="0" Max="100" Color="Color.Primary" Class="my-2" />
+										<MudText>@score.ToString("F0")</MudText>
+									}
+									else
+									{
+										<MudText Color="Color.Primary">Not graded yet</MudText>
+									}
+								</CellTemplate>
+							</TemplateColumn>
+							<TemplateColumn CellClass="justify-center">
+								<CellTemplate Context="staffContext">
+									<MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" Elevation="0" OnClick="@(() => OpenStaffGradingDialog(staffContext.Item))">
+										Grade
+									</MudButton>
+								</CellTemplate>
+							</TemplateColumn>
+						</Columns>
+						<PagerContent>
+							<MudDataGridPager T="StaffModel" />
+						</PagerContent>
+					</MudDataGrid>
 				</MudTabPanel>
 			</MudTabs>
 		}

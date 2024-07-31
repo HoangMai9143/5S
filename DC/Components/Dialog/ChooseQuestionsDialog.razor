@@ -4,7 +4,7 @@
 <MudDialog>
   <DialogContent>
     <MudCard>
-      <MudCardContent>
+      <MudCardContent Elevation="0">
         <MudText Typo="Typo.h6">Choose Questions for Survey: @Survey.Title</MudText>
         <MudDataGrid T="QuestionModel" Items="@Questions" MultiSelection="true" @bind-SelectedItems="SelectedQuestions" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Elevation="0">
           <ToolBarContent>

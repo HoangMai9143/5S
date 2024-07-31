@@ -6,9 +6,9 @@
   <DialogContent>
     <EditForm Model="@currentQuestion" OnValidSubmit="@SaveQuestion">
       <DataAnnotationsValidator />
-      <MudCard>
+      <MudCard Elevation="0">
         <MudText Typo="Typo.h6">Editing question: @currentQuestion.Id</MudText>
-        <MudCardContent>
+        <MudCardContent Elevation="0">
           <MudTextField @bind-Value="currentQuestion.QuestionContext" Label="Question" Required="true" />
           <MudSelect @bind-Value="currentQuestion.AnswerType" Label="Answer Type" Required="true">
             <MudSelectItem Value="@AnswerType.SingleChoice">Single Choice</MudSelectItem>

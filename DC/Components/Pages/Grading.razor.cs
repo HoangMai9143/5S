@@ -118,7 +118,7 @@ namespace DC.Components.Pages
 				["Survey"] = selectedSurvey
 			};
 
-			var options = new DialogOptions { CloseButton = true };
+			var options = new DialogOptions { FullScreen = true, CloseButton = true };
 			var dialog = await dialogService.ShowAsync<GradingDialog>("Grade Staff", parameters, options);
 			var result = await dialog.Result;
 

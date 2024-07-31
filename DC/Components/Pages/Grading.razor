@@ -73,17 +73,22 @@
                                 @foreach (var staff in staffs)
                                 {
                                     <MudListItem T="@StaffModel" OnClick="@(() => OpenStaffGradingDialog(staff))" Clickable="true">
-                                        <div class="d-flex justify-space-between align-center">
-                                            <MudText>@staff.FullName</MudText>
-                                            @if (staffScores.TryGetValue(staff.Id, out var score))
-                                            {
-                                                <MudText Color="Color.Primary">@score.ToString("F0")</MudText>
-                                            }
-                                            else
-                                            {
-                                                <MudText Color="Color.Primary">Not graded yet</MudText>
-                                            }
-                                        </div>
+                                        <MudGrid>
+                                            <MudItem xs="12" sm="6">
+                                                <MudText>@staff.FullName</MudText>
+                                            </MudItem>
+                                            <MudItem xs="12" sm="6">
+                                                @if (staffScores.TryGetValue(staff.Id, out var score))
+                                                {
+                                                    <MudProgressLinear Size="Size.Large" Rounded="true" Value="@score" Min="0" Max="100" Color="Color.Success" />
+                                                    <MudText Color="Color.Primary">Score: @score.ToString("F0")</MudText>
+                                                }
+                                                else
+                                                {
+                                                    <MudText Color="Color.Primary">Not graded yet</MudText>
+                                                }
+                                            </MudItem>
+                                        </MudGrid>
                                     </MudListItem>
                                 }
                             </MudExpansionPanel>

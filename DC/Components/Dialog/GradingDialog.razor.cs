@@ -35,6 +35,9 @@ namespace DC.Components.Dialog
       {
         var existingAnswer = existingAnswers.FirstOrDefault(a => a.QuestionId == question.QuestionId);
         selectedAnswer[question.QuestionId] = existingAnswer?.AnswerId ?? 0;
+        var existingResult = await appDbContext.ResultModel
+              .FirstOrDefaultAsync(r => r.SurveyId == Survey.Id && r.QuestionId == question.QuestionId && r.StaffId == Staff.Id);
+        questionNotes[question.QuestionId] = existingResult?.Note ?? "";
       }
 
       isLoading = false;
@@ -69,6 +72,7 @@ namespace DC.Components.Dialog
     private async Task Submit()
     {
       var gradingResult = new List<QuestionAnswerModel>();
+      var resultUpdates = new List<ResultModel>();
       bool changes = false;
 
       foreach (var sq in surveyQuestions)
@@ -83,14 +87,43 @@ namespace DC.Components.Dialog
         {
           changes |= HandleMultipleChoiceQuestion(sq, questionExistingAnswers, gradingResult);
         }
+
+        var existingResult = await appDbContext.ResultModel
+            .FirstOrDefaultAsync(r => r.SurveyId == Survey.Id && r.QuestionId == sq.QuestionId && r.StaffId == Staff.Id);
+
+        if (existingResult == null)
+        {
+          resultUpdates.Add(new ResultModel
+          {
+            SurveyId = Survey.Id,
+            QuestionId = sq.QuestionId,
+            StaffId = Staff.Id,
+            Note = questionNotes[sq.QuestionId]
+          });
+          changes = true;
+        }
+        else if (existingResult.Note != questionNotes[sq.QuestionId])
+        {
+          existingResult.Note = questionNotes[sq.QuestionId];
+          resultUpdates.Add(existingResult);
+          changes = true;
+        }
       }
 
       if (changes)
       {
+        appDbContext.ResultModel.AddRange(resultUpdates.Where(r => r.Id == 0));
+        appDbContext.ResultModel.UpdateRange(resultUpdates.Where(r => r.Id != 0));
         await appDbContext.SaveChangesAsync();
       }
 
       MudDialog.Close(DialogResult.Ok(new { GradingResult = gradingResult, Changes = changes }));
+    }
+
+    private void OnNoteChanged(int questionId, string newValue)
+    {
+      questionNotes[questionId] = newValue;
+      StateHasChanged();
     }
 
     private bool HandleSingleChoiceQuestion(SurveyQuestionModel sq, List<QuestionAnswerModel> questionExistingAnswers, List<QuestionAnswerModel> gradingResult)

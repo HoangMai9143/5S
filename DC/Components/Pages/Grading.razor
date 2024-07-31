@@ -75,24 +75,28 @@
 						<Columns>
 							<PropertyColumn Property="x => x.FullName" Title="Full Name" />
 							<PropertyColumn Property="x => x.Department" Title="Department" />
-							<TemplateColumn Title="Score" CellStyle="text-align:center">
+							<TemplateColumn Title="Score" CellClass="pa-0">
 								<CellTemplate Context="staffContext">
-									@if (staffScores.TryGetValue(staffContext.Item.Id, out var score))
-									{
-										<MudProgressLinear Size="Size.Small" Rounded="true" Value="@score" Min="0" Max="100" Color="Color.Primary" Class="my-2" />
-										<MudText>@score.ToString("F0")</MudText>
-									}
-									else
-									{
-										<MudText Color="Color.Primary">Not graded yet</MudText>
-									}
+									<MudPaper Elevation="0" Class="d-flex flex-column justify-center align-center pa-2" Style="height: 100%;">
+										@if (staffScores.TryGetValue(staffContext.Item.Id, out var score))
+										{
+											<MudProgressLinear Size="Size.Small" Rounded="true" Value="@score" Min="0" Max="100" Color="Color.Primary" Class="my-2 w-100" />
+											<MudText>@score.ToString("F0")</MudText>
+										}
+										else
+										{
+											<MudText Color="Color.Primary">Not graded yet</MudText>
+										}
+									</MudPaper>
 								</CellTemplate>
 							</TemplateColumn>
-							<TemplateColumn CellClass="justify-center">
+							<TemplateColumn CellClass="pa-0">
 								<CellTemplate Context="staffContext">
-									<MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" Elevation="0" OnClick="@(() => OpenStaffGradingDialog(staffContext.Item))">
-										Grade
-									</MudButton>
+									<MudPaper Elevation="0" Class="d-flex justify-center align-center" Style="height: 100%;">
+										<MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenStaffGradingDialog(staffContext.Item))">
+											Grade
+										</MudButton>
+									</MudPaper>
 								</CellTemplate>
 							</TemplateColumn>
 						</Columns>

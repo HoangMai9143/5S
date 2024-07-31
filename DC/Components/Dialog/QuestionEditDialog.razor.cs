@@ -110,7 +110,6 @@ namespace DC.Components.Dialog
         currentAnswers = new List<AnswerModel>();
       }
     }
-    // Add comment: "Moved from Question.razor.cs"
 
     void Submit() => MudDialog.Close(DialogResult.Ok(true));
     void Cancel() => MudDialog.Cancel();

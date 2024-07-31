@@ -162,29 +162,36 @@ namespace DC.Components.Pages
 
     private async Task DeleteQuestion(QuestionModel questionToDelete)
     {
-      var parameters = new DialogParameters
+      try
+      {
+        var parameters = new DialogParameters
       {
         { "ContentText", "Are you sure you want to delete this question?" },
         { "ButtonText", "Delete" },
         { "Color", Color.Error }
       };
 
-      var options = new DialogOptions()
-      {
-        MaxWidth = MaxWidth.Small,
-        FullWidth = true,
-        Position = DialogPosition.Center,
-        CloseOnEscapeKey = true,
-        FullScreen = false,
-      };
+        var options = new DialogOptions()
+        {
+          MaxWidth = MaxWidth.Small,
+          FullWidth = true,
+          Position = DialogPosition.Center,
+          CloseOnEscapeKey = true,
+          FullScreen = false,
+        };
 
-      var dialog = await dialogService.ShowAsync<ConfirmDialog>("Delete Question", parameters, options);
-      var result = await dialog.Result;
+        var dialog = await dialogService.ShowAsync<ConfirmDialog>("Delete Question", parameters, options);
+        var result = await dialog.Result;
 
-      if (!result.Canceled)
+        if (!result.Canceled)
+        {
+          await ConfirmedDeleteQuestion(questionToDelete);
+          sb.Add($"Question {questionToDelete.Id} deleted successfully.", Severity.Success);
+        }
+      }
+      catch (Exception ex)
       {
-        await ConfirmedDeleteQuestion(questionToDelete);
-        sb.Add($"Question {questionToDelete.Id} deleted successfully.", Severity.Success);
+        sb.Add($"Can't delete this question, it already been used", Severity.Error);
       }
     }
 

@@ -37,7 +37,7 @@ main {
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-
+/* 
 @media (max-width: 640.98px) {
 	.top-row {
 		justify-content: space-between;
@@ -47,7 +47,7 @@ main {
 	.top-row ::deep .btn-link {
 		margin-left: 0;
 	}
-}
+} */
 
 @media (min-width: 641px) {
 	.page {

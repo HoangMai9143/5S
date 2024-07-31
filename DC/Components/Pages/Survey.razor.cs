@@ -392,16 +392,40 @@ namespace DC.Components.Pages
     {
       if (string.IsNullOrWhiteSpace(searchTerm))
       {
-        await LoadQuestions(); // Load all questions if search term is empty
+        await LoadQuestions();
       }
       else
       {
-        searchTerm = searchTerm.ToLower(); // Convert search term to lowercase
+        searchTerm = searchTerm.ToLower();
         questions = await appDbContext.Set<QuestionModel>()
             .Where(q => q.Id.ToString().Contains(searchTerm) ||
                         q.QuestionContext.ToLower().Contains(searchTerm))
             .OrderByDescending(q => q.Id)
             .ToListAsync();
+      }
+    }
+    private async Task OpenChooseQuestionsDialog(SurveyModel survey)
+    {
+      selectedSurvey = survey;
+      await LoadExistingQuestions();
+
+      var parameters = new DialogParameters
+        {
+            { "Survey", selectedSurvey },
+            { "Questions", questions },
+            { "SelectedQuestions", selectedQuestions },
+            { "ExistingQuestionIds", existingQuestionIds }
+        };
+
+      var options = new DialogOptions { FullScreen = true, CloseOnEscapeKey = true };
+
+      var dialog = await dialogService.ShowAsync<ChooseQuestionsDialog>("Choose Questions", parameters, options);
+      var result = await dialog.Result;
+
+      if (!result.Canceled && result.Data is HashSet<QuestionModel> updatedSelectedQuestions)
+      {
+        selectedQuestions = updatedSelectedQuestions;
+        await SaveSurveyQuestions();
       }
     }
   }

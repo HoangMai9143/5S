@@ -1,0 +1,51 @@
+@inject AppDbContext appDbContext
+@inject ISnackbar sb
+
+<MudDialog>
+  <DialogContent>
+    <MudCard>
+      <MudCardContent>
+        <MudText Typo="Typo.h6">Choose Questions for Survey: @Survey.Title</MudText>
+        <MudDataGrid T="QuestionModel" Items="@Questions" MultiSelection="true" @bind-SelectedItems="SelectedQuestions" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Elevation="0">
+          <ToolBarContent>
+            <MudText Typo="Typo.h6">Questions</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" DebounceInterval="300" Clearable="true">
+            </MudTextField>
+          </ToolBarContent>
+          <Columns>
+            <SelectColumn T="QuestionModel" />
+            <PropertyColumn Property="x => x.Id" Title="ID" InitialDirection="SortDirection.Descending" Sortable="true" />
+            <PropertyColumn Property="x => x.QuestionContext" Title="Question" />
+            <TemplateColumn Title="Status">
+              <CellTemplate Context="cellContext">
+                @{
+                  var question = cellContext.Item;
+                  if (ExistingQuestionIds.Contains(question.Id))
+                  {
+                    <MudChip Color="Color.Success" Icon="@Icons.Material.Filled.Check" Size="Size.Small">Saved</MudChip>
+                  }
+                  else if (SelectedQuestions.Contains(question))
+                  {
+                    <MudChip Color="Color.Warning" Icon="@Icons.Material.Filled.AddCircle" Size="Size.Small">Not save</MudChip>
+                  }
+                  else
+                  {
+                    <MudChip Color="Color.Default" Icon="@Icons.Material.Filled.RadioButtonUnchecked" Size="Size.Small">Not Selected</MudChip>
+                  }
+                }
+              </CellTemplate>
+            </TemplateColumn>
+          </Columns>
+          <PagerContent>
+            <MudDataGridPager T="QuestionModel" />
+          </PagerContent>
+        </MudDataGrid>
+      </MudCardContent>
+    </MudCard>
+  </DialogContent>
+  <DialogActions>
+    <MudButton OnClick="Cancel">Cancel</MudButton>
+    <MudButton Color="Color.Primary" OnClick="Submit">Save</MudButton>
+  </DialogActions>
+</MudDialog>

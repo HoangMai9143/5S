@@ -249,6 +249,7 @@ namespace DC.Components.Pages
       if (!result.Canceled)
       {
         await LoadQuestions();
+        sb.Add("Question updated successfully.", Severity.Success);
         StateHasChanged();
       }
     }

@@ -77,7 +77,7 @@
                                             <MudText>@staff.FullName</MudText>
                                             @if (staffScores.TryGetValue(staff.Id, out var score))
                                             {
-                                                <MudText Color="Color.Primary">@score.ToString("F2")%</MudText>
+                                                <MudText Color="Color.Primary">@score.ToString("F0")</MudText>
                                             }
                                             else
                                             {

@@ -20,6 +20,7 @@ namespace DC.Components.Dialog
     private Dictionary<int, int> selectedAnswer = new Dictionary<int, int>();
     private Dictionary<int, Dictionary<int, bool>> selectedMultipleAnswers = new Dictionary<int, Dictionary<int, bool>>();
     private List<QuestionAnswerModel> existingAnswers = new List<QuestionAnswerModel>();
+    private Dictionary<int, string> questionNotes = new Dictionary<int, string>();
     private bool answerIsSelected;
 
     protected override async Task OnInitializedAsync()

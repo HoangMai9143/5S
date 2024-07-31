@@ -101,10 +101,11 @@ namespace DC.Components.Pages
       _searchString = value;
     }
 
-    private void OnSelectSurvey(SurveyModel survey)
+    private async Task OnSelectSurvey(SurveyModel survey)
     {
       selectedSurvey = survey;
-      activeIndex = 1; // Switch to the second tab
+      await LoadStaff();
+      activeIndex = 1;
       StateHasChanged();
     }
 
@@ -125,6 +126,8 @@ namespace DC.Components.Pages
         var dialogResult = (dynamic)result.Data;
         await SaveGradingResult(dialogResult.GradingResult, dialogResult.Changes);
         await CalculateAndSaveScores(selectedSurvey.Id);
+        await LoadStaff();
+        StateHasChanged();
       }
     }
 
@@ -229,7 +232,13 @@ namespace DC.Components.Pages
         foreach (var kvp in staffScores)
         {
           var staff = await appDbContext.StaffModel.FindAsync(kvp.Key);
+          if (staff != null)
+          {
+            staffScores[kvp.Key] = kvp.Value;
+          }
         }
+
+        StateHasChanged();
       }
       catch (DbUpdateException ex)
       {

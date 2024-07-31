@@ -7,6 +7,7 @@ using DC.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
+using DC.Data;
 
 namespace DC.Components.Pages
 {
@@ -191,50 +192,80 @@ namespace DC.Components.Pages
 			try
 			{
 				var surveyQuestions = await appDbContext.SurveyQuestionModel
-						.Where(sq => sq.SurveyId == surveyId)
-						.Select(sq => sq.QuestionId)
-						.ToListAsync();
+																								.Where(sq => sq.SurveyId == surveyId)
+																								.Select(sq => new { sq.QuestionId, sq.Question.AnswerType })
+																								.ToListAsync();
 
-				var totalPossiblePoints = await appDbContext.AnswerModel
-						.Where(a => surveyQuestions.Contains(a.QuestionId))
-						.SumAsync(a => a.Points);
+				var totalPossiblePoints = 0.0;
+				foreach (var sq in surveyQuestions)
+				{
+					var question = await appDbContext.QuestionModel
+																					 .Include(q => q.Answers)
+																					 .FirstOrDefaultAsync(q => q.Id == sq.QuestionId);
+
+					if (question != null)
+					{
+						if (sq.AnswerType == AnswerType.SingleChoice && question.Answers.Any())
+						{
+							totalPossiblePoints += question.Answers.Max(a => a.Points);
+						}
+						else if (sq.AnswerType == AnswerType.MultipleChoice && question.Answers.Any())
+						{
+							totalPossiblePoints += question.Answers.Sum(a => a.Points);
+						}
+					}
+				}
 
 				var staffAnswerGroups = await appDbContext.QuestionAnswerModel
-						.Where(qa => qa.SurveyId == surveyId && qa.Answer != null)
-						.Include(qa => qa.Answer)
-						.GroupBy(qa => qa.StaffId)
-						.ToListAsync();
+																									.Where(qa => qa.SurveyId == surveyId && qa.Answer != null)
+																									.Include(qa => qa.Answer)
+																									.GroupBy(qa => qa.StaffId)
+																									.ToListAsync();
 
-				var staffScores = new Dictionary<int, double>();
+				var scores = new Dictionary<int, double>();
 
 				foreach (var staffGroup in staffAnswerGroups)
 				{
 					int staffId = staffGroup.Key;
-					double totalPoints = staffGroup.Sum(qa => qa.Answer.Points);
+					double totalPoints = 0.0;
+
+					foreach (var sq in surveyQuestions)
+					{
+						var answers = staffGroup.Where(qa => qa.QuestionId == sq.QuestionId).Select(qa => qa.Answer);
+
+						if (sq.AnswerType == AnswerType.SingleChoice && answers.Any())
+						{
+							totalPoints += answers.Max(a => a.Points);
+						}
+						else if (sq.AnswerType == AnswerType.MultipleChoice && answers.Any())
+						{
+							totalPoints += answers.Sum(a => a.Points);
+						}
+					}
 
 					double scorePercentage = totalPossiblePoints > 0 ? (totalPoints / totalPossiblePoints) * 100 : 0;
-					staffScores[staffId] = scorePercentage;
+					scores[staffId] = Math.Min(scorePercentage, 100); // Ensure score does not exceed 100
 
 					var surveyResult = await appDbContext.SurveyResultModel
-							.FirstOrDefaultAsync(r => r.SurveyId == surveyId && r.StaffId == staffId)
-							?? new SurveyResultModel
-							{
-								SurveyId = surveyId,
-								StaffId = staffId
-							};
+																							 .FirstOrDefaultAsync(r => r.SurveyId == surveyId && r.StaffId == staffId)
+																							 ?? new SurveyResultModel
+																							 {
+																								 SurveyId = surveyId,
+																								 StaffId = staffId
+																							 };
 
-					surveyResult.FinalGrade = scorePercentage;
+					surveyResult.FinalGrade = scores[staffId];
 					appDbContext.Update(surveyResult);
 				}
 
 				await appDbContext.SaveChangesAsync();
 
-				foreach (var kvp in staffScores)
+				foreach (var kvp in scores)
 				{
 					var staff = await appDbContext.StaffModel.FindAsync(kvp.Key);
 					if (staff != null)
 					{
-						staffScores[kvp.Key] = kvp.Value;
+						scores[kvp.Key] = kvp.Value;
 					}
 				}
 

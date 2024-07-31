@@ -22,6 +22,8 @@ namespace DC.Components.Pages
 		private List<StaffModel> allStaff = new List<StaffModel>();
 		private string _searchString = "";
 		private string _staffSearchString = "";
+		private Dictionary<int, string> staffNotes = new Dictionary<int, string>();
+		private Dictionary<int, string> tempStaffNotes = new Dictionary<int, string>();
 		private Func<SurveyModel, bool> _surveyQuickFilter => x =>
 		{
 			if (string.IsNullOrWhiteSpace(_searchString))
@@ -82,16 +84,18 @@ namespace DC.Components.Pages
 
 				if (selectedSurvey != null)
 				{
-					// Load scores
-					var scores = await appDbContext.SurveyResultModel
-									.Where(sr => sr.SurveyId == selectedSurvey.Id)
-									.ToListAsync();
+					// Load scores and notes
+					var results = await appDbContext.SurveyResultModel
+													.Where(sr => sr.SurveyId == selectedSurvey.Id)
+													.ToListAsync();
 
-					staffScores = scores.ToDictionary(sr => sr.StaffId, sr => sr.FinalGrade);
+					staffScores = results.ToDictionary(sr => sr.StaffId, sr => sr.FinalGrade);
+					staffNotes = results.ToDictionary(sr => sr.StaffId, sr => sr.Note ?? "");
 				}
 				else
 				{
 					staffScores.Clear();
+					staffNotes.Clear();
 				}
 			}
 			catch (Exception ex)
@@ -100,6 +104,58 @@ namespace DC.Components.Pages
 			}
 		}
 
+		private string GetStaffNote(int staffId)
+		{
+			return tempStaffNotes.TryGetValue(staffId, out var note) ? note : staffNotes.TryGetValue(staffId, out var originalNote) ? originalNote : "";
+		}
+
+		private void UpdateStaffNote(int staffId, string newNote)
+		{
+			tempStaffNotes[staffId] = newNote;
+		}
+
+		private async Task SubmitStaffNote(int staffId)
+		{
+			if (selectedSurvey == null)
+			{
+				sb.Add("Please select a survey first", Severity.Error);
+				return;
+			}
+
+			if (!tempStaffNotes.TryGetValue(staffId, out var newNote))
+			{
+				sb.Add("No changes to submit", Severity.Info);
+				return;
+			}
+
+			try
+			{
+				var surveyResult = await appDbContext.SurveyResultModel
+						.FirstOrDefaultAsync(sr => sr.SurveyId == selectedSurvey.Id && sr.StaffId == staffId);
+
+				if (surveyResult == null)
+				{
+					surveyResult = new SurveyResultModel
+					{
+						SurveyId = selectedSurvey.Id,
+						StaffId = staffId,
+						FinalGrade = 0 // Default value
+					};
+					appDbContext.SurveyResultModel.Add(surveyResult);
+				}
+
+				surveyResult.Note = newNote;
+				await appDbContext.SaveChangesAsync();
+
+				staffNotes[staffId] = newNote;
+				tempStaffNotes.Remove(staffId);
+				sb.Add("Note updated successfully", Severity.Success);
+			}
+			catch (Exception ex)
+			{
+				sb.Add($"Error updating note: {ex.Message}", Severity.Error);
+			}
+		}
 		private void HandleTabChanged(int index)
 		{
 			if (index == 1 && selectedSurvey == null)

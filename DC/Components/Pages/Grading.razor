@@ -90,6 +90,14 @@
 									</MudPaper>
 								</CellTemplate>
 							</TemplateColumn>
+							<TemplateColumn Title="Note" CellClass="pa-0">
+								<CellTemplate Context="staffContext">
+									<div class="d-flex align-center">
+										<MudTextField T="string" Value="@(GetStaffNote(staffContext.Item.Id))" ValueChanged="@((string newNote) => UpdateStaffNote(staffContext.Item.Id, newNote))" Placeholder="Add note" Variant="Variant.Outlined" Margin="Margin.Dense" Class="flex-grow-1 ma-2" />
+										<MudIconButton Icon="@Icons.Material.Filled.Save" Color="Color.Primary" Size="Size.Small" OnClick="@(() => SubmitStaffNote(staffContext.Item.Id))" Class="ml-2" />
+									</div>
+								</CellTemplate>
+							</TemplateColumn>
 							<TemplateColumn CellClass="pa-0">
 								<CellTemplate Context="staffContext">
 									<MudPaper Elevation="0" Class="d-flex justify-center align-center" Style="height: 100%;">

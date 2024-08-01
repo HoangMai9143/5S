@@ -98,6 +98,7 @@ namespace DC.Components.Pages
 
         _searchString = string.Empty;
         sb.Add($"Question added successfully with ID: {newQuestion.Id}", Severity.Success);
+        OpenQuestionEditDialog(newQuestion.Id);
         StateHasChanged();
       }
     }
@@ -249,7 +250,6 @@ namespace DC.Components.Pages
       if (!result.Canceled)
       {
         await LoadQuestions();
-        sb.Add("Question updated successfully.", Severity.Success);
         StateHasChanged();
       }
     }

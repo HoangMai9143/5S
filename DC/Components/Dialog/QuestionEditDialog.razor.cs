@@ -65,8 +65,7 @@ namespace DC.Components.Dialog
         }
 
         await appDbContext.SaveChangesAsync();
-        sb.Add("Saved successfully.", Severity.Success);
-
+        sb.Add("Question saved successfully.", Severity.Success);
         // Close the dialog
         MudDialog.Close(DialogResult.Ok(true));
       }
@@ -111,7 +110,6 @@ namespace DC.Components.Dialog
       }
     }
 
-    void Submit() => MudDialog.Close(DialogResult.Ok(true));
     void Cancel() => MudDialog.Cancel();
   }
 }

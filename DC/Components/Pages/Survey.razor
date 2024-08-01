@@ -19,7 +19,7 @@
     }
     else
     {
-      <MudCard>
+      <MudCard Elevation="0">
         <MudCardContent>
           <MudText Typo="Typo.h6">Select or Create Survey</MudText>
         </MudCardContent>
@@ -31,8 +31,6 @@
       </MudCard>
       <MudDataGrid T="SurveyModel" Items="@surveys" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_surveyQuickFilter" Elevation="0">
         <ToolBarContent>
-          <MudText Typo="Typo.h6">Surveys</MudText>
-          <MudSpacer />
           <MudTextField Value="@_searchString" ValueChanged="@((string val) => OnSurveySearchInput(val))" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" DebounceInterval="300" Clearable="true">
           </MudTextField>
         </ToolBarContent>

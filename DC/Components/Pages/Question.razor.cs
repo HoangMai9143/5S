@@ -13,7 +13,6 @@ namespace DC.Components.Pages
 {
   public partial class Question
   {
-    private int activeIndex;
     private bool isLoading = true;
     private List<QuestionModel> questions = new();
     private QuestionModel currentQuestion = new();
@@ -22,10 +21,9 @@ namespace DC.Components.Pages
     private AnswerType _selectedAnswerType = AnswerType.SingleChoice;
     private System.Timers.Timer _questionDebounceTimer;
     private const int DebounceDelay = 300; // ms
-
     private int selectedAnswerIndex = -1;
 
-
+    //* Filter function
     private Func<QuestionModel, bool> _questionQuickFilter => x =>
     {
       if (string.IsNullOrWhiteSpace(_searchString))
@@ -40,6 +38,7 @@ namespace DC.Components.Pages
       return false;
     };
 
+    //* Initialize
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
       if (firstRender)
@@ -54,6 +53,7 @@ namespace DC.Components.Pages
       }
     }
 
+    //* Question CRUD
     private async Task LoadQuestions()
     {
       try
@@ -101,38 +101,6 @@ namespace DC.Components.Pages
         OpenQuestionEditDialog(newQuestion.Id);
         StateHasChanged();
       }
-    }
-
-    private async Task HandleTabChanged(int index)
-    {
-      if (index == 1 && currentQuestion.Id == 0)
-      {
-        sb.Add("Please select a question first.", Severity.Warning);
-        return;
-      }
-      activeIndex = index;
-    }
-
-    private void OnMultipleChoiceChanged(AnswerModel changedAnswer)
-    {
-      StateHasChanged();
-    }
-
-
-    private async Task OnQuestionSearchInput(string value)
-    {
-      _searchString = value;
-      _questionDebounceTimer.Stop();
-      _questionDebounceTimer.Start();
-    }
-
-    private async Task QuestionDebounceTimerElapsed()
-    {
-      await InvokeAsync(async () =>
-      {
-        await SearchQuestions(_searchString);
-        StateHasChanged();
-      });
     }
 
     private async Task SearchQuestions(string searchTerm)
@@ -195,6 +163,30 @@ namespace DC.Components.Pages
       }
     }
 
+    //* Event handler
+    private void OnMultipleChoiceChanged(AnswerModel changedAnswer)
+    {
+      StateHasChanged();
+    }
+
+    private async Task OnQuestionSearchInput(string value)
+    {
+      _searchString = value;
+      _questionDebounceTimer.Stop();
+      _questionDebounceTimer.Start();
+    }
+
+    private async Task QuestionDebounceTimerElapsed()
+    {
+      await InvokeAsync(async () =>
+      {
+        await SearchQuestions(_searchString);
+        StateHasChanged();
+      });
+    }
+
+
+    //* Dialog function
     private async Task ConfirmedDeleteQuestion(QuestionModel questionToDelete)
     {
       appDbContext.Set<QuestionModel>().Remove(questionToDelete);

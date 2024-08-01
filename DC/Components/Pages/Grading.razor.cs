@@ -25,7 +25,7 @@ namespace DC.Components.Pages
 		private Dictionary<int, string> staffNotes = new Dictionary<int, string>();
 		private Dictionary<int, string> tempStaffNotes = new Dictionary<int, string>();
 
-
+		//* Filter function
 		private Func<SurveyModel, bool> _surveyQuickFilter => x =>
 		{
 			if (string.IsNullOrWhiteSpace(_searchString))
@@ -53,6 +53,7 @@ namespace DC.Components.Pages
 			return false;
 		};
 
+		//* Initialize
 		protected override async Task OnAfterRenderAsync(bool firstRender)
 		{
 			if (firstRender)
@@ -64,6 +65,7 @@ namespace DC.Components.Pages
 			}
 		}
 
+		//* Load functions
 		private async Task LoadSurveys()
 		{
 			try
@@ -106,6 +108,7 @@ namespace DC.Components.Pages
 			}
 		}
 
+		//* Event handlers
 		private string GetStaffNote(int staffId)
 		{
 			return tempStaffNotes.TryGetValue(staffId, out var note) ? note : staffNotes.TryGetValue(staffId, out var originalNote) ? originalNote : "";
@@ -158,15 +161,6 @@ namespace DC.Components.Pages
 				sb.Add($"Error updating note: {ex.Message}", Severity.Error);
 			}
 		}
-		private void HandleTabChanged(int index)
-		{
-			if (index == 1 && selectedSurvey == null)
-			{
-				sb.Add("Please select a survey first", Severity.Error);
-				return;
-			}
-			activeIndex = index;
-		}
 
 		private void OnSurveySearchInput(string value)
 		{
@@ -181,6 +175,17 @@ namespace DC.Components.Pages
 			StateHasChanged();
 		}
 
+		private void HandleTabChanged(int index)
+		{
+			if (index == 1 && selectedSurvey == null)
+			{
+				sb.Add("Please select a survey first", Severity.Error);
+				return;
+			}
+			activeIndex = index;
+		}
+
+		//* Dialog functions
 		private async Task OpenStaffGradingDialog(StaffModel staff)
 		{
 			var parameters = new DialogParameters
@@ -303,17 +308,19 @@ namespace DC.Components.Pages
 					foreach (var sq in surveyQuestions)
 					{
 						var answers = staffGroup.Where(qa => qa.QuestionId == sq.QuestionId).Select(qa => qa.Answer);
-
+						// if single choice, get the max points
 						if (sq.AnswerType == AnswerType.SingleChoice && answers.Any())
 						{
 							totalPoints += answers.Max(a => a.Points);
 						}
+						// if multiple choice, get the sum of points
 						else if (sq.AnswerType == AnswerType.MultipleChoice && answers.Any())
 						{
 							totalPoints += answers.Sum(a => a.Points);
 						}
 					}
 
+					// Convert score to percentage
 					double scorePercentage = totalPossiblePoints > 0 ? (totalPoints / totalPossiblePoints) * 100 : 0;
 					scores[staffId] = Math.Min(scorePercentage, 100); // Ensure score does not exceed 100
 
@@ -358,7 +365,6 @@ namespace DC.Components.Pages
 				sb.Add($"An error occurred while calculating scores: {ex.Message}", Severity.Error);
 			}
 		}
-
 
 		private void HandleSqlException(SqlException sqlEx)
 		{

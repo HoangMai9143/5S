@@ -12,7 +12,6 @@ namespace DC.Components.Pages
 {
   public partial class Survey
   {
-    private int activeIndex = 0;
     private List<SurveyModel> surveys = new List<SurveyModel>();
     private List<QuestionModel> questions = new List<QuestionModel>();
     private HashSet<QuestionModel> selectedQuestions = new HashSet<QuestionModel>();
@@ -29,7 +28,7 @@ namespace DC.Components.Pages
     private bool isLoading = true;
 
 
-    // Filter surveys
+    //* Filter function
     private Func<SurveyModel, bool> _surveyQuickFilter => x =>
     {
       if (string.IsNullOrWhiteSpace(_searchString))
@@ -53,8 +52,6 @@ namespace DC.Components.Pages
 
       return false;
     };
-
-    // Filter questions
     private Func<QuestionModel, bool> _questionQuickFilter => x =>
     {
       if (string.IsNullOrWhiteSpace(_questionSearchString))
@@ -69,6 +66,7 @@ namespace DC.Components.Pages
       return false;
     };
 
+    //* Initialize
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
       if (firstRender)
@@ -89,6 +87,8 @@ namespace DC.Components.Pages
       }
     }
 
+
+    //* Survey CRUD
     private async Task LoadSurveys()
     {
       try
@@ -110,7 +110,7 @@ namespace DC.Components.Pages
 
         if (anyChanges)
         {
-          await appDbContext.SaveChangesAsync(); // Save changes if any survey's status was updated
+          await appDbContext.SaveChangesAsync();
         }
       }
       catch (Exception ex)
@@ -141,7 +141,6 @@ namespace DC.Components.Pages
       }
     }
 
-
     private async Task LoadExistingQuestions()
     {
       var existingQuestionIdsList = await appDbContext.Set<SurveyQuestionModel>()
@@ -156,29 +155,7 @@ namespace DC.Components.Pages
       StateHasChanged();
     }
 
-
-
-
-    private async Task HandleTabChanged(int index)
-    {
-      if (index == 1 && selectedSurvey == null)
-      {
-        sb.Add("Please select a survey first.", Severity.Warning);
-
-        return;
-      }
-      if (index == 0 && selectedSurvey != null)
-      {
-        selectedSurvey = null;
-        selectedQuestions.Clear();
-      }
-      if (selectedSurvey != null)
-      {
-        await LoadExistingQuestions();
-      }
-      activeIndex = index;
-    }
-
+    //* Dialog functions
     private async Task OpenCreateSurveyDialog()
     {
       var dialog = dialogService.Show<SurveyCreateDialog>("Create New Survey");
@@ -190,6 +167,62 @@ namespace DC.Components.Pages
         sb.Add($"Survey created successfully with ID: {newSurvey.Id}.", Severity.Success);
       }
     }
+    private async Task OpenEditSurveyDialog(SurveyModel surveyToEdit)
+    {
+      var parameters = new DialogParameters { { "Survey", surveyToEdit } };
+
+      var options = new DialogOptions()
+      {
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true,
+        Position = DialogPosition.Center,
+        CloseOnEscapeKey = true,
+        FullScreen = false,
+      };
+
+      var dialog = await dialogService.ShowAsync<SurveyEditDialog>("Edit Survey", parameters, options);
+      var result = await dialog.Result;
+
+      if (!result.Canceled)
+      {
+        await LoadSurveys();
+        sb.Add($"Survey {surveyToEdit.Id} updated successfully.", Severity.Success);
+        StateHasChanged();
+      }
+    }
+
+    private async Task ConfirmedDeleteSurvey(SurveyModel surveyToDelete)
+    {
+      int deletedSurveyId = surveyToDelete.Id;
+      appDbContext.Set<SurveyModel>().Remove(surveyToDelete);
+      await appDbContext.SaveChangesAsync();
+      await LoadSurveys();
+    }
+    private async Task OpenChooseQuestionsDialog(SurveyModel survey)
+    {
+      selectedSurvey = survey;
+      await LoadExistingQuestions();
+
+      var parameters = new DialogParameters
+        {
+            { "Survey", selectedSurvey },
+            { "Questions", questions },
+            { "SelectedQuestions", selectedQuestions },
+            { "ExistingQuestionIds", existingQuestionIds }
+        };
+
+      var options = new DialogOptions { FullScreen = true, CloseOnEscapeKey = true, CloseButton = true };
+
+      var dialog = await dialogService.ShowAsync<ChooseQuestionsDialog>("Choose Questions", parameters, options);
+      var result = await dialog.Result;
+
+      if (!result.Canceled && result.Data is HashSet<QuestionModel> updatedSelectedQuestions)
+      {
+        selectedQuestions = updatedSelectedQuestions;
+        await SaveSurveyQuestions();
+      }
+    }
+    //* Survey CRUD
     private async Task SaveSurveyQuestions()
     {
       try
@@ -232,41 +265,6 @@ namespace DC.Components.Pages
       }
     }
 
-    private void OnSelectionChanged(HashSet<QuestionModel> selectedItems)
-    {
-      selectedQuestions = selectedItems;
-      StateHasChanged();
-    }
-    private void OnSelectSurvey(SurveyModel survey)
-    {
-      selectedSurvey = survey;
-      LoadExistingQuestions();
-      activeIndex = 1;
-    }
-    private async Task OpenEditSurveyDialog(SurveyModel surveyToEdit)
-    {
-      var parameters = new DialogParameters { { "Survey", surveyToEdit } };
-
-      var options = new DialogOptions()
-      {
-        MaxWidth = MaxWidth.Small,
-        FullWidth = true,
-        Position = DialogPosition.Center,
-        CloseOnEscapeKey = true,
-        FullScreen = false,
-      };
-
-      var dialog = await dialogService.ShowAsync<SurveyEditDialog>("Edit Survey", parameters, options);
-      var result = await dialog.Result;
-
-      if (!result.Canceled)
-      {
-        await LoadSurveys();
-        sb.Add($"Survey {surveyToEdit.Id} updated successfully.", Severity.Success);
-        StateHasChanged();
-      }
-    }
-
     private async Task DeleteSurvey(SurveyModel surveyToDelete)
     {
       var parameters = new DialogParameters
@@ -294,12 +292,39 @@ namespace DC.Components.Pages
         sb.Add($"Survey {surveyToDelete.Id} deleted successfully.", Severity.Success);
       }
     }
-    private async Task ConfirmedDeleteSurvey(SurveyModel surveyToDelete)
+
+    private async Task SearchSurveys(string searchTerm)
     {
-      int deletedSurveyId = surveyToDelete.Id;
-      appDbContext.Set<SurveyModel>().Remove(surveyToDelete);
-      await appDbContext.SaveChangesAsync();
-      await LoadSurveys();
+      if (string.IsNullOrWhiteSpace(searchTerm))
+      {
+        await LoadSurveys(); // Load all surveys if search term is empty
+      }
+      else
+      {
+        searchTerm = searchTerm.ToLower(); // Convert search term to lowercase
+        var allSurveys = await appDbContext.Set<SurveyModel>()
+            .OrderByDescending(s => s.Id)
+            .ToListAsync();
+
+        surveys = allSurveys.Where(s =>
+            s.Id.ToString().Contains(searchTerm) ||
+            s.StartDate.ToString("dd/MM/yyyy HH:mm").ToLower().Contains(searchTerm) ||
+            s.EndDate.ToString("dd/MM/yyyy HH:mm").ToLower().Contains(searchTerm) ||
+            s.CreatedDate.ToString("dd/MM/yyyy HH:mm").ToLower().Contains(searchTerm) ||
+            s.IsActive.ToString().ToLower().Contains(searchTerm)
+        ).ToList();
+      }
+    }
+    //* Event handlers
+    private void OnSelectionChanged(HashSet<QuestionModel> selectedItems)
+    {
+      selectedQuestions = selectedItems;
+      StateHasChanged();
+    }
+    private void OnSelectSurvey(SurveyModel survey)
+    {
+      selectedSurvey = survey;
+      LoadExistingQuestions();
     }
 
     private async Task CloneSurvey(SurveyModel surveyToClone)
@@ -333,6 +358,7 @@ namespace DC.Components.Pages
       sb.Add($"Survey {surveyToClone.Id} cloned successfully with ID: {clonedSurvey.Id}", Severity.Success);
       OpenEditSurveyDialog(clonedSurvey);
     }
+
     private async Task OnSurveySearchInput(string value)
     {
       _searchString = value;
@@ -349,28 +375,6 @@ namespace DC.Components.Pages
       });
     }
 
-    private async Task SearchSurveys(string searchTerm)
-    {
-      if (string.IsNullOrWhiteSpace(searchTerm))
-      {
-        await LoadSurveys(); // Load all surveys if search term is empty
-      }
-      else
-      {
-        searchTerm = searchTerm.ToLower(); // Convert search term to lowercase
-        var allSurveys = await appDbContext.Set<SurveyModel>()
-            .OrderByDescending(s => s.Id)
-            .ToListAsync();
-
-        surveys = allSurveys.Where(s =>
-            s.Id.ToString().Contains(searchTerm) ||
-            s.StartDate.ToString("dd/MM/yyyy HH:mm").ToLower().Contains(searchTerm) ||
-            s.EndDate.ToString("dd/MM/yyyy HH:mm").ToLower().Contains(searchTerm) ||
-            s.CreatedDate.ToString("dd/MM/yyyy HH:mm").ToLower().Contains(searchTerm) ||
-            s.IsActive.ToString().ToLower().Contains(searchTerm)
-        ).ToList();
-      }
-    }
 
     private async Task OnQuestionSearchInput(string value)
     {
@@ -404,29 +408,6 @@ namespace DC.Components.Pages
             .ToListAsync();
       }
     }
-    private async Task OpenChooseQuestionsDialog(SurveyModel survey)
-    {
-      selectedSurvey = survey;
-      await LoadExistingQuestions();
 
-      var parameters = new DialogParameters
-        {
-            { "Survey", selectedSurvey },
-            { "Questions", questions },
-            { "SelectedQuestions", selectedQuestions },
-            { "ExistingQuestionIds", existingQuestionIds }
-        };
-
-      var options = new DialogOptions { FullScreen = true, CloseOnEscapeKey = true, CloseButton = true };
-
-      var dialog = await dialogService.ShowAsync<ChooseQuestionsDialog>("Choose Questions", parameters, options);
-      var result = await dialog.Result;
-
-      if (!result.Canceled && result.Data is HashSet<QuestionModel> updatedSelectedQuestions)
-      {
-        selectedQuestions = updatedSelectedQuestions;
-        await SaveSurveyQuestions();
-      }
-    }
   }
 }

@@ -24,7 +24,7 @@ namespace DC.Components.Pages
     private const int DebounceDelay = 300; // milliseconds
     private bool isLoading = true;
 
-
+    //* Filter function
     private Func<StaffModel, bool> _quickFilter => x =>
     {
       if (string.IsNullOrWhiteSpace(_searchString))
@@ -45,7 +45,7 @@ namespace DC.Components.Pages
       return false;
     };
 
-
+    //* Initialize
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
       if (firstRender)
@@ -59,6 +59,7 @@ namespace DC.Components.Pages
       }
     }
 
+    //* Staff CRUD
     private async Task LoadStaff()
     {
       try
@@ -142,7 +143,41 @@ namespace DC.Components.Pages
         }
       }
     }
+    private async Task UpdateStaff(StaffModel staffToUpdate)
+    {
+      var trackedStaff = appDbContext.ChangeTracker.Entries<StaffModel>()
+      .FirstOrDefault(e => e.Entity.Id == staffToUpdate.Id)?.Entity;
 
+      if (trackedStaff != null)
+      {
+        appDbContext.Entry(trackedStaff).State = EntityState.Detached;
+      }
+
+      appDbContext.Set<StaffModel>().Update(staffToUpdate);
+      await appDbContext.SaveChangesAsync();
+      sb.Add($"Staff member {staffToUpdate.Id} updated", Severity.Success);
+
+      await LoadStaff();
+      StateHasChanged();
+    }
+
+    private async Task SearchStaff(string searchTerm)
+    {
+      if (string.IsNullOrWhiteSpace(searchTerm))
+      {
+        await LoadStaff();
+      }
+      else
+      {
+        searchTerm = searchTerm.ToLower();
+        staffList = await appDbContext.Set<StaffModel>()
+            .Where(s => s.FullName.ToLower().Contains(searchTerm))
+            .OrderByDescending(s => s.Id)
+            .ToListAsync();
+      }
+    }
+
+    //* Dialog function
     private async Task ConfirmedDelete(StaffModel staffToDelete)
     {
       appDbContext.Set<StaffModel>().Remove(staffToDelete);
@@ -174,23 +209,7 @@ namespace DC.Components.Pages
       }
     }
 
-    private async Task UpdateStaff(StaffModel staffToUpdate)
-    {
-      var trackedStaff = appDbContext.ChangeTracker.Entries<StaffModel>()
-      .FirstOrDefault(e => e.Entity.Id == staffToUpdate.Id)?.Entity;
-
-      if (trackedStaff != null)
-      {
-        appDbContext.Entry(trackedStaff).State = EntityState.Detached;
-      }
-
-      appDbContext.Set<StaffModel>().Update(staffToUpdate);
-      await appDbContext.SaveChangesAsync();
-      sb.Add($"Staff member {staffToUpdate.Id} updated", Severity.Success);
-
-      await LoadStaff();
-      StateHasChanged();
-    }
+    //* Event handler
     private async Task OnKeyDown(KeyboardEventArgs e)
     {
       if (e.Key == "Enter")
@@ -213,21 +232,6 @@ namespace DC.Components.Pages
         await SearchStaff(_searchString);
         StateHasChanged();
       });
-    }
-    private async Task SearchStaff(string searchTerm)
-    {
-      if (string.IsNullOrWhiteSpace(searchTerm))
-      {
-        await LoadStaff();
-      }
-      else
-      {
-        searchTerm = searchTerm.ToLower();
-        staffList = await appDbContext.Set<StaffModel>()
-            .Where(s => s.FullName.ToLower().Contains(searchTerm))
-            .OrderByDescending(s => s.Id)
-            .ToListAsync();
-      }
     }
   }
 }

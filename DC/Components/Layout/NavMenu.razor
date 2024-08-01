@@ -15,7 +15,7 @@
             </NavLink>
         </div>
 
-        <AuthorizeView Roles="Admin,Mod">
+        <AuthorizeView>
             <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="question">
@@ -38,8 +38,6 @@
                     </NavLink>
                 </div>
             </Authorized>
-        </AuthorizeView>
-        <AuthorizeView>
             <NotAuthorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="login">

@@ -417,7 +417,7 @@ namespace DC.Components.Pages
             { "ExistingQuestionIds", existingQuestionIds }
         };
 
-      var options = new DialogOptions { FullScreen = true, CloseOnEscapeKey = true };
+      var options = new DialogOptions { FullScreen = true, CloseOnEscapeKey = true, CloseButton = true };
 
       var dialog = await dialogService.ShowAsync<ChooseQuestionsDialog>("Choose Questions", parameters, options);
       var result = await dialog.Result;

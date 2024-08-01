@@ -23,10 +23,10 @@
               <MudCardContent>
                 <MudGrid>
                   <MudItem xs="12" sm="7">
-                    <MudTextField @bind-Value="answer.AnswerText" Label="Answer Text" Required="true" FullWidth="true" />
+                    <MudTextField @bind-Value="answer.AnswerText" Label="Answer" Required="true" FullWidth="true" />
                   </MudItem>
                   <MudItem xs="12" sm="4">
-                    <MudNumericField @bind-Value="answer.Points" Label="Point multiplier" FullWidth="true" />
+                    <MudNumericField @bind-Value="answer.Points" Label="Point" FullWidth="true" />
                   </MudItem>
                   <MudItem xs="12" sm="1">
                     <MudButton StartIcon="@Icons.Material.Filled.Delete" Variant="Variant.Filled" Color="Color.Error" OnClick="@(() => RemoveAnswer(answer))" Size="Size.Small" Class="custom-button-alignment">Delete</MudButton>

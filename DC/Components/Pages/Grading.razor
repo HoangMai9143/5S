@@ -59,7 +59,7 @@
 						</PagerContent>
 					</MudDataGrid>
 				</MudTabPanel>
-				<MudTabPanel Text="Staff by Department" Icon="@Icons.Material.Filled.People">
+				<MudTabPanel Text="Staff" Icon="@Icons.Material.Filled.People">
 					@if (selectedSurvey != null)
 					{
 						<MudText Typo="Typo.h6" Class="mb-4">Current Survey: @selectedSurvey.Title</MudText>
@@ -76,12 +76,12 @@
 									<MudPaper Elevation="0" Class="d-flex flex-column justify-center align-center pa-2" Style="height: 100%;">
 										@if (staffScores.TryGetValue(staffContext.Item.Id, out var score))
 										{
-											<MudProgressLinear Size="Size.Small" Rounded="true" Value="@score" Min="0" Max="100" Color="Color.Primary" Class="my-2 w-100" />
+											<MudProgressLinear Size="Size.Medium" Rounded="true" Value="@score" Min="0" Max="100" Color="Color.Primary" Class="my-2 w-100" />
 											<MudText>@score.ToString("F0")</MudText>
 										}
 										else
 										{
-											<MudText Color="Color.Primary">Not graded yet</MudText>
+											<MudText Color="Color.Warning">Not graded yet</MudText>
 										}
 									</MudPaper>
 								</CellTemplate>

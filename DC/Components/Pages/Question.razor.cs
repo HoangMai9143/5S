@@ -163,37 +163,6 @@ namespace DC.Components.Pages
       }
     }
 
-    //* Event handler
-    private void OnMultipleChoiceChanged(AnswerModel changedAnswer)
-    {
-      StateHasChanged();
-    }
-
-    private async Task OnQuestionSearchInput(string value)
-    {
-      _searchString = value;
-      _questionDebounceTimer.Stop();
-      _questionDebounceTimer.Start();
-    }
-
-    private async Task QuestionDebounceTimerElapsed()
-    {
-      await InvokeAsync(async () =>
-      {
-        await SearchQuestions(_searchString);
-        StateHasChanged();
-      });
-    }
-
-
-    //* Dialog function
-    private async Task ConfirmedDeleteQuestion(QuestionModel questionToDelete)
-    {
-      appDbContext.Set<QuestionModel>().Remove(questionToDelete);
-      await appDbContext.SaveChangesAsync();
-      await LoadQuestions();
-    }
-
     private async Task CloneQuestion(QuestionModel questionToClone)
     {
       try
@@ -228,13 +197,42 @@ namespace DC.Components.Pages
       }
     }
 
+    //* Event handler
+    private void OnMultipleChoiceChanged(AnswerModel changedAnswer)
+    {
+      StateHasChanged();
+    }
+
+    private async Task OnQuestionSearchInput(string value)
+    {
+      _searchString = value;
+      _questionDebounceTimer.Stop();
+      _questionDebounceTimer.Start();
+    }
+
+    private async Task QuestionDebounceTimerElapsed()
+    {
+      await InvokeAsync(async () =>
+      {
+        await SearchQuestions(_searchString);
+        StateHasChanged();
+      });
+    }
+
+    //* Dialog function
+    private async Task ConfirmedDeleteQuestion(QuestionModel questionToDelete)
+    {
+      appDbContext.Set<QuestionModel>().Remove(questionToDelete);
+      await appDbContext.SaveChangesAsync();
+      await LoadQuestions();
+    }
+
     private async Task OpenQuestionEditDialog(int questionId)
     {
       var parameters = new DialogParameters
         {
           { "QuestionId", questionId }
         };
-
       var options = new DialogOptions { CloseOnEscapeKey = true, FullScreen = true, CloseButton = true };
       var dialog = await dialogService.ShowAsync<QuestionEditDialog>("Edit Question", parameters, options);
       var result = await dialog.Result;

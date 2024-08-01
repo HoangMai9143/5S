@@ -236,11 +236,12 @@ namespace DC.Components.Pages
         sb.Add($"Error cloning question: {ex.Message}", Severity.Error);
       }
     }
+
     private async Task OpenQuestionEditDialog(int questionId)
     {
       var parameters = new DialogParameters
         {
-            { "QuestionId", questionId }
+          { "QuestionId", questionId }
         };
 
       var options = new DialogOptions { CloseOnEscapeKey = true, FullScreen = true, CloseButton = true };

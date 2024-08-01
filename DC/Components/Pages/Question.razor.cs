@@ -13,7 +13,7 @@ namespace DC.Components.Pages
 {
   public partial class Question
   {
-    private int activeIndex = 0;
+    private int activeIndex;
     private bool isLoading = true;
     private List<QuestionModel> questions = new();
     private QuestionModel currentQuestion = new();
@@ -21,12 +21,11 @@ namespace DC.Components.Pages
     private string _searchString = string.Empty;
     private AnswerType _selectedAnswerType = AnswerType.SingleChoice;
     private System.Timers.Timer _questionDebounceTimer;
-    private const int DebounceDelay = 300; // milliseconds
+    private const int DebounceDelay = 300; // ms
 
     private int selectedAnswerIndex = -1;
 
 
-    // Filter questions
     private Func<QuestionModel, bool> _questionQuickFilter => x =>
     {
       if (string.IsNullOrWhiteSpace(_searchString))
@@ -54,6 +53,7 @@ namespace DC.Components.Pages
         StateHasChanged();
       }
     }
+
     private async Task LoadQuestions()
     {
       try
@@ -113,12 +113,11 @@ namespace DC.Components.Pages
       activeIndex = index;
     }
 
-
-
     private void OnMultipleChoiceChanged(AnswerModel changedAnswer)
     {
       StateHasChanged();
     }
+
 
     private async Task OnQuestionSearchInput(string value)
     {

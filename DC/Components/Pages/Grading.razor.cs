@@ -16,14 +16,16 @@ namespace DC.Components.Pages
 		private bool isLoading = true;
 		private int activeIndex = 0;
 		private List<SurveyModel> surveys = new List<SurveyModel>();
-		private SurveyModel selectedSurvey;
-		private Dictionary<string, List<StaffModel>> staffByDepartment = new Dictionary<string, List<StaffModel>>();
-		private Dictionary<int, double> staffScores = new Dictionary<int, double>();
 		private List<StaffModel> allStaff = new List<StaffModel>();
+		private SurveyModel selectedSurvey;
 		private string _searchString = "";
 		private string _staffSearchString = "";
+		private Dictionary<string, List<StaffModel>> staffByDepartment = new Dictionary<string, List<StaffModel>>();
+		private Dictionary<int, double> staffScores = new Dictionary<int, double>();
 		private Dictionary<int, string> staffNotes = new Dictionary<int, string>();
 		private Dictionary<int, string> tempStaffNotes = new Dictionary<int, string>();
+
+
 		private Func<SurveyModel, bool> _surveyQuickFilter => x =>
 		{
 			if (string.IsNullOrWhiteSpace(_searchString))
@@ -38,18 +40,18 @@ namespace DC.Components.Pages
 			return false;
 		};
 		private Func<StaffModel, bool> _staffQuickFilter => x =>
-{
-	if (string.IsNullOrWhiteSpace(_staffSearchString))
-		return true;
+		{
+			if (string.IsNullOrWhiteSpace(_staffSearchString))
+				return true;
 
-	if (x.FullName.Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase))
-		return true;
+			if (x.FullName.Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase))
+				return true;
 
-	if (x.Department?.Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase) == true)
-		return true;
+			if (x.Department?.Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase) == true)
+				return true;
 
-	return false;
-};
+			return false;
+		};
 
 		protected override async Task OnAfterRenderAsync(bool firstRender)
 		{

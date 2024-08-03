@@ -20,6 +20,9 @@ namespace DC.Components.Pages
 		private SurveyModel selectedSurvey;
 		private string _searchString = "";
 		private string _staffSearchString = "";
+		private System.Timers.Timer _surveyDebounceTimer;
+		private System.Timers.Timer _staffDebounceTimer;
+		private const int DebounceDelay = 300;
 		private Dictionary<string, List<StaffModel>> staffByDepartment = new Dictionary<string, List<StaffModel>>();
 		private Dictionary<int, double> staffScores = new Dictionary<int, double>();
 		private Dictionary<int, string> staffNotes = new Dictionary<int, string>();
@@ -60,6 +63,15 @@ namespace DC.Components.Pages
 			{
 				await LoadSurveys();
 				await LoadStaff();
+
+				_surveyDebounceTimer = new System.Timers.Timer(DebounceDelay);
+				_surveyDebounceTimer.Elapsed += async (sender, e) => await SurveyDebounceTimerElapsed();
+				_surveyDebounceTimer.AutoReset = false;
+
+				_staffDebounceTimer = new System.Timers.Timer(DebounceDelay);
+				_staffDebounceTimer.Elapsed += async (sender, e) => await StaffDebounceTimerElapsed();
+				_staffDebounceTimer.AutoReset = false;
+
 				isLoading = false;
 				StateHasChanged();
 			}
@@ -165,6 +177,70 @@ namespace DC.Components.Pages
 		private void OnSurveySearchInput(string value)
 		{
 			_searchString = value;
+			_surveyDebounceTimer.Stop();
+			_surveyDebounceTimer.Start();
+		}
+		private async Task SurveyDebounceTimerElapsed()
+		{
+			await InvokeAsync(async () =>
+			{
+				await SearchSurveys(_searchString);
+				StateHasChanged();
+			});
+		}
+		private async Task SearchSurveys(string searchTerm)
+		{
+			if (string.IsNullOrWhiteSpace(searchTerm))
+			{
+				await LoadSurveys();
+			}
+			else
+			{
+				searchTerm = searchTerm.ToLower();
+				var allSurveys = await appDbContext.SurveyModel
+						.OrderByDescending(s => s.Id)
+						.ToListAsync();
+
+				surveys = allSurveys.Where(s =>
+						s.Id.ToString().Contains(searchTerm) ||
+						s.Title.ToLower().Contains(searchTerm) ||
+						s.StartDate.ToString("dd/MM/yyyy").Contains(searchTerm) ||
+						s.EndDate.ToString("dd/MM/yyyy").Contains(searchTerm) ||
+						s.CreatedDate.ToString("dd/MM/yyyy HH:mm").Contains(searchTerm) ||
+						s.IsActive.ToString().ToLower().Contains(searchTerm)
+				).ToList();
+			}
+		}
+
+		private void OnStaffSearchInput(string value)
+		{
+			_staffSearchString = value;
+			_staffDebounceTimer.Stop();
+			_staffDebounceTimer.Start();
+		}
+		private async Task StaffDebounceTimerElapsed()
+		{
+			await InvokeAsync(async () =>
+			{
+				await SearchStaff(_staffSearchString);
+				StateHasChanged();
+			});
+		}
+		private async Task SearchStaff(string searchTerm)
+		{
+			if (string.IsNullOrWhiteSpace(searchTerm))
+			{
+				await LoadStaff();
+			}
+			else
+			{
+				searchTerm = searchTerm.ToLower();
+				allStaff = await appDbContext.StaffModel
+						.Where(s => s.IsActive &&
+												(s.FullName.ToLower().Contains(searchTerm) ||
+												 s.Department.ToLower().Contains(searchTerm)))
+						.ToListAsync();
+			}
 		}
 
 		private async Task OnSelectSurvey(SurveyModel survey)

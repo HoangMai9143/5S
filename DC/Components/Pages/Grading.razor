@@ -25,7 +25,10 @@
 				<MudTabPanel Text="Choose Survey" Icon="@Icons.Material.Filled.ListAlt">
 					<MudDataGrid T="SurveyModel" Items="@surveys" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_surveyQuickFilter" Elevation="0">
 						<ToolBarContent>
-							<MudTextField Value="@_searchString" ValueChanged="@((string val) => OnSurveySearchInput(val))" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" DebounceInterval="300" Clearable="true">
+							<MudTextField Value="@_searchString" ValueChanged="@((string val) => OnSurveySearchInput(val))" 
+              Placeholder="Search" Adornment="Adornment.Start" 
+              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" 
+              Class="mt-0" DebounceInterval="300" Clearable="true">
 							</MudTextField>
 						</ToolBarContent>
 						<Columns>
@@ -66,7 +69,11 @@
 					}
 					<MudDataGrid T="StaffModel" Items="@allStaff" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_staffQuickFilter">
 						<ToolBarContent>
-							<MudTextField @bind-Value="_staffSearchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+							<MudTextField Value="@_staffSearchString" ValueChanged="@((string val) => OnStaffSearchInput(val))" 
+              Placeholder="Search" Adornment="Adornment.Start" 
+              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" 
+              Class="mt-0" DebounceInterval="300" Clearable="true">
+							</MudTextField>
 						</ToolBarContent>
 						<Columns>
 							<PropertyColumn Property="x => x.FullName" Title="Full Name" />

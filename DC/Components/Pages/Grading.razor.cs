@@ -344,69 +344,75 @@ namespace DC.Components.Pages
 			try
 			{
 				var surveyQuestions = await appDbContext.SurveyQuestionModel
-																								.Where(sq => sq.SurveyId == surveyId)
-																								.Select(sq => new { sq.QuestionId, sq.Question.AnswerType })
-																								.ToListAsync();
+						.Where(sq => sq.SurveyId == surveyId)
+						.Select(sq => new { sq.QuestionId, sq.Question.AnswerType })
+						.ToListAsync();
 
 				var totalPossiblePoints = 0.0;
 				foreach (var sq in surveyQuestions)
 				{
 					var question = await appDbContext.QuestionModel
-																					 .Include(q => q.Answers)
-																					 .FirstOrDefaultAsync(q => q.Id == sq.QuestionId);
+							.Include(q => q.Answers)
+							.FirstOrDefaultAsync(q => q.Id == sq.QuestionId);
 
 					if (question != null)
 					{
 						if (sq.AnswerType == AnswerType.SingleChoice && question.Answers.Any())
 						{
-							totalPossiblePoints += question.Answers.Max(a => a.Points);
+							totalPossiblePoints += question.Answers.Where(a => a.Points > 0).Max(a => a.Points);
 						}
 						else if (sq.AnswerType == AnswerType.MultipleChoice && question.Answers.Any())
 						{
-							totalPossiblePoints += question.Answers.Sum(a => a.Points);
+							totalPossiblePoints += question.Answers.Where(a => a.Points > 0).Sum(a => a.Points);
 						}
 					}
 				}
 
 				var staffAnswerGroups = await appDbContext.QuestionAnswerModel
-																									.Where(qa => qa.SurveyId == surveyId && qa.Answer != null)
-																									.Include(qa => qa.Answer)
-																									.GroupBy(qa => qa.StaffId)
-																									.ToListAsync();
+						.Where(qa => qa.SurveyId == surveyId && qa.Answer != null)
+						.Include(qa => qa.Answer)
+						.GroupBy(qa => qa.StaffId)
+						.ToListAsync();
 
 				var scores = new Dictionary<int, double>();
 
 				foreach (var staffGroup in staffAnswerGroups)
 				{
 					int staffId = staffGroup.Key;
-					double totalPoints = 0.0;
+					double totalPositivePoints = 0.0;
+					double totalNegativePoints = 0.0;
 
 					foreach (var sq in surveyQuestions)
 					{
 						var answers = staffGroup.Where(qa => qa.QuestionId == sq.QuestionId).Select(qa => qa.Answer);
-						// if single choice, get the max points
 						if (sq.AnswerType == AnswerType.SingleChoice && answers.Any())
 						{
-							totalPoints += answers.Max(a => a.Points);
+							var maxPoints = answers.Max(a => a.Points);
+							if (maxPoints > 0)
+								totalPositivePoints += maxPoints;
+							else
+								totalNegativePoints += Math.Abs(maxPoints);
 						}
-						// if multiple choice, get the sum of points
 						else if (sq.AnswerType == AnswerType.MultipleChoice && answers.Any())
 						{
-							totalPoints += answers.Sum(a => a.Points);
+							totalPositivePoints += answers.Where(a => a.Points > 0).Sum(a => a.Points);
+							totalNegativePoints += Math.Abs(answers.Where(a => a.Points < 0).Sum(a => a.Points));
 						}
 					}
 
-					// Convert score to percentage
-					double scorePercentage = totalPossiblePoints > 0 ? (totalPoints / totalPossiblePoints) * 100 : 0;
-					scores[staffId] = Math.Min(scorePercentage, 100); // Ensure score does not exceed 100
+					// Calculate score percentage considering both positive and negative points
+					double scorePercentage = totalPossiblePoints > 0
+							? ((totalPositivePoints - totalNegativePoints) / totalPossiblePoints) * 100
+							: 0;
+					scores[staffId] = Math.Max(0, Math.Min(scorePercentage, 100)); // Ensure score is between 0 and 100
 
 					var surveyResult = await appDbContext.SurveyResultModel
-																							 .FirstOrDefaultAsync(r => r.SurveyId == surveyId && r.StaffId == staffId)
-																							 ?? new SurveyResultModel
-																							 {
-																								 SurveyId = surveyId,
-																								 StaffId = staffId
-																							 };
+							.FirstOrDefaultAsync(r => r.SurveyId == surveyId && r.StaffId == staffId)
+							?? new SurveyResultModel
+							{
+								SurveyId = surveyId,
+								StaffId = staffId
+							};
 
 					surveyResult.FinalGrade = scores[staffId];
 					appDbContext.Update(surveyResult);

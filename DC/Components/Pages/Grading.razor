@@ -78,9 +78,9 @@
 						<Columns>
 							<PropertyColumn Property="x => x.FullName" Title="Full Name" />
 							<PropertyColumn Property="x => x.Department" Title="Department" />
-							<TemplateColumn Title="Score" CellClass="pa-0">
+							<TemplateColumn Title="Score" CellClass="auto">
 								<CellTemplate Context="staffContext">
-									<MudPaper Elevation="0" Class="d-flex flex-column justify-center align-center pa-2" Style="height: 100%;">
+									<div Elevation="0" Class="d-flex flex-column justify-center align-center pa-2" Style="height: 100%;width:80%;">
 										@if (staffScores.TryGetValue(staffContext.Item.Id, out var score))
 										{
 											<MudProgressLinear Size="Size.Medium" Rounded="true" Value="@score" Min="0" Max="100" Color="Color.Primary" Class="my-2 w-100" />
@@ -90,10 +90,10 @@
 										{
 											<MudText Color="Color.Warning">Not graded yet</MudText>
 										}
-									</MudPaper>
+									</div>
 								</CellTemplate>
 							</TemplateColumn>
-							<TemplateColumn Title="Note" CellClass="pa-0">
+							<TemplateColumn Title="Note">
 								<CellTemplate Context="staffContext">
 									<div class="d-flex align-center">
 										<MudTextField T="string" Value="@(GetStaffNote(staffContext.Item.Id))" ValueChanged="@((string newNote) => UpdateStaffNote(staffContext.Item.Id, newNote))" Placeholder="Add note" Variant="Variant.Outlined" Margin="Margin.Dense" Class="flex-grow-1 ma-2" />
@@ -101,13 +101,13 @@
 									</div>
 								</CellTemplate>
 							</TemplateColumn>
-							<TemplateColumn CellClass="pa-0">
+							<TemplateColumn>
 								<CellTemplate Context="staffContext">
-									<MudPaper Elevation="0" Class="d-flex justify-center align-center" Style="height: 100%;">
+									<div Elevation="0" Class="d-flex align-center" Style="height: 100%;">
 										<MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenStaffGradingDialog(staffContext.Item))">
 											Grade
 										</MudButton>
-									</MudPaper>
+									</div>
 								</CellTemplate>
 							</TemplateColumn>
 						</Columns>

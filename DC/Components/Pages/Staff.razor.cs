@@ -21,7 +21,7 @@ namespace DC.Components.Pages
     private bool newStaffIsActive = true;
     private string _searchString = string.Empty;
     private System.Timers.Timer _debounceTimer;
-    private const int DebounceDelay = 300; // milliseconds
+    private const int DebounceDelay = 300; // ms
     private bool isLoading = true;
 
     //* Filter function

@@ -8,7 +8,7 @@
 
 <MudLayout>
     <MudAppBar Elevation="1">
-        <MudText Typo="Typo.h5" Class="ml-3">5S Application</MudText>
+        <MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu />
@@ -39,6 +39,20 @@
                 PaletteDark = _darkPalette,
                 LayoutProperties = new LayoutProperties()
             };
+    }
+
+    private void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+        Console.WriteLine("DrawerToggle");
+        StateHasChanged();
+    }
+
+    private void DarkModeToggle()
+    {
+        _isDarkMode = !_isDarkMode;
+        Console.WriteLine("DarkModeToggle");
+        StateHasChanged();
     }
 
     private readonly PaletteLight _lightPalette = new()

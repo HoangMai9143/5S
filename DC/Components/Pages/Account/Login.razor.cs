@@ -1,5 +1,4 @@
 ﻿using System.Security.Claims;
-using DC.Data;
 using DC.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;

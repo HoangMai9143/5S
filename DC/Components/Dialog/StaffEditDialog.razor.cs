@@ -7,7 +7,6 @@ namespace DC.Components.Dialog
 {
   public partial class StaffEditDialog
   {
-
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
     [Parameter] public StaffModel Staff { get; set; }
 

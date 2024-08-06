@@ -13,6 +13,5 @@ namespace DC.Components.Dialog
     {
       mudDialog.Close(DialogResult.Ok(true));
     }
-
   }
 }

@@ -1,0 +1,52 @@
+@page "/interactive"
+@rendermode InteractiveServer
+@using MudBlazor
+@using Microsoft.AspNetCore.Components.Web
+@using DC.Components
+
+<MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+  <MudAppBar Elevation="1">
+    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@DrawerToggle" />
+    <MudText Typo="Typo.h5" Class="ml-3">5S Application</MudText>
+    <MudSpacer />
+    <MudIconButton Icon="@DarkLightModeButtonIcon" Color="Color.Inherit" OnClick="@DarkModeToggle" />
+  </MudAppBar>
+  <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
+    <NavMenu />
+  </MudDrawer>
+  <MudMainContent Class="mt-16 pa-4">
+    @Body
+  </MudMainContent>
+</MudLayout>
+
+<div id="blazor-error-ui">
+  An unhandled error has occurred.
+  <a href="" class="reload">Reload</a>
+  <a class="dismiss">🗙</a>
+</div>
+
+@code {
+  [Parameter]
+  public RenderFragment Body { get; set; }
+
+  private bool _drawerOpen;
+  private bool _isDarkMode;
+  private MudTheme _theme = new MudTheme();
+
+  private void DrawerToggle()
+  {
+    _drawerOpen = !_drawerOpen;
+  }
+
+  private void DarkModeToggle()
+  {
+    _isDarkMode = !_isDarkMode;
+  }
+
+  private string DarkLightModeButtonIcon => _isDarkMode ? Icons.Material.Filled.Brightness7 : Icons.Material.Filled.Brightness4;
+}

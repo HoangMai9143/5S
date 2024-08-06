@@ -1,68 +1,66 @@
 ﻿<MudNavMenu Class="nav-menu">
-	<div class="nav-content">
-		<MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
-			<span class="nav-text">Home</span>
-		</MudNavLink>
-		<AuthorizeView Roles="Admin">
-			<Authorized>
-				<MudNavLink Href="question" Icon="@Icons.Material.Filled.QuestionAnswer">
-					<span class="nav-text">Manage Questions</span>
-				</MudNavLink>
-				<MudNavLink Href="survey" Icon="@Icons.Material.Filled.Assignment">
-					<span class="nav-text">Manage Surveys</span>
-				</MudNavLink>
-				<MudNavLink Href="gradingmanage" Icon="@Icons.Material.Filled.Star">
-					<span class="nav-text">Manage Grading</span>
-				</MudNavLink>
-				<MudNavLink Href="staff" Icon="@Icons.Material.Filled.People">
-					<span class="nav-text">Manage Staffs</span>
-				</MudNavLink>
-			</Authorized>
-		</AuthorizeView>
-		<AuthorizeView Roles="Mod">
-			<Authorized>
-				<MudNavLink Href="grading" Icon="@Icons.Material.Filled.Star">
-					<span class="nav-text">Grading</span>
-				</MudNavLink>
-			</Authorized>
-		</AuthorizeView>
-	</div>
-
-	<div class="nav-footer">
-		<MudDivider Class="my-2" />
-		<AuthorizeView>
-			<Authorized>
-				<MudNavLink Href="/logout" Icon="@Icons.Material.Filled.Logout" Class="logout-link">
-					<span class="nav-text">Log out</span>
-				</MudNavLink>
-			</Authorized>
-			<NotAuthorized>
-				<MudNavLink Href="/login" Icon="@Icons.Material.Filled.Login" Class="logout-link">
-					<span class="nav-text">Login</span>
-				</MudNavLink>
-			</NotAuthorized>
-		</AuthorizeView>
-	</div>
+    <div class="nav-content">
+        <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
+            <span class="nav-text">Home</span>
+        </MudNavLink>
+        <MudNavLink Href="/interactive" Icon="@Icons.Material.Filled.Home">
+            <span class="nav-text">Interactive Page</span>
+        </MudNavLink>
+        <AuthorizeView Roles="Admin">
+            <Authorized>
+                <MudNavLink Href="question" Icon="@Icons.Material.Filled.QuestionAnswer">
+                    <span class="nav-text">Manage Questions</span>
+                </MudNavLink>
+                <MudNavLink Href="survey" Icon="@Icons.Material.Filled.Assignment">
+                    <span class="nav-text">Manage Surveys</span>
+                </MudNavLink>
+                <MudNavLink Href="gradingmanage" Icon="@Icons.Material.Filled.Star">
+                    <span class="nav-text">Manage Grading</span>
+                </MudNavLink>
+                <MudNavLink Href="staff" Icon="@Icons.Material.Filled.People">
+                    <span class="nav-text">Manage Staffs</span>
+                </MudNavLink>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="Mod">
+            <Authorized>
+                <MudNavLink Href="grading" Icon="@Icons.Material.Filled.Star">
+                    <span class="nav-text">Grading</span>
+                </MudNavLink>
+            </Authorized>
+        </AuthorizeView>
+    </div>
+    <div class="nav-footer">
+        <MudDivider Class="my-2" />
+        <AuthorizeView>
+            <Authorized>
+                <MudNavLink Href="/logout" Icon="@Icons.Material.Filled.Logout" Class="logout-link">
+                    <span class="nav-text">Log out</span>
+                </MudNavLink>
+            </Authorized>
+            <NotAuthorized>
+                <MudNavLink Href="/login" Icon="@Icons.Material.Filled.Login" Class="logout-link">
+                    <span class="nav-text">Login</span>
+                </MudNavLink>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
 </MudNavMenu>
-
 <style>
-	.nav-menu {
-		display: flex;
-		flex-direction: column;
-		height: 100%;
-	}
-
-	.nav-content {
-		flex-grow: 1;
-		overflow-y: auto;
-	}
-
-	.nav-footer {
-		margin-top: auto;
-		padding-top: 8px;
-	}
-
-	.logout-link {
-		margin-top: 8px;
-	}
+    .nav-menu {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    .nav-content {
+        flex-grow: 1;
+        overflow-y: auto;
+    }
+    .nav-footer {
+        margin-top: auto;
+        padding-top: 8px;
+    }
+    .logout-link {
+        margin-top: 8px;
+    }
 </style>

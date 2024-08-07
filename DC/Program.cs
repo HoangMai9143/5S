@@ -22,7 +22,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(option =>
     {
         option.Cookie.Name = "auth_cookie";
-        option.LoginPath = "/login";
+        option.LoginPath = "/Account/login";
         option.Cookie.MaxAge = TimeSpan.FromDays(1);
     }
     );

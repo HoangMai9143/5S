@@ -153,13 +153,22 @@ namespace DC.Components.Pages
     //* Dialog functions
     private async Task OpenCreateSurveyDialog()
     {
-      var dialog = dialogService.Show<SurveyCreateDialog>("Create New Survey");
+      var options = new DialogOptions()
+      {
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true,
+        Position = DialogPosition.Center,
+        CloseOnEscapeKey = true,
+        FullScreen = false,
+      };
+      var dialog = await dialogService.ShowAsync<SurveyCreateDialog>("Edit Survey", options);
       var result = await dialog.Result;
 
       if (!result.Canceled && result.Data is SurveyModel newSurvey)
       {
         await LoadSurveys();
         sb.Add($"Survey created successfully with ID: {newSurvey.Id}.", Severity.Success);
+        StateHasChanged();
       }
     }
     private async Task OpenEditSurveyDialog(SurveyModel surveyToEdit)

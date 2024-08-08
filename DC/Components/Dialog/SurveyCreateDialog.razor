@@ -35,7 +35,7 @@
 <MudDialog>
   <DialogContent>
     <MudStack>
-      <MudTextField @bind-Value="_title" Label="Title" Variant="Variant.Outlined" FullWidth="true" />
+      <MudTextField @bind-Value="_title" Label="Title" Variant="Variant.Filled" FullWidth="true" />
     </MudStack>
     <MudStack>
       <MudDateRangePicker @bind-DateRange="_dateRange" Margin="Margin.Dense" PlaceholderStart="Start Date" PlaceholderEnd="End Date" MinDate="@DateTime.Today" MaxDate="@DateTime.Now.AddYears(1)" AllowSingleDateSelection="true" />

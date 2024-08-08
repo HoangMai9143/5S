@@ -23,6 +23,26 @@ namespace DC.Components.Pages
 		private Dictionary<int, string> staffNotes = new Dictionary<int, string>();
 		private Dictionary<int, string> tempStaffNotes = new Dictionary<int, string>();
 
+		private List<StaffModel> filteredStaff => allStaff.Where(FilterStaff).ToList();
+
+		private string staffFilter = "All";
+
+		private bool FilterStaff(StaffModel staff)
+		{
+			return staffFilter switch
+			{
+				"Graded" => staffScores.ContainsKey(staff.Id),
+				"NotGraded" => !staffScores.ContainsKey(staff.Id),
+				_ => true,
+			};
+		}
+
+		private void SetStaffFilter(string filter)
+		{
+			staffFilter = filter;
+			StateHasChanged();
+		}
+
 		//* Filter function
 		private Func<SurveyModel, bool> _surveyQuickFilter => x =>
 		{

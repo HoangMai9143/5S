@@ -16,8 +16,6 @@ namespace DC.Components.Pages.Account
     [Inject]
     private AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
 
-
-
     [SupplyParameterFromForm]
     public LoginViewModel Model { get; set; } = new();
     private string? errorMessage;

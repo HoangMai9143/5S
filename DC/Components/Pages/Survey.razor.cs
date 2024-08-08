@@ -153,6 +153,7 @@ namespace DC.Components.Pages
     //* Dialog functions
     private async Task OpenCreateSurveyDialog()
     {
+      var parameters = new DialogParameters();
       var options = new DialogOptions()
       {
         MaxWidth = MaxWidth.Small,
@@ -161,7 +162,7 @@ namespace DC.Components.Pages
         CloseOnEscapeKey = true,
         FullScreen = false,
       };
-      var dialog = await dialogService.ShowAsync<SurveyCreateDialog>("Edit Survey", options);
+      var dialog = await dialogService.ShowAsync<SurveyCreateDialog>("Create Survey", parameters, options);
       var result = await dialog.Result;
 
       if (!result.Canceled && result.Data is SurveyModel newSurvey)

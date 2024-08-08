@@ -4,10 +4,38 @@
 
 @rendermode InteractiveServer
 
+<style>
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    z-index: 1;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #c4c4c4;
+    border-radius: 1px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a6a6a6;
+  }
+
+  html,
+  body * {
+    scrollbar-color: #c4c4c4 transparent;
+    scrollbar-width: none;
+    overflow-y: hidden !important;
+  }
+</style>
+
 <MudDialog>
   <DialogContent>
     <MudStack>
-      <MudTextField @bind-Value="_title" Label="Title" Variant="Variant.Outlined" FullWidth="true" />
+      <MudTextField @bind-Value="_title" Label="Title" Variant="Variant.Filled" FullWidth="true" />
     </MudStack>
     <MudStack>
       <MudDateRangePicker @bind-DateRange="_dateRange" Margin="Margin.Dense" PlaceholderStart="Start Date" PlaceholderEnd="End Date" MinDate="@DateTime.Today.AddYears(-1)" MaxDate="@DateTime.Today.AddYears(1)" />

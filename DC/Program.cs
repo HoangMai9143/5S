@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 using MudBlazor.Services;
 using MudBlazor;
+using Microsoft.AspNetCore.Components.Authorization;
+using DC.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +32,12 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddHttpClient();
+
+
+
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+builder.Services.AddAuthorizationCore();
+
 
 builder.Services.AddMudServices(config =>
 {

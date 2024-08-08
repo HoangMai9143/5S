@@ -1,17 +1,22 @@
-﻿using System.Security.Claims;
+﻿using System.Text.Json;
+using DC.Services;
 using DC.ViewModels;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.JSInterop;
 
 namespace DC.Components.Pages.Account
 {
   public partial class Login
   {
-    [CascadingParameter]
-    public HttpContext? httpContext { get; set; }
+    [Inject]
+    private IJSRuntime JSRuntime { get; set; } = default!;
+
+    [Inject]
+    private AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
+
+
 
     [SupplyParameterFromForm]
     public LoginViewModel Model { get; set; } = new();
@@ -19,26 +24,44 @@ namespace DC.Components.Pages.Account
 
     private async Task Authenticate()
     {
-      if (appDbContext == null)
+      try
       {
-        errorMessage = "Database context is not available.";
-        return;
+        if (appDbContext == null)
+        {
+          errorMessage = "Database context is not available.";
+          return;
+        }
+        var userAccount = await appDbContext.UserAccountModel.FirstOrDefaultAsync(x => x.Username == Model.userName && x.Password == Model.password);
+        if (userAccount == null)
+        {
+          errorMessage = "Invalid User Name or Password";
+          return;
+        }
+
+        var userInfo = new UserInfo
+        {
+          Username = userAccount.Username,
+          Role = userAccount.Role
+        };
+
+        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "userInfo", JsonSerializer.Serialize(userInfo));
+
+        if (AuthStateProvider is CustomAuthenticationStateProvider customProvider)
+        {
+          await customProvider.UpdateAuthenticationState();
+        }
+        else
+        {
+          errorMessage = "Authentication provider is not available.";
+          return;
+        }
+
+        navigationManager.NavigateTo("/home");
       }
-      var userAccount = await appDbContext.UserAccountModel.FirstOrDefaultAsync(x => x.Username == Model.userName && x.Password == Model.password);
-      if (userAccount == null)
+      catch (Exception ex)
       {
-        errorMessage = "Invalid User Name or Password";
-        return;
+        errorMessage = $"An error occurred: {ex.Message}";
       }
-      var claims = new List<Claim>
-      {
-          new Claim(ClaimTypes.Name, userAccount.Username),
-          new Claim(ClaimTypes.Role, userAccount.Role)
-      };
-      var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-      var principal = new ClaimsPrincipal(identity);
-      await httpContext.SignInAsync(principal);
-      navigationManager.NavigateTo("/home");
     }
   }
 }

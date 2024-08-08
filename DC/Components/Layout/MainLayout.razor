@@ -9,60 +9,16 @@
 <MudSnackbarProvider @rendermode="InteractiveServer" />
 
 <MudLayout>
-	<MudCard Elevation="2" Class="custom-card-padding">
-		<MudContainer MaxWidth="MaxWidth.ExtraExtraLarge" Class="d-flex flex-column">
-
-			<MudGrid Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
-
-				<MudItem xs="12" sm="2" Class="d-flex justify-start">
-					<MudText Typo="Typo.h5">5S Application</MudText>
-				</MudItem>
-
-				<MudItem xs="12" sm="7" Class="d-flex justify-center mud-width-full">
-					<MudGrid Justify="Justify.Center" Class="mud-width-full" Style="flex-grow: 1;">
-						<MudItem>
-							<MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
-						</MudItem>
-						<AuthorizeView Roles="Admin">
-							<Authorized>
-								<MudItem>
-									<MudNavLink Href="question" Icon="@Icons.Material.Filled.QuestionAnswer">Manage Questions</MudNavLink>
-								</MudItem>
-								<MudItem>
-									<MudNavLink Href="survey" Icon="@Icons.Material.Filled.Assignment">Manage Surveys</MudNavLink>
-								</MudItem>
-								<MudItem>
-									<MudNavLink Href="grading" Icon="@Icons.Material.Filled.Star">Manage Grading</MudNavLink>
-								</MudItem>
-								<MudItem>
-									<MudNavLink Href="staff" Icon="@Icons.Material.Filled.People">Manage Staffs</MudNavLink>
-								</MudItem>
-							</Authorized>
-						</AuthorizeView>
-						<AuthorizeView Roles="Mod">
-							<Authorized>
-								<MudItem>
-									<MudNavLink Href="grading" Icon="@Icons.Material.Filled.Star">Grading</MudNavLink>
-								</MudItem>
-							</Authorized>
-						</AuthorizeView>
-					</MudGrid>
-				</MudItem>
-
-				<MudItem xs="12" sm="2" Class="d-flex justify-end">
-					<div class="d-flex justify-end">
-						<AuthorizeView>
-							<NotAuthorized>
-								<MudNavLink Href="/Account/login" Icon="@Icons.Material.Filled.Login">Login</MudNavLink>
-							</NotAuthorized>
-						</AuthorizeView>
-					</div>
-				</MudItem>
-
-			</MudGrid>
-		</MudContainer>
-	</MudCard>
-	<MudMainContent Class="pa-4">
+	<MudAppBar Elevation="1">
+		<MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@DrawerToggle" />
+		<MudText Typo="Typo.h5" Class="ml-3">5S Application</MudText>
+		<MudSpacer />
+		<MudIconButton Icon="@DarkLightModeButtonIcon" Color="Color.Inherit" OnClick="@DarkModeToggle" />
+	</MudAppBar>
+	<MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
+		<NavMenu />
+	</MudDrawer>
+	<MudMainContent Class="mt-16 pa-4">
 		@Body
 	</MudMainContent>
 </MudLayout>
@@ -72,18 +28,3 @@
 	<a href="" class="reload">Reload</a>
 	<a class="dismiss">🗙</a>
 </div>
-
-<style>
-	.mud-nav-link {
-		padding: 0 8px !important;
-	}
-
-	.mud-nav-link .mud-nav-link-text {
-		font-size: 0.875rem;
-	}
-
-	.custom-card-padding {
-		padding-top: 16px;
-		padding-bottom: 8px;
-	}
-</style>

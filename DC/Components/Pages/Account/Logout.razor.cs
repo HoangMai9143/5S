@@ -1,21 +1,18 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Authentication;
+using Microsoft.JSInterop;
 
 namespace DC.Components.Pages.Account
 {
   public partial class Logout
   {
-    [CascadingParameter]
-    public HttpContext? httpContext { get; set; }
+    [Inject]
+    private IJSRuntime JSRuntime { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
       await base.OnInitializedAsync();
-      if (httpContext.User.Identity.IsAuthenticated)
-      {
-        await httpContext.SignOutAsync();
-        navigationManager.NavigateTo("/home", true);
-      }
+      await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "userInfo");
+      navigationManager.NavigateTo("/home", true);
     }
   }
 }

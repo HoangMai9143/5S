@@ -61,6 +61,7 @@ namespace DC.Components.Pages.Account
       catch (Exception ex)
       {
         errorMessage = $"An error occurred: {ex.Message}";
+        navigationManager.NavigateTo("/home");
       }
     }
   }

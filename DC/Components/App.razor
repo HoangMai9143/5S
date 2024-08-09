@@ -34,9 +34,9 @@
 
 @code {
     [CascadingParameter]
-    private HttpContext HttpContext { get; set; } = default!;
+    private HttpContext httpContext { get; set; } = default!;
 
-    private IComponentRenderMode? RenderModeForPage => HttpContext.Request.Path.StartsWithSegments("/Account") ? null : InteractiveServer;
+    private IComponentRenderMode? RenderModeForPage => httpContext.Request.Path.StartsWithSegments("/Account") ? null : InteractiveServer;
 
 
     protected override async Task OnInitializedAsync()

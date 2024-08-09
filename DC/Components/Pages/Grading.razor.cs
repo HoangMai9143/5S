@@ -37,12 +37,6 @@ namespace DC.Components.Pages
 			};
 		}
 
-		private void SetStaffFilter(string filter)
-		{
-			staffFilter = filter;
-			StateHasChanged();
-		}
-
 		//* Filter function
 		private Func<SurveyModel, bool> _surveyQuickFilter => x =>
 		{

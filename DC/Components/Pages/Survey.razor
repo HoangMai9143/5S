@@ -9,9 +9,6 @@
 <PageTitle>Survey</PageTitle>
 
 <AuthorizeView Roles="Admin">
-  <NotAuthorized>
-    <MudText Typo="Typo.h6">You are not authorized to view this page.</MudText>
-  </NotAuthorized>
   <Authorized>
     @if (isLoading)
     {

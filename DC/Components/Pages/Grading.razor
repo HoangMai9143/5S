@@ -9,9 +9,6 @@
 <PageTitle>Grading</PageTitle>
 
 <AuthorizeView Roles="Admin, Mod">
-	<NotAuthorized>
-		<MudText Typo="Typo.h6">You are not authorized to view this page.</MudText>
-	</NotAuthorized>
 	<Authorized>
 		@if (isLoading)
 		{
@@ -40,15 +37,15 @@
 						}
 					</MudGrid>
 				</MudTabPanel>
-				<MudTabPanel Text="Staff" Icon="@Icons.Material.Filled.People">
-					<MudGrid>
+				<MudTabPanel Text="Report" Icon="@Icons.Material.Filled.People">
+					<MudStack>
 						<MudText Typo="Typo.h6" Class="mb-4">Current Survey: @selectedSurvey.Title</MudText>
-						<MudButtonGroup Class="mb-4">
-							<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => SetStaffFilter("All"))">All</MudButton>
-							<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => SetStaffFilter("Graded"))">Graded</MudButton>
-							<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => SetStaffFilter("NotGraded"))">Not Graded</MudButton>
-						</MudButtonGroup>
-					</MudGrid>
+						<MudToggleGroup T="string" SelectionMode="SelectionMode.SingleSelection" @bind-Value="staffFilter" Color="Color.Primary">
+							<MudToggleItem Value="@("All")" Text="All" />
+							<MudToggleItem Value="@("Graded")" Text="Graded" />
+							<MudToggleItem Value="@("NotGraded")" Text="Not Graded" />
+						</MudToggleGroup>
+					</MudStack>
 					<MudDataGrid T="StaffModel" Items="@filteredStaff" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_staffQuickFilter">
 						<ToolBarContent>
 							<MudTextField @bind-Value="_staffSearchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" DebounceInterval="300" />

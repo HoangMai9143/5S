@@ -6,6 +6,7 @@ using MudBlazor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using DC.Models;
+using DC.Components.Dialog;
 
 namespace DC.Components.Pages
 {
@@ -18,6 +19,11 @@ namespace DC.Components.Pages
     private List<ChartSeries> series = new();
     private string[] xAxisLabels = { "0-10", "11-20", "21-30", "31-40", "41-50", "51-60", "61-70", "71-80", "81-90", "91-100" };
     private double yAxisMax;
+    private string _staffSearchString = "";
+    private HashSet<StaffModel> selectedItems = new HashSet<StaffModel>();
+    private IEnumerable<StaffModel> filteredStaff = new List<StaffModel>();
+    private Dictionary<int, double> staffScores = new Dictionary<int, double>();
+    private Dictionary<int, string> staffNotes = new Dictionary<int, string>();
 
     private List<SurveyModel> surveys = new();
     private List<string> departments = new();
@@ -66,16 +72,11 @@ namespace DC.Components.Pages
       isLoading = false;
     }
 
-    private async Task LoadReportData()
+    private async Task LoadStaffData()
     {
-      isLoading = true;
-      StateHasChanged();
-
-      // Query the database
       var staffQuery = appDbContext.StaffModel.AsQueryable();
       var surveyResultsQuery = appDbContext.SurveyResultModel.AsQueryable();
 
-      // Filter the data
       if (selectedSurvey != null && selectedSurvey.Title != ALL_SURVEYS)
       {
         surveyResultsQuery = surveyResultsQuery.Where(sr => sr.SurveyId == selectedSurvey.Id);
@@ -84,29 +85,68 @@ namespace DC.Components.Pages
       if (selectedDepartment != ALL_DEPARTMENTS)
       {
         staffQuery = staffQuery.Where(s => s.Department == selectedDepartment);
+      }
+
+      filteredStaff = await staffQuery.ToListAsync();
+
+      var surveyResults = await surveyResultsQuery.ToListAsync();
+      staffScores = surveyResults.GroupBy(sr => sr.StaffId)
+          .ToDictionary(g => g.Key, g => g.Average(sr => sr.FinalGrade));
+    }
+    private string GetStaffNote(int staffId)
+    {
+      return staffNotes.TryGetValue(staffId, out var note) ? note : "";
+    }
+
+    private void UpdateStaffNote(int staffId, string newNote)
+    {
+      staffNotes[staffId] = newNote;
+    }
+
+    private async Task LoadReportData()
+    {
+      isLoading = true;
+      StateHasChanged();
+
+      var staffQuery = appDbContext.StaffModel.AsQueryable();
+      var surveyResultsQuery = appDbContext.SurveyResultModel.AsQueryable();
+
+      if (selectedSurvey != null && selectedSurvey.Title != ALL_SURVEYS)
+      {
+        surveyResultsQuery = surveyResultsQuery.Where(sr => sr.SurveyId == selectedSurvey.Id);
+        staffQuery = staffQuery.Where(s => surveyResultsQuery.Any(sr => sr.StaffId == s.Id));
+      }
+
+      if (selectedDepartment != ALL_DEPARTMENTS)
+      {
+        staffQuery = staffQuery.Where(s => s.Department == selectedDepartment);
         surveyResultsQuery = surveyResultsQuery.Where(sr => sr.Staff.Department == selectedDepartment);
       }
 
-      // Calculate the report data
       totalStaff = await staffQuery.CountAsync();
+
       var surveyResults = await surveyResultsQuery.ToListAsync();
       gradedStaff = surveyResults.Select(sr => sr.StaffId).Distinct().Count();
       averageScore = surveyResults.Any() ? surveyResults.Average(sr => sr.FinalGrade) : 0;
 
-      // Calculate the score distribution
       var scoreDistribution = new int[10];
       foreach (var result in surveyResults)
       {
         int index = (int)(result.FinalGrade / 10);
-        if (index == 10) index = 9; // handle the case where the grade is 100
+        if (index == 10) index = 9;
         scoreDistribution[index]++;
       }
 
-      yAxisMax = scoreDistribution.Max() * 1.1; // 10% higher than the max value
+      yAxisMax = scoreDistribution.Max() * 1.1;
       series = new List<ChartSeries>
-        {
-            new ChartSeries { Name = "Staff Count", Data = scoreDistribution.Select(x => (double)x).ToArray() }
-        };
+    {
+        new ChartSeries { Name = "Staff Count", Data = scoreDistribution.Select(x => (double)x).ToArray() }
+    };
+
+      staffScores = surveyResults.GroupBy(sr => sr.StaffId)
+          .ToDictionary(g => g.Key, g => g.Average(sr => sr.FinalGrade));
+
+      filteredStaff = await staffQuery.ToListAsync();
 
       isLoading = false;
       StateHasChanged();
@@ -122,6 +162,42 @@ namespace DC.Components.Pages
     {
       selectedDepartment = value;
       await LoadReportData();
+    }
+    private async Task OpenStaffGradingDialog(StaffModel staff)
+    {
+      var parameters = new DialogParameters
+      {
+        ["Staff"] = staff,
+        ["SurveyId"] = selectedSurvey?.Id ?? 0
+      };
+
+      var options = new DialogOptions
+      {
+        CloseButton = true,
+        FullScreen = true,
+        FullWidth = true
+      };
+
+      var dialog = dialogService.Show<ReportShowDetailDialog>("Staff Report", parameters, options);
+      var result = await dialog.Result;
+
+      if (!result.Canceled)
+      {
+        await LoadReportData();
+      }
+    }
+    private bool _staffQuickFilter(StaffModel staff)
+    {
+      if (string.IsNullOrWhiteSpace(_staffSearchString))
+        return true;
+
+      if (staff.FullName.Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase))
+        return true;
+
+      if (staff.Department.Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase))
+        return true;
+
+      return false;
     }
   }
 }

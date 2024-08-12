@@ -1,0 +1,98 @@
+@using DC.Models
+@using Microsoft.EntityFrameworkCore
+@inject AppDbContext appDbContext
+
+<MudDialog>
+  <TitleContent>
+    <MudText Typo="Typo.h6">Staff Report: @Staff.FullName</MudText>
+  </TitleContent>
+  <DialogContent>
+    <MudGrid>
+      <MudItem xs="12" sm="6">
+        <MudPaper Class="pa-4">
+          <MudText Typo="Typo.h6">Personal Information</MudText>
+          <MudText><strong>Name:</strong> @Staff.FullName</MudText>
+          <MudText><strong>Department:</strong> @Staff.Department</MudText>
+        </MudPaper>
+      </MudItem>
+      <MudItem xs="12" sm="6">
+        <MudPaper Class="pa-4">
+          <MudText Typo="Typo.h6">Survey Score</MudText>
+          @if (score.HasValue)
+          {
+            <MudText><strong>Score:</strong> @score.Value.ToString("F2")</MudText>
+            <MudProgressLinear Color="Color.Primary" Value="@score.Value" Class="my-4" />
+          }
+          else
+          {
+            <MudText>No score available for this survey.</MudText>
+          }
+        </MudPaper>
+      </MudItem>
+      <MudItem xs="12">
+        <MudPaper Class="pa-4">
+          <MudText Typo="Typo.h6">Notes</MudText>
+          <MudTextField @bind-Value="note" Label="Staff Notes" Lines="5" />
+        </MudPaper>
+      </MudItem>
+    </MudGrid>
+  </DialogContent>
+  <DialogActions>
+    <MudButton OnClick="Cancel">Close</MudButton>
+    <MudButton Color="Color.Primary" OnClick="Submit">Save</MudButton>
+  </DialogActions>
+</MudDialog>
+
+@code {
+  [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+  [Parameter] public StaffModel Staff { get; set; }
+  [Parameter] public int SurveyId { get; set; }
+
+  private double? score;
+  private string note;
+
+  protected override async Task OnInitializedAsync()
+  {
+    await LoadStaffData();
+  }
+
+  private async Task LoadStaffData()
+  {
+    var surveyResult = await appDbContext.SurveyResultModel
+    .FirstOrDefaultAsync(sr => sr.StaffId == Staff.Id && sr.SurveyId == SurveyId);
+
+    if (surveyResult != null)
+    {
+      score = surveyResult.FinalGrade;
+      note = surveyResult.Note;
+    }
+  }
+
+  private void Cancel()
+  {
+    MudDialog.Cancel();
+  }
+
+  private async Task Submit()
+  {
+    var surveyResult = await appDbContext.SurveyResultModel
+    .FirstOrDefaultAsync(sr => sr.StaffId == Staff.Id && sr.SurveyId == SurveyId);
+
+    if (surveyResult == null)
+    {
+      surveyResult = new SurveyResultModel
+        {
+          StaffId = Staff.Id,
+          SurveyId = SurveyId
+        };
+      appDbContext.SurveyResultModel.Add(surveyResult);
+    }
+
+    surveyResult.FinalGrade = score ?? 0;
+    surveyResult.Note = note;
+
+    await appDbContext.SaveChangesAsync();
+
+    MudDialog.Close(DialogResult.Ok(true));
+  }
+}

@@ -1,0 +1,43 @@
+@page "/report"
+@using DC.Models
+@inject AppDbContext appDbContext
+
+<PageTitle>Report</PageTitle>
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        @if (isLoading)
+        {
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+        }
+        else
+        {
+            <MudGrid>
+                <MudItem xs="12" sm="4">
+                    <MudCard>
+                        <MudCardContent>
+                            <MudText Typo="Typo.h6">Graded Staff</MudText>
+                            <MudText Typo="Typo.h4">@gradedStaff / @totalStaff</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <MudCard>
+                        <MudCardContent>
+                            <MudText Typo="Typo.h6">Average Point</MudText>
+                            <MudText Typo="Typo.h4">@averagePoint.ToString("F2")</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <MudCard>
+                        <MudCardContent>
+                            <MudText Typo="Typo.h6">Score Distribution</MudText>
+                            <MudChart ChartType="ChartType.Bar" ChartSeries="@series" XAxisLabels="@xAxisLabels" Width="100%" Height="300px" />
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
+        }
+    </Authorized>
+</AuthorizeView>

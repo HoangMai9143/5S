@@ -3,6 +3,8 @@
 @using MudBlazor
 @inject AppDbContext appDbContext
 
+@rendermode InteractiveServer
+
 <PageTitle>Report</PageTitle>
 
 <AuthorizeView Roles="Admin">
@@ -40,8 +42,8 @@
         <MudItem xs="12" sm="4">
           <MudCard>
             <MudCardContent>
-              <MudText Typo="Typo.h6">Average Point</MudText>
-              <MudText Typo="Typo.h4">@averagePoint.ToString("F2")</MudText>
+              <MudText Typo="Typo.h6">Average Score</MudText>
+              <MudText Typo="Typo.h4">@averageScore.ToString("F2")</MudText>
             </MudCardContent>
           </MudCard>
         </MudItem>
@@ -49,7 +51,7 @@
           <MudCard>
             <MudCardContent>
               <MudText Typo="Typo.h6">Score Distribution</MudText>
-              <MudChart ChartType="ChartType.Bar" ChartSeries="@series" XAxisLabels="@xAxisLabels" Width="100%" Height="350px" ChartOptions="new ChartOptions { YAxisTicks = 1, BarThickness = 20 }"></MudChart>
+              <MudChart ChartType="ChartType.Bar" ChartSeries="@series" XAxisLabels="@xAxisLabels" Width="100%" Height="350px" ChartOptions="new ChartOptions { YAxisTicks = 1 }"></MudChart>
             </MudCardContent>
           </MudCard>
         </MudItem>
@@ -57,3 +59,10 @@
     }
   </Authorized>
 </AuthorizeView>
+
+<style>
+  .mud-chart-bar {
+    width: 100%;
+    stroke-width: 20px;
+  }
+</style>

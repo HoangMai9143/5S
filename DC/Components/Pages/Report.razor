@@ -1,43 +1,59 @@
 @page "/report"
 @using DC.Models
+@using MudBlazor
 @inject AppDbContext appDbContext
 
 <PageTitle>Report</PageTitle>
 
 <AuthorizeView Roles="Admin">
-    <Authorized>
-        @if (isLoading)
-        {
-            <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
-        }
-        else
-        {
-            <MudGrid>
-                <MudItem xs="12" sm="4">
-                    <MudCard>
-                        <MudCardContent>
-                            <MudText Typo="Typo.h6">Graded Staff</MudText>
-                            <MudText Typo="Typo.h4">@gradedStaff / @totalStaff</MudText>
-                        </MudCardContent>
-                    </MudCard>
-                </MudItem>
-                <MudItem xs="12" sm="4">
-                    <MudCard>
-                        <MudCardContent>
-                            <MudText Typo="Typo.h6">Average Point</MudText>
-                            <MudText Typo="Typo.h4">@averagePoint.ToString("F2")</MudText>
-                        </MudCardContent>
-                    </MudCard>
-                </MudItem>
-                <MudItem xs="12" sm="4">
-                    <MudCard>
-                        <MudCardContent>
-                            <MudText Typo="Typo.h6">Score Distribution</MudText>
-                            <MudChart ChartType="ChartType.Bar" ChartSeries="@series" XAxisLabels="@xAxisLabels" Width="100%" Height="300px" />
-                        </MudCardContent>
-                    </MudCard>
-                </MudItem>
-            </MudGrid>
-        }
-    </Authorized>
+  <Authorized>
+    @if (isLoading)
+    {
+      <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+    }
+    else
+    {
+      <MudGrid>
+        <MudItem xs="12" sm="4">
+          <MudSelect T="SurveyModel" Label="Select Survey" @bind-Value="selectedSurvey" AnchorOrigin="Origin.BottomCenter">
+            @foreach (var survey in surveys)
+            {
+              <MudSelectItem Value="@survey">@survey.Title</MudSelectItem>
+            }
+          </MudSelect>
+
+          <MudSelect T="string" Label="Select Department" @bind-Value="selectedDepartment" AnchorOrigin="Origin.BottomCenter">
+            @foreach (var department in departments)
+            {
+              <MudSelectItem Value="@department">@department</MudSelectItem>
+            }
+          </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="4">
+          <MudCard>
+            <MudCardContent>
+              <MudText Typo="Typo.h6">Graded Staff</MudText>
+              <MudText Typo="Typo.h4">@gradedStaff / @totalStaff</MudText>
+            </MudCardContent>
+          </MudCard>
+        </MudItem>
+        <MudItem xs="12" sm="4">
+          <MudCard>
+            <MudCardContent>
+              <MudText Typo="Typo.h6">Average Point</MudText>
+              <MudText Typo="Typo.h4">@averagePoint.ToString("F2")</MudText>
+            </MudCardContent>
+          </MudCard>
+        </MudItem>
+        <MudItem xs="12">
+          <MudCard>
+            <MudCardContent>
+              <MudText Typo="Typo.h6">Score Distribution</MudText>
+              <MudChart ChartType="ChartType.Bar" ChartSeries="@series" XAxisLabels="@xAxisLabels" Width="100%" Height="350px" ChartOptions="new ChartOptions { YAxisTicks = 1, BarThickness = 20 }"></MudChart>
+            </MudCardContent>
+          </MudCard>
+        </MudItem>
+      </MudGrid>
+    }
+  </Authorized>
 </AuthorizeView>

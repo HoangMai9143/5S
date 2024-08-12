@@ -31,8 +31,52 @@
       </MudItem>
       <MudItem xs="12">
         <MudPaper Class="pa-4">
+          <MudText Typo="Typo.h6">Question Responses</MudText>
+          @foreach (var question in surveyQuestions)
+          {
+            <MudCard Elevation="3" Class="my-4">
+              <MudCardContent>
+                <MudText Typo="Typo.subtitle1"><strong>@question.Question.QuestionContext</strong></MudText>
+                @if (question.Question.AnswerType == AnswerType.SingleChoice)
+                {
+                  var selectedAnswer = questionAnswers.FirstOrDefault(qa => qa.QuestionId == question.QuestionId);
+                  if (selectedAnswer != null)
+                  {
+                    var answer = question.Question.Answers.FirstOrDefault(a => a.Id == selectedAnswer.AnswerId);
+                    <MudText>Selected: @answer?.AnswerText</MudText>
+                    <MudText>Score Contribution: @answer?.Points</MudText>
+                  }
+                  else
+                  {
+                    <MudText>No answer selected</MudText>
+                  }
+                }
+                else if (question.Question.AnswerType == AnswerType.MultipleChoice)
+                {
+                  var selectedAnswers = questionAnswers.Where(qa => qa.QuestionId == question.QuestionId).ToList();
+                  if (selectedAnswers.Any())
+                  {
+                    foreach (var selectedAnswer in selectedAnswers)
+                    {
+                      var answer = question.Question.Answers.FirstOrDefault(a => a.Id == selectedAnswer.AnswerId);
+                      <MudText>Selected: @answer?.AnswerText</MudText>
+                      <MudText>Score Contribution: @answer?.Points</MudText>
+                    }
+                  }
+                  else
+                  {
+                    <MudText>No answers selected</MudText>
+                  }
+                }
+              </MudCardContent>
+            </MudCard>
+          }
+        </MudPaper>
+      </MudItem>
+      <MudItem xs="12">
+        <MudPaper Class="pa-4">
           <MudText Typo="Typo.h6">Notes</MudText>
-          <MudTextField @bind-Value="note" Label="Staff Notes" Lines="5" />
+          <MudTextField @bind-Value="surveyNote" Label="Staff Notes" Lines="5" />
         </MudPaper>
       </MudItem>
     </MudGrid>
@@ -42,57 +86,3 @@
     <MudButton Color="Color.Primary" OnClick="Submit">Save</MudButton>
   </DialogActions>
 </MudDialog>
-
-@code {
-  [CascadingParameter] MudDialogInstance MudDialog { get; set; }
-  [Parameter] public StaffModel Staff { get; set; }
-  [Parameter] public int SurveyId { get; set; }
-
-  private double? score;
-  private string note;
-
-  protected override async Task OnInitializedAsync()
-  {
-    await LoadStaffData();
-  }
-
-  private async Task LoadStaffData()
-  {
-    var surveyResult = await appDbContext.SurveyResultModel
-    .FirstOrDefaultAsync(sr => sr.StaffId == Staff.Id && sr.SurveyId == SurveyId);
-
-    if (surveyResult != null)
-    {
-      score = surveyResult.FinalGrade;
-      note = surveyResult.Note;
-    }
-  }
-
-  private void Cancel()
-  {
-    MudDialog.Cancel();
-  }
-
-  private async Task Submit()
-  {
-    var surveyResult = await appDbContext.SurveyResultModel
-    .FirstOrDefaultAsync(sr => sr.StaffId == Staff.Id && sr.SurveyId == SurveyId);
-
-    if (surveyResult == null)
-    {
-      surveyResult = new SurveyResultModel
-        {
-          StaffId = Staff.Id,
-          SurveyId = SurveyId
-        };
-      appDbContext.SurveyResultModel.Add(surveyResult);
-    }
-
-    surveyResult.FinalGrade = score ?? 0;
-    surveyResult.Note = note;
-
-    await appDbContext.SaveChangesAsync();
-
-    MudDialog.Close(DialogResult.Ok(true));
-  }
-}

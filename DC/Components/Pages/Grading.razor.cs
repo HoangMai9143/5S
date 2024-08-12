@@ -99,6 +99,8 @@ namespace DC.Components.Pages
 			catch (Exception ex)
 			{
 				sb.Add("Error Loading Surveys", Severity.Error);
+				await Task.Delay(1000);
+				await LoadSurveys();
 			}
 		}
 
@@ -127,6 +129,8 @@ namespace DC.Components.Pages
 			catch (Exception ex)
 			{
 				sb.Add("Error Loading Staffs", Severity.Error);
+				await Task.Delay(1000);
+				await LoadStaff();
 			}
 		}
 

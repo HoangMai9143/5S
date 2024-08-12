@@ -21,7 +21,7 @@ namespace DC.Components.Pages
 
     private List<SurveyModel> surveys = new();
     private List<string> departments = new();
-    private SurveyModel? _selectedSurvey;
+    protected SurveyModel? _selectedSurvey;
     private SurveyModel? selectedSurvey
     {
       get => _selectedSurvey;
@@ -48,8 +48,8 @@ namespace DC.Components.Pages
       }
     }
 
-    private const string ALL_DEPARTMENTS = "All";
-    private const string ALL_SURVEYS = "All";
+    private const string ALL_DEPARTMENTS = "All departments";
+    private const string ALL_SURVEYS = "All surveys";
 
     protected override async Task OnInitializedAsync()
     {

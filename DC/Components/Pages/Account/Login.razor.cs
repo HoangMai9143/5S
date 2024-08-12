@@ -11,7 +11,7 @@ namespace DC.Components.Pages.Account
   public partial class Login
   {
     [Inject]
-    private IJSRuntime JSRuntime { get; set; } = default!;
+    private IJSRuntime js { get; set; } = default!;
 
     [Inject]
     private AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
@@ -42,7 +42,7 @@ namespace DC.Components.Pages.Account
           Role = userAccount.Role
         };
 
-        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "userInfo", JsonSerializer.Serialize(userInfo));
+        await js.InvokeVoidAsync("localStorage.setItem", "userInfo", JsonSerializer.Serialize(userInfo));
 
         if (AuthStateProvider is CustomAuthenticationStateProvider customProvider)
         {

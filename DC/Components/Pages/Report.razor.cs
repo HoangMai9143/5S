@@ -57,19 +57,23 @@ namespace DC.Components.Pages
     private const string ALL_DEPARTMENTS = "All departments";
     private const string ALL_SURVEYS = "All surveys";
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-      surveys = await appDbContext.SurveyModel.ToListAsync();
-      surveys.Insert(0, new SurveyModel { Id = 0, Title = ALL_SURVEYS });
+      if (firstRender)
+      {
+        surveys = await appDbContext.SurveyModel.OrderByDescending(s => s.Id).ToListAsync();
+        surveys.Insert(0, new SurveyModel { Id = 0, Title = ALL_SURVEYS });
 
-      departments = new List<string> { ALL_DEPARTMENTS };
-      departments.AddRange(await appDbContext.StaffModel.Select(s => s.Department).Distinct().OrderBy(d => d).ToListAsync());
+        departments = new List<string> { ALL_DEPARTMENTS };
+        departments.AddRange(await appDbContext.StaffModel.Select(s => s.Department).Distinct().OrderBy(d => d).ToListAsync());
 
-      _selectedDepartment = ALL_DEPARTMENTS;
-      _selectedSurvey = surveys.First(s => s.Title == ALL_SURVEYS);
+        _selectedDepartment = ALL_DEPARTMENTS;
+        _selectedSurvey = surveys.First(s => s.Title == ALL_SURVEYS);
 
-      await LoadReportData();
-      isLoading = false;
+        await LoadReportData();
+        isLoading = false;
+        StateHasChanged();
+      }
     }
 
     private async Task LoadStaffData()
@@ -175,7 +179,8 @@ namespace DC.Components.Pages
       {
         CloseButton = true,
         FullScreen = true,
-        FullWidth = true
+        FullWidth = true,
+        CloseOnEscapeKey = true
       };
 
       var dialog = dialogService.Show<ReportShowDetailDialog>("Staff Report", parameters, options);

@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,15 +18,18 @@ namespace DC.Components.Dialog
 
     private double? score;
     private string surveyNote;
+    private Dictionary<int, string> questionNotes = new Dictionary<int, string>();
     private List<SurveyQuestionModel> surveyQuestions = new List<SurveyQuestionModel>();
     private List<QuestionAnswerModel> questionAnswers = new List<QuestionAnswerModel>();
 
+    private string questionNote;
+
     protected override async Task OnInitializedAsync()
     {
-      await LoadStaffData();
+      await LoadReportData();
     }
 
-    private async Task LoadStaffData()
+    private async Task LoadReportData()
     {
       var surveyResult = await appDbContext.SurveyResultModel
         .FirstOrDefaultAsync(sr => sr.StaffId == Staff.Id && sr.SurveyId == SurveyId);
@@ -45,6 +49,13 @@ namespace DC.Components.Dialog
       questionAnswers = await appDbContext.QuestionAnswerModel
         .Where(qa => qa.StaffId == Staff.Id && qa.SurveyId == SurveyId)
         .ToListAsync();
+
+      // Fetch question notes from ResultModel
+      var results = await appDbContext.ResultModel
+        .Where(r => r.StaffId == Staff.Id && r.SurveyId == SurveyId)
+        .ToListAsync();
+
+      questionNotes = results.ToDictionary(r => r.QuestionId, r => r.Note ?? string.Empty);
     }
 
     private void Cancel()
@@ -73,6 +84,15 @@ namespace DC.Components.Dialog
       await appDbContext.SaveChangesAsync();
 
       MudDialog.Close(DialogResult.Ok(true));
+    }
+    private Color GetChipColor(int points)
+    {
+      if (points > 0)
+        return Color.Success;
+      else if (points < 0)
+        return Color.Error;
+      else
+        return Color.Default;
     }
   }
 }

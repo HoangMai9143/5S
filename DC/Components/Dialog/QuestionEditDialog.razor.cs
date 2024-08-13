@@ -18,10 +18,17 @@ namespace DC.Components.Dialog
     {
       await LoadQuestion(QuestionId);
     }
+
     private async Task SaveQuestion()
     {
       try
       {
+        if (currentQuestion == null || currentAnswers == null)
+        {
+          sb.Add("Error: Question or answers cannot be null.", Severity.Error);
+          return;
+        }
+
         if (currentQuestion.Id == 0)
         {
           await appDbContext.Set<QuestionModel>().AddAsync(currentQuestion);

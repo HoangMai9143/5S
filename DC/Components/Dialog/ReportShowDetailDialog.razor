@@ -81,7 +81,7 @@
                 }
                 @if (questionNotes.TryGetValue(question.QuestionId, out var note))
                 {
-                  <MudText Typo="Typo.body2"><strong>Note:</strong> @note</MudText>
+                  <MudTextField @bind-Value="questionNotes[question.QuestionId]" />
                 }
               </MudCardContent>
             </MudCard>

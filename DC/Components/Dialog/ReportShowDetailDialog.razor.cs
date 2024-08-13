@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,7 +59,6 @@ namespace DC.Components.Dialog
 
     private void Cancel()
     {
-      sb.Add("Canceled", Severity.Info);
       MudDialog.Cancel();
     }
 
@@ -84,6 +82,28 @@ namespace DC.Components.Dialog
         surveyResult.FinalGrade = score ?? 0;
         surveyResult.Note = surveyNote;
 
+        foreach (var note in questionNotes)
+        {
+          var result = await appDbContext.ResultModel
+            .FirstOrDefaultAsync(r => r.StaffId == Staff.Id && r.SurveyId == SurveyId && r.QuestionId == note.Key);
+
+          if (result != null)
+          {
+            result.Note = note.Value;
+          }
+          else
+          {
+            result = new ResultModel
+            {
+              StaffId = Staff.Id,
+              SurveyId = SurveyId,
+              QuestionId = note.Key,
+              Note = note.Value
+            };
+            appDbContext.ResultModel.Add(result);
+          }
+        }
+
         await appDbContext.SaveChangesAsync();
         sb.Add("Saved", Severity.Success);
 
@@ -94,6 +114,7 @@ namespace DC.Components.Dialog
         sb.Add(ex.Message, Severity.Error);
       }
     }
+
     private Color GetChipColor(int points)
     {
       if (points > 0)

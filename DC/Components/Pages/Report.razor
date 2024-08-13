@@ -25,7 +25,6 @@
               <MudSelectItem Value="@survey">@survey.Title</MudSelectItem>
             }
           </MudSelect>
-
           <MudSelect T="string" Label="Select Department" @bind-Value="selectedDepartment" AnchorOrigin="Origin.BottomCenter">
             @foreach (var department in departments)
             {

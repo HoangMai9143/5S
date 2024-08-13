@@ -60,30 +60,39 @@ namespace DC.Components.Dialog
 
     private void Cancel()
     {
+      sb.Add("Canceled", Severity.Info);
       MudDialog.Cancel();
     }
 
     private async Task Submit()
     {
-      var surveyResult = await appDbContext.SurveyResultModel
-        .FirstOrDefaultAsync(sr => sr.StaffId == Staff.Id && sr.SurveyId == SurveyId);
-
-      if (surveyResult == null)
+      try
       {
-        surveyResult = new SurveyResultModel
+        var surveyResult = await appDbContext.SurveyResultModel
+          .FirstOrDefaultAsync(sr => sr.StaffId == Staff.Id && sr.SurveyId == SurveyId);
+
+        if (surveyResult == null)
         {
-          StaffId = Staff.Id,
-          SurveyId = SurveyId
-        };
-        appDbContext.SurveyResultModel.Add(surveyResult);
+          surveyResult = new SurveyResultModel
+          {
+            StaffId = Staff.Id,
+            SurveyId = SurveyId
+          };
+          appDbContext.SurveyResultModel.Add(surveyResult);
+        }
+
+        surveyResult.FinalGrade = score ?? 0;
+        surveyResult.Note = surveyNote;
+
+        await appDbContext.SaveChangesAsync();
+        sb.Add("Saved", Severity.Success);
+
+        MudDialog.Close(DialogResult.Ok(true));
       }
-
-      surveyResult.FinalGrade = score ?? 0;
-      surveyResult.Note = surveyNote;
-
-      await appDbContext.SaveChangesAsync();
-
-      MudDialog.Close(DialogResult.Ok(true));
+      catch (Exception ex)
+      {
+        sb.Add(ex.Message, Severity.Error);
+      }
     }
     private Color GetChipColor(int points)
     {

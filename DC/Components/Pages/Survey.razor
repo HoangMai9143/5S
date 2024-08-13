@@ -53,7 +53,7 @@
             <CellTemplate Context="cellContext">
               <MudStack Row>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenChooseQuestionsDialog(cellContext.Item))">
-                  Select this
+                  Choose Questions
                 </MudButton>
                 <MudIconButton Label="Edit" Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenEditSurveyDialog(cellContext.Item))" />
                 <MudIconButton Label="Delete" Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="Size.Small" OnClick="@(() => DeleteSurvey(cellContext.Item))" />

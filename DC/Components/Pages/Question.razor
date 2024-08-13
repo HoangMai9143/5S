@@ -24,9 +24,9 @@
                         <MudTextField Value="@_searchString" ValueChanged="@((string val) => OnQuestionSearchInput(val))" T="string" Label="New Question / Search" HelperText="Type to search or add new question" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" TextUpdateSuppression="false" Immediate="true" DebounceInterval="300" Clearable="true" />
                     </MudItem>
                     <MudItem xs="12" sm="2">
-                        <MudSelect T="AnswerType" @bind-Value="_selectedAnswerType" Label="Answer Type" AnchorOrigin="Origin.BottomCenter">
-                            <MudSelectItem Value="@AnswerType.SingleChoice">Single Choice</MudSelectItem>
-                            <MudSelectItem Value="@AnswerType.MultipleChoice">Multiple Choice</MudSelectItem>
+                        <MudSelect T="AnswerType" @bind-Value="_selectedAnswerType" Label="Answer type" AnchorOrigin="Origin.BottomCenter">
+                            <MudSelectItem Value="@AnswerType.SingleChoice">Single choice</MudSelectItem>
+                            <MudSelectItem Value="@AnswerType.MultipleChoice">Multiple choice</MudSelectItem>
                         </MudSelect>
                     </MudItem>
                     <MudItem xs="12" sm="1" Style="text-align: center;" Class="custom-button">

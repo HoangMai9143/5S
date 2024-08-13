@@ -1,7 +1,6 @@
 @page "/"
 @page "/home"
 
-
 <PageTitle>Home</PageTitle>
 
 <MudGrid>
@@ -9,18 +8,56 @@
     <MudText Typo="Typo.h5" Class="fw-bolder">Welcome</MudText>
   </MudItem>
   <MudItem xs="12">
-    <MudPaper Elevation="1">
-      <div class="p-4">
-        <AuthorizeView>
-          <NotAuthorized>
+    <AuthorizeView>
+      <NotAuthorized>
+        <MudPaper Elevation="4">
+          <div class="p-4">
             <MudText> You are not logged in. Please <MudLink Href="/Account/login" Color="Color.Primary" Underline="Underline.Hover">Login here</MudLink>.
             </MudText>
-          </NotAuthorized>
-          <Authorized>
+          </div>
+        </MudPaper>
+      </NotAuthorized>
+      <Authorized>
+        <MudPaper Elevation="4">
+          <div class="p-4">
             <MudText> You are now logged in as <b>@(context.User.Identity?.Name)</b>.</MudText>
-          </Authorized>
+          </div>
+        </MudPaper>
+        <AuthorizeView Roles="Admin" Context="adminContext">
+          <div class="p-4">
+            <MudText Typo="Typo.h6">User Manual</MudText>
+            <MudText Typo="Typo.body1">
+              <MudIcon Icon="@Icons.Material.Filled.QuestionAnswer" />
+              <MudLink Href="question" Color="Color.Primary" Underline="Underline.Hover">Manage Questions</MudLink>: Create/Edit/Delete/Clone questions and assign answers to the questions.
+            </MudText>
+            <MudText Typo="Typo.body1">
+              <MudIcon Icon="@Icons.Material.Filled.Assignment" />
+              <MudLink Href="survey" Color="Color.Primary" Underline="Underline.Hover">Manage Surveys</MudLink>: Create/Edit/Delete/Clone surveys and assign questions to the surveys.
+            </MudText>
+            <MudText Typo="Typo.body1">
+              <MudIcon Icon="@Icons.Material.Filled.Star" />
+              <MudLink Href="grading" Color="Color.Primary" Underline="Underline.Hover">Manage Grading</MudLink>: Choose which survey to conduct and do the grading for each staff.
+            </MudText>
+            <MudText Typo="Typo.body1">
+              <MudIcon Icon="@Icons.Material.Filled.BarChart" />
+              <MudLink Href="report" Color="Color.Primary" Underline="Underline.Hover">Report</MudLink>: View overall information and detailed information for each staff.
+            </MudText>
+            <MudText Typo="Typo.body1">
+              <MudIcon Icon="@Icons.Material.Filled.People" />
+              <MudLink Href="staff" Color="Color.Primary" Underline="Underline.Hover">Manage Account</MudLink>: Use to create/modify User accounts.
+            </MudText>
+          </div>
         </AuthorizeView>
-      </div>
-    </MudPaper>
+        <AuthorizeView Roles="Mod" Context="modContext">
+          <div class="p-4">
+            <MudText Typo="Typo.h6">User Manual</MudText>
+            <MudText Typo="Typo.body1">
+              <MudIcon Icon="@Icons.Material.Filled.Star" />
+              <MudLink Href="grading" Color="Color.Primary" Underline="Underline.Hover">Take survey</MudLink>: Choose which survey to conduct and do the grading for each staff.
+            </MudText>
+          </div>
+        </AuthorizeView>
+      </Authorized>
+    </AuthorizeView>
   </MudItem>
 </MudGrid>

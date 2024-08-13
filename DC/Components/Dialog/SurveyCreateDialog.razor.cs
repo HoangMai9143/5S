@@ -19,7 +19,7 @@ namespace DC.Components.Dialog
 
     private async Task Submit()
     {
-      if (_dateRange.Start.HasValue)
+      if (_dateRange.Start.HasValue || _dateRange.End.HasValue)
       {
         var startDate = _dateRange.Start.Value;
         var endDate = _dateRange.End.HasValue ? _dateRange.End.Value : startDate;
@@ -39,6 +39,13 @@ namespace DC.Components.Dialog
           IsActive = true
         };
 
+        // Edit
+        // if (_title == string.Empty)
+        if (string.IsNullOrEmpty(_title))
+        {
+          sb.Add("Title can't be empty", Severity.Warning);
+          return;
+        }
         try
         {
           await appDbContext.Set<SurveyModel>().AddAsync(newSurvey);
@@ -54,12 +61,6 @@ namespace DC.Components.Dialog
       {
         sb.Add("Please select a start date", Severity.Warning);
       }
-
     }
-    private async Task HandleSubmit()
-    {
-      await Submit();
-    }
-
   }
 }

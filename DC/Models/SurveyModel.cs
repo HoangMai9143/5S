@@ -25,7 +25,7 @@ namespace DC.Models
     public DateTime EndDate { get; set; }
 
     [Column("created_date", TypeName = "datetime")]
-    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedDate { get; set; } = DateTime.Now;
 
     [Column("isActive", TypeName = "bit")]
     [DefaultValue(true)]

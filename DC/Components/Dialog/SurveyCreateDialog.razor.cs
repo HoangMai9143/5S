@@ -35,7 +35,7 @@ namespace DC.Components.Dialog
           Title = _title,
           StartDate = startDate,
           EndDate = endDate,
-          CreatedDate = DateTime.UtcNow,
+          CreatedDate = DateTime.Now,
           IsActive = true
         };
 

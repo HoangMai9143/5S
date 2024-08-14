@@ -1,8 +1,9 @@
 using System.Security.Claims;
 using System.Text.Json;
+
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.JSInterop;
 using Microsoft.Extensions.Logging;
+using Microsoft.JSInterop;
 
 namespace DC.Services
 {

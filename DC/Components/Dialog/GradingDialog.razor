@@ -2,9 +2,9 @@
 @inject AppDbContext appDbContext
 
 <style>
-  .horizontal-stack {
+  .vertical-stack {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
   }
 </style>
 
@@ -24,15 +24,17 @@
             @if (question.Question.AnswerType == AnswerType.SingleChoice)
             {
               <MudRadioGroup T="int" @bind-Value="@selectedAnswer[question.QuestionId]" SelectedValueChanged="@((int val) => OnSingleChoiceChanged(question.QuestionId, val))">
+                <div class="vertical-stack">
                 @foreach (var answer in question.Question.Answers)
                 {
                   <MudRadio T="int" Value="@answer.Id" Color="Color.Primary">@answer.AnswerText</MudRadio>
                 }
+                </div>
               </MudRadioGroup>
             }
             else if (question.Question.AnswerType == AnswerType.MultipleChoice)
             {
-              <div class="horizontal-stack">
+              <div class="vertical-stack">
                 @foreach (var answer in question.Question.Answers)
                 {
                   <MudCheckBox T="bool" @bind-Value="@selectedMultipleAnswers[question.QuestionId][answer.Id]" CheckedChanged="@((bool newValue) => OnMultipleChoiceChanged(question.QuestionId, answer.Id, newValue))">

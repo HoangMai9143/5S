@@ -47,7 +47,7 @@
                     if (answer != null)
                     {
                       <MudChip T="string" Color="@GetChipColor(answer.Points)">
-                        @answer.AnswerText (Score: @answer.Points)
+                        @answer.AnswerText (@answer.Points)
                       </MudChip>
                     }
                   }
@@ -76,7 +76,7 @@
                   }
                   else
                   {
-                    <MudText>No answers selected</MudText>
+                    <MudText>No answer selected</MudText>
                   }
                 }
                 @if (questionNotes.TryGetValue(question.QuestionId, out var note))

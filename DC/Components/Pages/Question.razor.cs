@@ -9,7 +9,6 @@ namespace DC.Components.Pages
   {
     private bool isLoading = true;
     private List<QuestionModel> questions = new();
-    private QuestionModel currentQuestion = new();
     private List<AnswerModel> currentAnswers = [];
     private string _searchString = string.Empty;
     private AnswerType _selectedAnswerType = AnswerType.SingleChoice;
@@ -94,7 +93,7 @@ namespace DC.Components.Pages
 
         _searchString = string.Empty;
         sb.Add($"Question added successfully with ID: {newQuestion.Id}", Severity.Success);
-        OpenQuestionEditDialog(newQuestion.Id);
+        await OpenQuestionEditDialog(newQuestion.Id);
         StateHasChanged();
       }
     }
@@ -129,11 +128,11 @@ namespace DC.Components.Pages
       try
       {
         var parameters = new DialogParameters
-      {
-        { "ContentText", "Are you sure you want to delete this question?" },
-        { "ButtonText", "Delete" },
-        { "Color", Color.Error }
-      };
+        {
+          { "ContentText", "Are you sure you want to delete this question?" },
+          { "ButtonText", "Delete" },
+          { "Color", Color.Error }
+        };
 
         var options = new DialogOptions()
         {
@@ -226,9 +225,9 @@ namespace DC.Components.Pages
     private async Task OpenQuestionEditDialog(int questionId)
     {
       var parameters = new DialogParameters
-        {
-          { "QuestionId", questionId }
-        };
+      {
+        { "QuestionId", questionId }
+      };
       var options = new DialogOptions { CloseOnEscapeKey = true, FullScreen = true, CloseButton = true };
       var dialog = await dialogService.ShowAsync<QuestionEditDialog>("Edit Question", parameters, options);
       var result = await dialog.Result;

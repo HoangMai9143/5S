@@ -1,10 +1,12 @@
 ﻿using System.Text.Json;
-using DC.Services;
-using DC.ViewModels;
+
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
+
+using DC.Services;
+using DC.ViewModels;
 
 namespace DC.Components.Pages.Account
 {

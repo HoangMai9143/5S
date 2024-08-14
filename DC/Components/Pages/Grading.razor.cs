@@ -1,7 +1,9 @@
-using DC.Components.Dialog;
-using DC.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+
+using DC.Components.Dialog;
+using DC.Models;
+
 using MudBlazor;
 
 namespace DC.Components.Pages
@@ -9,19 +11,20 @@ namespace DC.Components.Pages
 	public partial class Grading
 	{
 		private bool isLoading = true;
-		private int activeIndex = 0;
-		private List<SurveyModel> surveys = new List<SurveyModel>();
-		private List<StaffModel> allStaff = new List<StaffModel>();
-		private SurveyModel selectedSurvey;
+		private int activeIndex;
+		private List<SurveyModel> surveys = [];
+		private List<StaffModel> allStaff = [];
+		private SurveyModel? selectedSurvey;
 		private string _searchString = "";
 		private string _staffSearchString = "";
-		private System.Timers.Timer _surveyDebounceTimer;
-		private System.Timers.Timer _staffDebounceTimer;
+		private System.Timers.Timer? _surveyDebounceTimer;
+		private System.Timers.Timer? _staffDebounceTimer;
 		private const int DebounceDelay = 300;
-		private Dictionary<string, List<StaffModel>> staffByDepartment = new Dictionary<string, List<StaffModel>>();
-		private Dictionary<int, double> staffScores = new Dictionary<int, double>();
-		private Dictionary<int, string> staffNotes = new Dictionary<int, string>();
-		private Dictionary<int, string> tempStaffNotes = new Dictionary<int, string>();
+		private readonly Dictionary<string, List<StaffModel>> staffByDepartment = [];
+		private Dictionary<int, double> staffScores = [];
+		private Dictionary<int, string> staffNotes = [];
+		private readonly Dictionary<int, string> tempStaffNotes = [];
+
 
 		private List<StaffModel> filteredStaff => allStaff.Where(FilterStaff).ToList();
 
@@ -92,9 +95,9 @@ namespace DC.Components.Pages
 			try
 			{
 				surveys = await appDbContext.SurveyModel
-								.Where(s => s.IsActive)
-								.OrderByDescending(s => s.Id)
-								.ToListAsync();
+												.Where(s => s.IsActive)
+												.OrderByDescending(s => s.Id)
+												.ToListAsync();
 			}
 			catch (Exception ex)
 			{
@@ -114,8 +117,8 @@ namespace DC.Components.Pages
 				{
 					// Load scores and notes
 					var results = await appDbContext.SurveyResultModel
-													.Where(sr => sr.SurveyId == selectedSurvey.Id)
-													.ToListAsync();
+																					.Where(sr => sr.SurveyId == selectedSurvey.Id)
+																					.ToListAsync();
 
 					staffScores = results.ToDictionary(sr => sr.StaffId, sr => sr.FinalGrade);
 					staffNotes = results.ToDictionary(sr => sr.StaffId, sr => sr.Note ?? "");
@@ -162,7 +165,7 @@ namespace DC.Components.Pages
 			try
 			{
 				var surveyResult = await appDbContext.SurveyResultModel
-						.FirstOrDefaultAsync(sr => sr.SurveyId == selectedSurvey.Id && sr.StaffId == staffId);
+								.FirstOrDefaultAsync(sr => sr.SurveyId == selectedSurvey.Id && sr.StaffId == staffId);
 
 				if (surveyResult == null)
 				{
@@ -212,16 +215,16 @@ namespace DC.Components.Pages
 			{
 				searchTerm = searchTerm.ToLower();
 				var allSurveys = await appDbContext.SurveyModel
-						.OrderByDescending(s => s.Id)
-						.ToListAsync();
+								.OrderByDescending(s => s.Id)
+								.ToListAsync();
 
 				surveys = allSurveys.Where(s =>
-						s.Id.ToString().Contains(searchTerm) ||
-						s.Title.ToLower().Contains(searchTerm) ||
-						s.StartDate.ToString("dd/MM/yyyy").Contains(searchTerm) ||
-						s.EndDate.ToString("dd/MM/yyyy").Contains(searchTerm) ||
-						s.CreatedDate.ToString("dd/MM/yyyy HH:mm").Contains(searchTerm) ||
-						s.IsActive.ToString().ToLower().Contains(searchTerm)
+								s.Id.ToString().Contains(searchTerm) ||
+								s.Title.ToLower().Contains(searchTerm) ||
+								s.StartDate.ToString("dd/MM/yyyy").Contains(searchTerm) ||
+								s.EndDate.ToString("dd/MM/yyyy").Contains(searchTerm) ||
+								s.CreatedDate.ToString("dd/MM/yyyy HH:mm").Contains(searchTerm) ||
+								s.IsActive.ToString().ToLower().Contains(searchTerm)
 				).ToList();
 			}
 		}
@@ -250,10 +253,10 @@ namespace DC.Components.Pages
 			{
 				searchTerm = searchTerm.ToLower();
 				allStaff = await appDbContext.StaffModel
-						.Where(s => s.IsActive &&
-												(s.FullName.ToLower().Contains(searchTerm) ||
-												 s.Department.ToLower().Contains(searchTerm)))
-						.ToListAsync();
+								.Where(s => s.IsActive &&
+																				(s.FullName.ToLower().Contains(searchTerm) ||
+																				 s.Department.ToLower().Contains(searchTerm)))
+								.ToListAsync();
 			}
 		}
 
@@ -358,16 +361,16 @@ namespace DC.Components.Pages
 			try
 			{
 				var surveyQuestions = await appDbContext.SurveyQuestionModel
-						.Where(sq => sq.SurveyId == surveyId)
-						.Select(sq => new { sq.QuestionId, sq.Question.AnswerType })
-						.ToListAsync();
+								.Where(sq => sq.SurveyId == surveyId)
+								.Select(sq => new { sq.QuestionId, sq.Question.AnswerType })
+								.ToListAsync();
 
 				var totalPossiblePoints = 0.0;
 				foreach (var sq in surveyQuestions)
 				{
 					var question = await appDbContext.QuestionModel
-							.Include(q => q.Answers)
-							.FirstOrDefaultAsync(q => q.Id == sq.QuestionId);
+									.Include(q => q.Answers)
+									.FirstOrDefaultAsync(q => q.Id == sq.QuestionId);
 
 					if (question != null)
 					{
@@ -383,10 +386,10 @@ namespace DC.Components.Pages
 				}
 
 				var staffAnswerGroups = await appDbContext.QuestionAnswerModel
-						.Where(qa => qa.SurveyId == surveyId && qa.Answer != null)
-						.Include(qa => qa.Answer)
-						.GroupBy(qa => qa.StaffId)
-						.ToListAsync();
+								.Where(qa => qa.SurveyId == surveyId && qa.Answer != null)
+								.Include(qa => qa.Answer)
+								.GroupBy(qa => qa.StaffId)
+								.ToListAsync();
 
 				var scores = new Dictionary<int, double>();
 
@@ -416,17 +419,17 @@ namespace DC.Components.Pages
 
 					// Calculate score percentage considering both positive and negative points
 					double scorePercentage = totalPossiblePoints > 0
-							? ((totalPositivePoints - totalNegativePoints) / totalPossiblePoints) * 100
-							: 0;
+									? ((totalPositivePoints - totalNegativePoints) / totalPossiblePoints) * 100
+									: 0;
 					scores[staffId] = Math.Max(0, Math.Min(scorePercentage, 100)); // Ensure score is between 0 and 100
 
 					var surveyResult = await appDbContext.SurveyResultModel
-							.FirstOrDefaultAsync(r => r.SurveyId == surveyId && r.StaffId == staffId)
-							?? new SurveyResultModel
-							{
-								SurveyId = surveyId,
-								StaffId = staffId
-							};
+									.FirstOrDefaultAsync(r => r.SurveyId == surveyId && r.StaffId == staffId)
+									?? new SurveyResultModel
+									{
+										SurveyId = surveyId,
+										StaffId = staffId
+									};
 
 					surveyResult.FinalGrade = scores[staffId];
 					appDbContext.Update(surveyResult);

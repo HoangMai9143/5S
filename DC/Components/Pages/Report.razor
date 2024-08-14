@@ -40,6 +40,9 @@
             </MudCardContent>
           </MudCard>
         </MudItem>
+
+
+
         @if (selectedSurvey != null && selectedSurvey.Title != ALL_SURVEYS)
         {
           <MudItem xs="12" sm="4">
@@ -59,6 +62,18 @@
             </MudCardContent>
           </MudCard>
         </MudItem>
+        @if (selectedSurvey != null && selectedSurvey.Title != ALL_SURVEYS && topScoringStaff != null)
+        {
+          <MudItem xs="12" sm="4">
+            <MudCard>
+              <MudCardContent>
+                <MudText Typo="Typo.h6">Highest Score: </MudText>
+                <MudText Typo="Typo.h4">@topScoringStaff.FullName / @topScoringStaff.Department</MudText>
+                <MudText Typo="Typo.h6">Score: @staffScores[topScoringStaff.Id].ToString("F2")/100</MudText>
+              </MudCardContent>
+            </MudCard>
+          </MudItem>
+        }
         @if (selectedSurvey != null && selectedSurvey.Title != ALL_SURVEYS)
         {
           <MudItem xs="12">

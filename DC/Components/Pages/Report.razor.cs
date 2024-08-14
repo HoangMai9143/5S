@@ -1,14 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using MudBlazor;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using DC.Models;
-using DC.Components.Dialog;
 using Microsoft.AspNetCore.Components;
+using Microsoft.EntityFrameworkCore;
+
+using DC.Components.Dialog;
 using DC.Data;
+using DC.Models;
+
+using MudBlazor;
 
 namespace DC.Components.Pages
 {
@@ -28,6 +25,7 @@ namespace DC.Components.Pages
     private IEnumerable<StaffModel> filteredStaff = new List<StaffModel>();
     private Dictionary<int, double> staffScores = new Dictionary<int, double>();
     private Dictionary<int, string> staffNotes = new Dictionary<int, string>();
+    private StaffModel? topScoringStaff;
 
     private List<SurveyModel> surveys = new();
     private List<string> departments = new();
@@ -167,6 +165,25 @@ namespace DC.Components.Pages
             .ToDictionary(g => g.Key, g => g.Average(sr => sr.FinalGrade));
 
         filteredStaff = await staffQuery.ToListAsync();
+
+        if (selectedSurvey != null && selectedSurvey.Title != ALL_SURVEYS)
+        {
+          // Find the top-scoring staff
+          var topScore = surveyResults.Max(sr => sr.FinalGrade);
+          var topScoringStaffId = surveyResults.FirstOrDefault(sr => sr.FinalGrade == topScore)?.StaffId;
+          if (topScoringStaffId.HasValue)
+          {
+            topScoringStaff = await staffQuery.FirstOrDefaultAsync(s => s.Id == topScoringStaffId.Value);
+          }
+          else
+          {
+            topScoringStaff = null;
+          }
+        }
+        else
+        {
+          topScoringStaff = null;
+        }
 
         isLoading = false;
         StateHasChanged();

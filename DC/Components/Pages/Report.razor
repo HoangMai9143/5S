@@ -62,14 +62,19 @@
             </MudCardContent>
           </MudCard>
         </MudItem>
-        @if (selectedSurvey != null && selectedSurvey.Title != ALL_SURVEYS && topScoringStaff != null)
+        @if (selectedSurvey != null && selectedSurvey.Title != ALL_SURVEYS && topScoringStaff.Any())
         {
           <MudItem xs="12" sm="4">
             <MudCard>
               <MudCardContent>
-                <MudText Typo="Typo.h6">Highest Score: </MudText>
-                <MudText Typo="Typo.h4">@topScoringStaff.FullName / @topScoringStaff.Department</MudText>
-                <MudText Typo="Typo.h6">Score: @staffScores[topScoringStaff.Id].ToString("F2")/100</MudText>
+                <MudText Typo="Typo.h6">
+                  @(topScoringStaff.Count == 1 ? "Highest Score: " : "Highest Scores: ")
+                  @staffScores[topScoringStaff[0].Id].ToString("F0")/100
+                </MudText>
+                @foreach (var staff in topScoringStaff)
+                {
+                  <MudText Typo="Typo.h5">@staff.FullName - @staff.Department</MudText>
+                }
               </MudCardContent>
             </MudCard>
           </MudItem>

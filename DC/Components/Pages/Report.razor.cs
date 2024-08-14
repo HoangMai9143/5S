@@ -25,7 +25,7 @@ namespace DC.Components.Pages
     private IEnumerable<StaffModel> filteredStaff = new List<StaffModel>();
     private Dictionary<int, double> staffScores = new Dictionary<int, double>();
     private Dictionary<int, string> staffNotes = new Dictionary<int, string>();
-    private StaffModel? topScoringStaff;
+    private List<StaffModel> topScoringStaff = new List<StaffModel>();
 
     private List<SurveyModel> surveys = new();
     private List<string> departments = new();
@@ -99,11 +99,18 @@ namespace DC.Components.Pages
         staffQuery = staffQuery.Where(s => s.Department == selectedDepartment);
       }
 
-      filteredStaff = await staffQuery.ToListAsync();
-
+      // Fetch all staff and survey results
+      var allStaff = await staffQuery.ToListAsync();
       var surveyResults = await surveyResultsQuery.ToListAsync();
+
+      // Calculate staff scores
       staffScores = surveyResults.GroupBy(sr => sr.StaffId)
           .ToDictionary(g => g.Key, g => g.Average(sr => sr.FinalGrade));
+
+      // Sort staff by score on the client side
+      filteredStaff = allStaff
+          .OrderByDescending(s => staffScores.TryGetValue(s.Id, out var score) ? score : 0)
+          .ToList();
     }
 
     private string GetStaffNote(int staffId)
@@ -161,28 +168,20 @@ namespace DC.Components.Pages
             new ChartSeries { Name = "Staff Count", Data = scoreDistribution.Select(x => (double)x).ToArray() }
         };
 
-        staffScores = surveyResults.GroupBy(sr => sr.StaffId)
-            .ToDictionary(g => g.Key, g => g.Average(sr => sr.FinalGrade));
+        // Load staff data, which will populate filteredStaff and staffScores
+        await LoadStaffData();
 
-        filteredStaff = await staffQuery.ToListAsync();
-
-        if (selectedSurvey != null && selectedSurvey.Title != ALL_SURVEYS)
+        if (selectedSurvey != null && selectedSurvey.Title != ALL_SURVEYS && staffScores.Any())
         {
           // Find the top-scoring staff
-          var topScore = surveyResults.Max(sr => sr.FinalGrade);
-          var topScoringStaffId = surveyResults.FirstOrDefault(sr => sr.FinalGrade == topScore)?.StaffId;
-          if (topScoringStaffId.HasValue)
-          {
-            topScoringStaff = await staffQuery.FirstOrDefaultAsync(s => s.Id == topScoringStaffId.Value);
-          }
-          else
-          {
-            topScoringStaff = null;
-          }
+          var topScore = staffScores.Values.Max();
+          topScoringStaff = filteredStaff
+              .Where(s => staffScores.TryGetValue(s.Id, out var score) && Math.Abs(score - topScore) < 0.001)
+              .ToList();
         }
         else
         {
-          topScoringStaff = null;
+          topScoringStaff.Clear();
         }
 
         isLoading = false;

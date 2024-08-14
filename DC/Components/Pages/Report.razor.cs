@@ -21,7 +21,6 @@ namespace DC.Components.Pages
     private string[] xAxisLabels = { "0-10", "11-20", "21-30", "31-40", "41-50", "51-60", "61-70", "71-80", "81-90", "91-100" };
     private double yAxisMax;
     private string _staffSearchString = "";
-    private HashSet<StaffModel> selectedItems = new HashSet<StaffModel>();
     private IEnumerable<StaffModel> filteredStaff = new List<StaffModel>();
     private Dictionary<int, double> staffScores = new Dictionary<int, double>();
     private Dictionary<int, string> staffNotes = new Dictionary<int, string>();
@@ -65,6 +64,8 @@ namespace DC.Components.Pages
       {
         using var scope = ScopeFactory.CreateScope();
         var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        totalStaff = await appDbContext.StaffModel.CountAsync();
 
         surveys = await appDbContext.SurveyModel.OrderByDescending(s => s.Id).ToListAsync();
         surveys.Insert(0, new SurveyModel { Id = 0, Title = ALL_SURVEYS });
@@ -148,7 +149,7 @@ namespace DC.Components.Pages
           surveyResultsQuery = surveyResultsQuery.Where(sr => sr.Staff.Department == selectedDepartment);
         }
 
-        totalStaff = await staffQuery.CountAsync();
+        // totalStaff = await staffQuery.CountAsync();
 
         var surveyResults = await surveyResultsQuery.ToListAsync();
         gradedStaff = surveyResults.Select(sr => sr.StaffId).Distinct().Count();

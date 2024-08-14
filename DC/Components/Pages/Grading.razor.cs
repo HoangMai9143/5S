@@ -20,7 +20,6 @@ namespace DC.Components.Pages
 		private System.Timers.Timer? _surveyDebounceTimer;
 		private System.Timers.Timer? _staffDebounceTimer;
 		private const int DebounceDelay = 300;
-		private readonly Dictionary<string, List<StaffModel>> staffByDepartment = [];
 		private Dictionary<int, double> staffScores = [];
 		private Dictionary<int, string> staffNotes = [];
 		private readonly Dictionary<int, string> tempStaffNotes = [];

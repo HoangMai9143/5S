@@ -82,28 +82,31 @@ namespace DC.Components.Pages.Account
 
         if (userExists)
         {
-          sb.Add("User already exists", Severity.Error);
+            sb.Add("User already exists", Severity.Error);
         }
         else
         {
-          var newUser = new UserAccountModel
-          {
-            Username = newUsername,
-            Password = newPassword,
-            Role = newRole,
-            IsActive = true
-          };
+            // Hash the password
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(newPassword);
 
-          await appDbContext.Set<UserAccountModel>().AddAsync(newUser);
-          await appDbContext.SaveChangesAsync();
+            var newUser = new UserAccountModel
+            {
+                Username = newUsername,
+                Password = hashedPassword, // Store the hashed password
+                Role = newRole,
+                IsActive = true
+            };
 
-          await LoadUsers(); // Refresh the user list
+            await appDbContext.Set<UserAccountModel>().AddAsync(newUser);
+            await appDbContext.SaveChangesAsync();
 
-          newUsername = string.Empty;
-          newPassword = string.Empty;
-          _searchString = string.Empty; // Clear the search filter
-          sb.Add($"User added successfully with ID: {newUser.Id}", Severity.Success);
-          StateHasChanged();
+            await LoadUsers(); // Refresh the user list
+
+            newUsername = string.Empty;
+            newPassword = string.Empty;
+            _searchString = string.Empty; // Clear the search filter
+            sb.Add($"User added successfully with ID: {newUser.Id}", Severity.Success);
+            StateHasChanged();
         }
       }
     }

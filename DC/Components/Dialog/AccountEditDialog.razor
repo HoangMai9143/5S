@@ -12,7 +12,7 @@
         <MudText Typo="Typo.h6" Class="pa-4">Editing user: @currentUser.Id</MudText>
         <MudCardContent>
           <MudTextField @bind-Value="currentUser.Username" Label="Username" Class="mb-4" />
-          <MudTextField @bind-Value="currentUser.Password" Label="Password" Class="mb-4" />
+          <MudTextField @bind-Value="newPassword" Label="New Password" Type="InputType.Password" Class="mb-4" />
           <MudSelect @bind-Value="currentUser.Role" Label="Role" Class="mb-4">
             <MudSelectItem Value="@("Admin")">Admin</MudSelectItem>
             <MudSelectItem Value="@("Mod")">Mod</MudSelectItem>
@@ -24,51 +24,6 @@
   </DialogContent>
   <DialogActions>
     <MudButton OnClick="Cancel">Cancel</MudButton>
-    <MudButton Color="Color.Primary" Type="submit">Save</MudButton>
+    <MudButton Color="Color.Primary" OnClick="SaveUser">Save</MudButton>
   </DialogActions>
 </MudDialog>
-
-@code {
-  [CascadingParameter]
-  MudDialogInstance MudDialog { get; set; }
-
-  [Parameter]
-  public UserAccountModel User { get; set; }
-
-  private UserAccountModel currentUser;
-
-  protected override void OnInitialized()
-  {
-    currentUser = User;
-  }
-
-  private async Task SaveUser()
-  {
-    try
-    {
-      var trackedUser = appDbContext.ChangeTracker.Entries<UserAccountModel>()
-      .FirstOrDefault(e => e.Entity.Id == currentUser.Id)?.Entity;
-
-      if (trackedUser != null)
-      {
-        appDbContext.Entry(trackedUser).State = EntityState.Detached;
-      }
-
-      appDbContext.Set<UserAccountModel>().Update(currentUser);
-      await appDbContext.SaveChangesAsync();
-      sb.Add("User updated successfully", Severity.Success);
-
-      // Close the dialog with the updated user as the result
-      MudDialog.Close(DialogResult.Ok(currentUser));
-    }
-    catch (Exception ex)
-    {
-      sb.Add($"Error updating user: {ex.Message}", Severity.Error);
-    }
-  }
-
-  private void Cancel()
-  {
-    MudDialog.Cancel();
-  }
-}

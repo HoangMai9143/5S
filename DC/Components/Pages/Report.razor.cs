@@ -278,6 +278,7 @@ namespace DC.Components.Pages
 
     private async Task ExportToExcel()
     {
+
       try
       {
         var templatePath = "Template/5SReportTemplate.xlsx";
@@ -306,21 +307,21 @@ namespace DC.Components.Pages
         ws.Cell("H2").Value = $"Lowest Score: {lowestScore:F2}/100";
 
         // Insert average score
-        ws.Cell("F3").Value = $"Average Score: {averageScore:F2}/100";
+        ws.Cell("F3").Value = $"{averageScore:F2}/100";
 
         // Insert number of graded staff
         ws.Cell("F5").Value = $"{gradedStaff}/{totalStaff}";
 
         // Insert grid data
         int row = 3;
-        foreach (var staff in allStaff) // Assuming allStaff contains all staff including those not graded
+        foreach (var staff in filteredStaff)
         {
           ws.Cell(row, 1).Value = staff.Id;
           ws.Cell(row, 2).Value = staff.FullName;
           ws.Cell(row, 3).Value = staff.Department;
           var scoreCell = ws.Cell(row, 4);
           scoreCell.Value = staffScores.TryGetValue(staff.Id, out var score) ? score : 0;
-          scoreCell.Style.NumberFormat.Format = "0.00"; // Format as number with two decimal places
+          scoreCell.Style.NumberFormat.Format = "0.00";
           row++;
         }
 
@@ -339,9 +340,6 @@ namespace DC.Components.Pages
           ws.Cell(row, 8).Value = staff.FullName;
           row++;
         }
-
-        // Auto-fit columns
-        ws.Columns().AdjustToContents();
 
         // Convert to byte array
         using var stream = new MemoryStream();

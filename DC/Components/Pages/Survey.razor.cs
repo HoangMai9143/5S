@@ -98,7 +98,7 @@ namespace DC.Components.Pages
         bool anyChanges = false;
         foreach (var survey in surveys)
         {
-          if (survey.EndDate < DateTime.Today.AddDays(-1) && survey.IsActive)
+          if (survey.EndDate < DateTime.Today && survey.IsActive)
           {
             survey.IsActive = false; // Mark the survey as ended
             anyChanges = true;

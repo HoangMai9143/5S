@@ -16,16 +16,14 @@
     }
     else
     {
-      <MudCard Elevation="0">
-        <MudCardContent>
-          <MudText Typo="Typo.h6">Select or Create Survey</MudText>
-        </MudCardContent>
-        <MudCardActions>
-          <MudStack Spacing="2" Row="true">
-            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="OpenCreateSurveyDialog">Create New Survey</MudButton>
-          </MudStack>
-        </MudCardActions>
-      </MudCard>
+      <MudCardContent>
+        <MudText Typo="Typo.h6">Select or Create Survey</MudText>
+      </MudCardContent>
+      <MudCardActions>
+        <MudStack Spacing="2" Row="true">
+          <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="OpenCreateSurveyDialog">Create New Survey</MudButton>
+        </MudStack>
+      </MudCardActions>
       <MudDataGrid T="SurveyModel" Items="@surveys" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_surveyQuickFilter" Elevation="0">
         <ToolBarContent>
           <MudTextField Value="@_searchString" ValueChanged="@((string val) => OnSurveySearchInput(val))" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" DebounceInterval="300" Clearable="true">

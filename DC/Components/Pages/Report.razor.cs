@@ -291,52 +291,61 @@ namespace DC.Components.Pages
         using var workbook = new XLWorkbook(templatePath);
         var ws = workbook.Worksheet(1);
 
-        // Insert export time
-        ws.Cell("A1").Value = $"Export time: {DateTime.Now:HH:mm:ss dd/MM/yyyy}";
-
         // Insert survey title
-        ws.Cell("E1").Value = $"Survey: {selectedSurvey?.Title ?? "N/A"}";
+        ws.Cell("A1").Value = $"Survey: {selectedSurvey?.Title ?? "N/A"}";
+
+        // Insert export time
+        ws.Cell("G1").Value = $"Export time: {DateTime.Now:HH:mm:ss dd/MM/yyyy}";
 
         // Insert highest score
         var highestScore = staffScores.Values.Any() ? staffScores.Values.Max() : 0;
-        ws.Cell("G2").Value = $"Highest Score: {highestScore:F2}/100";
+        ws.Cell("H2").Value = $"Highest Score: {highestScore:F2}/100";
+
+        // Insert names of highest scoring staff
+        int row = 3;
+        foreach (var staff in topScoringStaff)
+        {
+          ws.Cell(row, 8).Value = staff.FullName;
+          row++;
+        }
 
         // Insert lowest score
         var lowestScore = staffScores.Values.Any() ? staffScores.Values.Min() : 0;
-        ws.Cell("H2").Value = $"Lowest Score: {lowestScore:F2}/100";
-
-        // Insert average score
-        ws.Cell("F3").Value = $"{averageScore:F2}/100";
-
-        // Insert number of graded staff
-        ws.Cell("F5").Value = $"{gradedStaff}/{totalStaff}";
-
-        // Insert grid data
-        int row = 3;
-        foreach (var staff in filteredStaff)
-        {
-          ws.Cell(row, 1).Value = staff.Id;
-          ws.Cell(row, 2).Value = staff.FullName;
-          ws.Cell(row, 3).Value = staff.Department;
-          var scoreCell = ws.Cell(row, 4);
-          scoreCell.Value = staffScores.TryGetValue(staff.Id, out var score) ? score : 0;
-          scoreCell.Style.NumberFormat.Format = "0.00";
-          row++;
-        }
-
-        // Insert names of highest scoring staff
-        row = 3;
-        foreach (var staff in topScoringStaff)
-        {
-          ws.Cell(row, 7).Value = staff.FullName;
-          row++;
-        }
+        ws.Cell("I2").Value = $"Lowest Score: {lowestScore:F2}/100";
 
         // Insert names of lowest scoring staff
         row = 3;
         foreach (var staff in lowestScoringStaff)
         {
-          ws.Cell(row, 8).Value = staff.FullName;
+          ws.Cell(row, 9).Value = staff.FullName;
+          row++;
+        }
+        // Insert average score
+        ws.Cell("G3").Value = $"{averageScore:F2}/100";
+
+        // Insert number of graded staff
+        ws.Cell("G5").Value = $"{gradedStaff}/{totalStaff}";
+
+        // Insert grid data
+        row = 3;
+        int ranking = 0;
+        double previousScore = double.MaxValue;
+        foreach (var staff in filteredStaff)
+        {
+          var currentScore = staffScores.TryGetValue(staff.Id, out var score) ? score : 0;
+          if (currentScore < previousScore)
+          {
+            ranking++;
+          }
+          previousScore = currentScore;
+
+          ws.Cell(row, 1).Value = ranking;
+          ws.Cell(row, 2).Value = staff.Id;
+          ws.Cell(row, 3).Value = staff.FullName;
+          ws.Cell(row, 4).Value = staff.Department;
+          var scoreCell = ws.Cell(row, 5);
+          scoreCell.Value = currentScore;
+          scoreCell.Style.NumberFormat.Format = "0.00";
           row++;
         }
 

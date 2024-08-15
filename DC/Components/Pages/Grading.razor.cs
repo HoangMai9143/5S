@@ -114,13 +114,43 @@ namespace DC.Components.Pages
 
 				if (selectedSurvey != null)
 				{
+					// Load all survey questions
+					var surveyQuestions = await appDbContext.SurveyQuestionModel
+							.Where(sq => sq.SurveyId == selectedSurvey.Id)
+							.ToListAsync();
+
+					// Load all answers for this survey
+					var allAnswers = await appDbContext.QuestionAnswerModel
+							.Where(qa => qa.SurveyId == selectedSurvey.Id)
+							.ToListAsync();
+
 					// Load scores and notes
 					var results = await appDbContext.SurveyResultModel
-																					.Where(sr => sr.SurveyId == selectedSurvey.Id)
-																					.ToListAsync();
+							.Where(sr => sr.SurveyId == selectedSurvey.Id)
+							.ToListAsync();
 
-					staffScores = results.ToDictionary(sr => sr.StaffId, sr => sr.FinalGrade);
-					staffNotes = results.ToDictionary(sr => sr.StaffId, sr => sr.Note ?? "");
+					staffScores.Clear();
+					staffNotes.Clear();
+
+					foreach (var staff in allStaff)
+					{
+						var staffAnswers = allAnswers.Where(a => a.StaffId == staff.Id).ToList();
+						bool allQuestionsAnswered = surveyQuestions.All(sq =>
+								staffAnswers.Any(a => a.QuestionId == sq.QuestionId));
+
+						var result = results.FirstOrDefault(r => r.StaffId == staff.Id);
+
+						if (allQuestionsAnswered && result != null)
+						{
+							staffScores[staff.Id] = result.FinalGrade;
+							staffNotes[staff.Id] = result.Note ?? "";
+						}
+						else
+						{
+							// Mark as not graded by not adding to staffScores
+							staffNotes[staff.Id] = "";
+						}
+					}
 				}
 				else
 				{

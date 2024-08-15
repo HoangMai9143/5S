@@ -278,7 +278,6 @@ namespace DC.Components.Pages
 
     private async Task ExportToExcel()
     {
-
       try
       {
         var templatePath = "Template/5SReportTemplate.xlsx";

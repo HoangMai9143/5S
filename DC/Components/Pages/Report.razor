@@ -4,6 +4,7 @@
 @inject AppDbContext appDbContext
 @inject IDialogService dialogService
 @inject ISnackbar sb
+@inject IJSRuntime js
 
 @rendermode InteractiveServer
 
@@ -19,28 +20,11 @@
     {
       <MudGrid>
         <MudItem xs="12" sm="4">
-          <MudAutocomplete T="SurveyModel" 
-                 Label="Select Survey" 
-                 @bind-Value="selectedSurvey" 
-                 SearchFunc="@SearchSurveys"
-                 ToStringFunc="@(s => s?.Title ?? string.Empty)"
-                 AnchorOrigin="Origin.BottomCenter"
-                 ResetValueOnEmptyText="true"
-                 CoerceText="true"
-                 AdornmentColor="Color.Primary"
-                 Clearable="true">
-</MudAutocomplete>
+          <MudAutocomplete T="SurveyModel" Label="Select Survey" @bind-Value="selectedSurvey" SearchFunc="@SearchSurveys" ToStringFunc="@(s => s?.Title ?? string.Empty)" AnchorOrigin="Origin.BottomCenter" ResetValueOnEmptyText="true" CoerceText="true" AdornmentColor="Color.Primary" Clearable="true">
+          </MudAutocomplete>
 
-<MudAutocomplete T="string" 
-                 Label="Select Department" 
-                 @bind-Value="selectedDepartment" 
-                 SearchFunc="@SearchDepartments"
-                 AnchorOrigin="Origin.BottomCenter"
-                 ResetValueOnEmptyText="true"
-                 CoerceText="true"
-                 AdornmentColor="Color.Primary"
-                 Clearable="true">
-</MudAutocomplete>
+          <MudAutocomplete T="string" Label="Select Department" @bind-Value="selectedDepartment" SearchFunc="@SearchDepartments" AnchorOrigin="Origin.BottomCenter" ResetValueOnEmptyText="true" CoerceText="true" AdornmentColor="Color.Primary" Clearable="true">
+          </MudAutocomplete>
         </MudItem>
         <MudItem xs="12" sm="4">
           <MudCard>
@@ -69,11 +53,11 @@
             <MudCardContent>
               @if (selectedSurvey != null)
               {
-                  <MudText Typo="Typo.h6">Score distribution of @selectedSurvey.Title.ToLower()</MudText>
+                <MudText Typo="Typo.h6">Score distribution of @selectedSurvey.Title.ToLower()</MudText>
               }
               else
               {
-                  <MudText Typo="Typo.h6">Score distribution of all surveys</MudText>
+                <MudText Typo="Typo.h6">Score distribution of all surveys</MudText>
               }
               <MudChart ChartType="ChartType.Bar" ChartSeries="@series" XAxisLabels="@xAxisLabels" Width="100%" Height="350px" ChartOptions="new ChartOptions { YAxisTicks = 1 }"></MudChart>
             </MudCardContent>
@@ -118,6 +102,15 @@
           <MudItem xs="12">
             <MudDataGrid T="StaffModel" Items="@filteredStaff" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_staffQuickFilter">
               <ToolBarContent>
+                <MudButton
+                  Variant="Variant.Filled"
+                  Color="Color.Primary"
+                  StartIcon="@Icons.Material.Filled.Print"
+                  OnClick="@ExportToExcel"
+                  Class="mr-2"
+                >
+                  Export to Excel
+                </MudButton>
                 <MudTextField @bind-Value="_staffSearchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" DebounceInterval="300" />
               </ToolBarContent>
               <Columns>

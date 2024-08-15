@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.JSInterop;
+
+using ClosedXML.Excel;
 
 using DC.Components.Dialog;
 using DC.Data;
@@ -271,6 +274,40 @@ namespace DC.Components.Pages
         return departments;
 
       return departments.Where(d => d.Contains(value, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private async Task ExportToExcel()
+    {
+      using var workbook = new XLWorkbook();
+      var worksheet = workbook.Worksheets.Add("Staff Report");
+
+      // Add headers
+      worksheet.Cell(1, 1).Value = "ID";
+      worksheet.Cell(1, 2).Value = "Full Name";
+      worksheet.Cell(1, 3).Value = "Department";
+      worksheet.Cell(1, 4).Value = "Score";
+
+      // Add data
+      int row = 2;
+      foreach (var staff in filteredStaff)
+      {
+        worksheet.Cell(row, 1).Value = staff.Id;
+        worksheet.Cell(row, 2).Value = staff.FullName;
+        worksheet.Cell(row, 3).Value = staff.Department;
+        worksheet.Cell(row, 4).Value = staffScores.TryGetValue(staff.Id, out var score) ? score : 0;
+        row++;
+      }
+
+      // Auto-fit columns
+      worksheet.Columns().AdjustToContents();
+
+      // Convert to byte array
+      using var stream = new MemoryStream();
+      workbook.SaveAs(stream);
+      var content = stream.ToArray();
+
+      // Trigger file download
+      await js.InvokeVoidAsync("downloadFile", "report.xlsx", Convert.ToBase64String(content));
     }
   }
 }

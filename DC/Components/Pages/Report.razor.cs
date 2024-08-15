@@ -108,13 +108,38 @@ namespace DC.Components.Pages
       var surveyResults = await surveyResultsQuery.ToListAsync();
 
       // Calculate staff scores
-      staffScores = surveyResults.GroupBy(sr => sr.StaffId)
+      staffScores = surveyResults
+          .GroupBy(sr => sr.StaffId)
           .ToDictionary(g => g.Key, g => g.Average(sr => sr.FinalGrade));
+
+      // Fetch all survey questions
+      var surveyQuestions = await appDbContext.SurveyQuestionModel
+          .Where(sq => selectedSurvey == null || selectedSurvey.Title == ALL_SURVEYS || sq.SurveyId == selectedSurvey.Id)
+          .ToListAsync();
+
+      // Fetch all answers
+      var allAnswers = await appDbContext.QuestionAnswerModel
+          .Where(qa => selectedSurvey == null || selectedSurvey.Title == ALL_SURVEYS || qa.SurveyId == selectedSurvey.Id)
+          .ToListAsync();
+
+      // Determine which staff are fully graded
+      var fullyGradedStaffIds = allStaff
+          .Where(staff => surveyQuestions.All(sq =>
+              allAnswers.Any(a => a.StaffId == staff.Id && a.QuestionId == sq.QuestionId)))
+          .Select(staff => staff.Id)
+          .ToHashSet();
+
+      // Update staffScores to only include fully graded staff
+      staffScores = staffScores
+          .Where(kvp => fullyGradedStaffIds.Contains(kvp.Key))
+          .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
       // Sort staff by score on the client side
       filteredStaff = allStaff
-          .OrderByDescending(s => staffScores.TryGetValue(s.Id, out var score) ? score : 0)
+          .OrderByDescending(s => staffScores.TryGetValue(s.Id, out var score) ? score : double.MinValue)
           .ToList();
+
+      gradedStaff = fullyGradedStaffIds.Count;
     }
 
     private string GetStaffNote(int staffId)

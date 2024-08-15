@@ -14,10 +14,10 @@
           <MudTextField @bind-Value="currentUser.Username" Label="Username" Class="mb-4" />
           <MudTextField @bind-Value="currentUser.Password" Label="Password" Class="mb-4" />
           <MudSelect @bind-Value="currentUser.Role" Label="Role" Class="mb-4">
-  <MudSelectItem Value="@("Admin")">Admin</MudSelectItem>
-  <MudSelectItem Value="@("Mod")">Mod</MudSelectItem>
-  <MudSelectItem Value="@("User")">User</MudSelectItem>
-</MudSelect>
+            <MudSelectItem Value="@("Admin")">Admin</MudSelectItem>
+            <MudSelectItem Value="@("Mod")">Mod</MudSelectItem>
+            <MudSelectItem Value="@("User")">User</MudSelectItem>
+          </MudSelect>
         </MudCardContent>
       </MudCard>
     </EditForm>

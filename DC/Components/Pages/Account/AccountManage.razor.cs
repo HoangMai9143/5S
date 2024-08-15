@@ -72,7 +72,7 @@ namespace DC.Components.Pages.Account
       }
     }
 
-    private async Task InsertUser()
+    private async Task CreateNewAccount()
     {
       if (!string.IsNullOrWhiteSpace(newUsername) && !string.IsNullOrWhiteSpace(newPassword))
       {
@@ -101,7 +101,7 @@ namespace DC.Components.Pages.Account
 
           newUsername = string.Empty;
           newPassword = string.Empty;
-          newRole = "User";
+          _searchString = string.Empty; // Clear the search filter
           sb.Add($"User added successfully with ID: {newUser.Id}", Severity.Success);
           StateHasChanged();
         }
@@ -112,6 +112,21 @@ namespace DC.Components.Pages.Account
     {
       if (userToDelete != null)
       {
+        // Check if the user to delete is an admin
+        if (userToDelete.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+        {
+          // Count the number of admin accounts
+          int adminCount = await appDbContext.Set<UserAccountModel>()
+              .CountAsync(u => u.Role.ToLower() == "admin");
+
+          // If there is only one admin account left, show a warning and return
+          if (adminCount <= 1)
+          {
+            sb.Add("Cannot delete the last admin account", Severity.Warning);
+            return;
+          }
+        }
+
         int userToDeleteId = userToDelete.Id;
         var parameters = new DialogParameters
         {
@@ -134,7 +149,7 @@ namespace DC.Components.Pages.Account
 
         if (!result.Canceled)
         {
-          await ConfirmedDelete(userToDelete);
+          await ConfirmDelete(userToDelete);
           sb.Add($"User {userToDeleteId} deleted", Severity.Success);
         }
       }
@@ -175,7 +190,7 @@ namespace DC.Components.Pages.Account
     }
 
     //* Dialog function
-    private async Task ConfirmedDelete(UserAccountModel userToDelete)
+    private async Task ConfirmDelete(UserAccountModel userToDelete)
     {
       appDbContext.Set<UserAccountModel>().Remove(userToDelete);
       await appDbContext.SaveChangesAsync();
@@ -211,7 +226,7 @@ namespace DC.Components.Pages.Account
     {
       if (e.Key == "Enter")
       {
-        await InsertUser();
+        await CreateNewAccount();
       }
       StateHasChanged();
     }

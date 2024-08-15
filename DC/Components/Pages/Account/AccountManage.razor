@@ -14,51 +14,51 @@
   <Authorized>
     @if (isLoading)
     {
-          <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+      <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
     }
     else
     {
-          <EditForm Context="cellContext" Model="@this" OnValidSubmit="@InsertUser">
-            <DataAnnotationsValidator />
-            <MudGrid Spacing="3" Justify="Justify.Center" AlignItems="AlignItems.Center">
-              <MudItem xs="12" sm="4">
-                <MudTextField Value="@newUsername" ValueChanged="@((string val) => OnSearchInput(val))" T="string" Label="Username / Search" HelperText="Type to search or add new user" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" TextUpdateSuppression="false" Immediate="true" DebounceInterval="300" @onkeydown="@OnKeyDown" Clearable="true" />
-              </MudItem>
-              <MudItem xs="12" sm="3">
-                <MudTextField @bind-Value="newPassword" T="string" Label="Password" HelperText="Enter user password" HelperTextOnFocus="true" Variant="Variant.Outlined" Clearable="true" />
-              </MudItem>
-              <MudItem xs="12" sm="3">
-  <MudSelect @bind-Value="newRole" T="string" Label="Role" HelperText="Select user role" HelperTextOnFocus="true" Variant="Variant.Outlined">
-    <MudSelectItem Value="@("Admin")">Admin</MudSelectItem>
-    <MudSelectItem Value="@("Mod")">Mod</MudSelectItem>
-    <MudSelectItem Value="@("User")">User</MudSelectItem>
-  </MudSelect>
-</MudItem>
-              <MudItem xs="12" sm="1" Style="text-align: center;" Class="custom-button">
-                <MudButton Variant="Variant.Filled" Size="Size.Medium" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary" OnClick="@(() => InsertUser())">Add</MudButton>
-              </MudItem>
-            </MudGrid>
-          </EditForm>
+      <EditForm Context="cellContext" Model="@this" OnValidSubmit="@CreateNewAccount">
+        <DataAnnotationsValidator />
+        <MudGrid Spacing="3" Justify="Justify.Center" AlignItems="AlignItems.Center">
+          <MudItem xs="12" sm="4">
+            <MudTextField Value="@newUsername" ValueChanged="@((string val) => OnSearchInput(val))" T="string" Label="Username / Search" HelperText="Type to search or add new user" HelperTextOnFocus="true" Variant="Variant.Outlined" FullWidth="true" TextUpdateSuppression="false" Immediate="true" DebounceInterval="300" @onkeydown="@OnKeyDown" Clearable="true" />
+          </MudItem>
+          <MudItem xs="12" sm="3">
+            <MudTextField @bind-Value="newPassword" T="string" Label="Password" HelperText="Enter user password" HelperTextOnFocus="true" Variant="Variant.Outlined" Clearable="true" />
+          </MudItem>
+          <MudItem xs="12" sm="3">
+            <MudSelect @bind-Value="newRole" T="string" Label="Role" HelperText="Select user role" HelperTextOnFocus="true" Variant="Variant.Outlined">
+              <MudSelectItem Value="@("Admin")">Admin</MudSelectItem>
+              <MudSelectItem Value="@("Mod")">Mod</MudSelectItem>
+              <MudSelectItem Value="@("User")">User</MudSelectItem>
+            </MudSelect>
+          </MudItem>
+          <MudItem xs="12" sm="1" Style="text-align: center;" Class="custom-button">
+            <MudButton Variant="Variant.Filled" Size="Size.Medium" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary" OnClick="@(() => CreateNewAccount())">Add</MudButton>
+          </MudItem>
+        </MudGrid>
+      </EditForm>
 
-          <MudDataGrid T="UserAccountModel" Items="@userList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Elevation="0" Class="custom-mudtable no-scroll pa6">
-            <Columns>
-              <PropertyColumn Property="x => x.Id" Title="ID" InitialDirection="SortDirection.Descending" Sortable="true" />
-              <PropertyColumn Property="x => x.Username" Title="Username" />
-              <PropertyColumn Property="x => x.Role" Title="Role" />
-              <PropertyColumn Property="x => x.IsActive" Title="Is Active" />
-              <TemplateColumn CellClass="d-flex justify-end" Width="30px">
-                <CellTemplate Context="cellContext">
-                  <MudStack Row>
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenEditDialog(cellContext.Item))" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="Size.Small" OnClick="@(() => DeleteUser(cellContext.Item))" />
-                  </MudStack>
-                </CellTemplate>
-              </TemplateColumn>
-            </Columns>
-            <PagerContent>
-              <MudDataGridPager T="UserAccountModel" />
-            </PagerContent>
-          </MudDataGrid>
+      <MudDataGrid T="UserAccountModel" Items="@userList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Elevation="0" Class="custom-mudtable no-scroll pa6">
+        <Columns>
+          <PropertyColumn Property="x => x.Id" Title="ID" InitialDirection="SortDirection.Descending" Sortable="true" />
+          <PropertyColumn Property="x => x.Username" Title="Username" />
+          <PropertyColumn Property="x => x.Role" Title="Role" />
+          <PropertyColumn Property="x => x.IsActive" Title="Is Active" />
+          <TemplateColumn CellClass="d-flex justify-end" Width="30px">
+            <CellTemplate Context="cellContext">
+              <MudStack Row>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenEditDialog(cellContext.Item))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="Size.Small" OnClick="@(() => DeleteUser(cellContext.Item))" />
+              </MudStack>
+            </CellTemplate>
+          </TemplateColumn>
+        </Columns>
+        <PagerContent>
+          <MudDataGridPager T="UserAccountModel" />
+        </PagerContent>
+      </MudDataGrid>
     }
   </Authorized>
 </AuthorizeView>

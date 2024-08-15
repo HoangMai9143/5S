@@ -278,36 +278,85 @@ namespace DC.Components.Pages
 
     private async Task ExportToExcel()
     {
-      using var workbook = new XLWorkbook();
-      var worksheet = workbook.Worksheets.Add("Staff Report");
-
-      // Add headers
-      worksheet.Cell(1, 1).Value = "ID";
-      worksheet.Cell(1, 2).Value = "Full Name";
-      worksheet.Cell(1, 3).Value = "Department";
-      worksheet.Cell(1, 4).Value = "Score";
-
-      // Add data
-      int row = 2;
-      foreach (var staff in filteredStaff)
+      try
       {
-        worksheet.Cell(row, 1).Value = staff.Id;
-        worksheet.Cell(row, 2).Value = staff.FullName;
-        worksheet.Cell(row, 3).Value = staff.Department;
-        worksheet.Cell(row, 4).Value = staffScores.TryGetValue(staff.Id, out var score) ? score : 0;
-        row++;
+        var templatePath = "Template/5SReportTemplate.xlsx";
+
+        if (!File.Exists(templatePath))
+        {
+          sb.Add("Template file not found!", Severity.Error);
+          return;
+        }
+
+        using var workbook = new XLWorkbook(templatePath);
+        var ws = workbook.Worksheet(1);
+
+        // Insert export time
+        ws.Cell("A1").Value = $"Export time: {DateTime.Now:HH:mm:ss dd/MM/yyyy}";
+
+        // Insert survey title
+        ws.Cell("E1").Value = $"Survey: {selectedSurvey?.Title ?? "N/A"}";
+
+        // Insert highest score
+        var highestScore = staffScores.Values.Any() ? staffScores.Values.Max() : 0;
+        ws.Cell("G2").Value = $"Highest Score: {highestScore:F2}/100";
+
+        // Insert lowest score
+        var lowestScore = staffScores.Values.Any() ? staffScores.Values.Min() : 0;
+        ws.Cell("H2").Value = $"Lowest Score: {lowestScore:F2}/100";
+
+        // Insert average score
+        ws.Cell("F3").Value = $"Average Score: {averageScore:F2}/100";
+
+        // Insert number of graded staff
+        ws.Cell("F5").Value = $"{gradedStaff}/{totalStaff}";
+
+        // Insert grid data
+        int row = 3;
+        foreach (var staff in allStaff) // Assuming allStaff contains all staff including those not graded
+        {
+          ws.Cell(row, 1).Value = staff.Id;
+          ws.Cell(row, 2).Value = staff.FullName;
+          ws.Cell(row, 3).Value = staff.Department;
+          var scoreCell = ws.Cell(row, 4);
+          scoreCell.Value = staffScores.TryGetValue(staff.Id, out var score) ? score : 0;
+          scoreCell.Style.NumberFormat.Format = "0.00"; // Format as number with two decimal places
+          row++;
+        }
+
+        // Insert names of highest scoring staff
+        row = 3;
+        foreach (var staff in topScoringStaff)
+        {
+          ws.Cell(row, 7).Value = staff.FullName;
+          row++;
+        }
+
+        // Insert names of lowest scoring staff
+        row = 3;
+        foreach (var staff in lowestScoringStaff)
+        {
+          ws.Cell(row, 8).Value = staff.FullName;
+          row++;
+        }
+
+        // Auto-fit columns
+        ws.Columns().AdjustToContents();
+
+        // Convert to byte array
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+        var content = stream.ToArray();
+
+        // Trigger file download
+        await js.InvokeVoidAsync("downloadFile", "report.xlsx", Convert.ToBase64String(content));
+
+        sb.Add("Report data exported to Excel!", Severity.Success);
       }
-
-      // Auto-fit columns
-      worksheet.Columns().AdjustToContents();
-
-      // Convert to byte array
-      using var stream = new MemoryStream();
-      workbook.SaveAs(stream);
-      var content = stream.ToArray();
-
-      // Trigger file download
-      await js.InvokeVoidAsync("downloadFile", "report.xlsx", Convert.ToBase64String(content));
+      catch (Exception ex)
+      {
+        sb.Add($"Error exporting report data to Excel: {ex.Message}", Severity.Error);
+      }
     }
   }
 }

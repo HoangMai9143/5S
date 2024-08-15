@@ -75,7 +75,6 @@ namespace DC.Components.Pages
         departments.AddRange(await appDbContext.StaffModel.Select(s => s.Department).Distinct().OrderBy(d => d).ToListAsync());
 
         _selectedDepartment = ALL_DEPARTMENTS;
-        _selectedSurvey = surveys.FirstOrDefault(s => s.Title == ALL_SURVEYS) ?? surveys.FirstOrDefault();
 
         await LoadReportData();
         isLoading = false;

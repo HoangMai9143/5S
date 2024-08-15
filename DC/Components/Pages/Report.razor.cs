@@ -29,7 +29,6 @@ namespace DC.Components.Pages
     private Dictionary<int, string> staffNotes = new Dictionary<int, string>();
     private List<StaffModel> topScoringStaff = new List<StaffModel>();
     private List<StaffModel> lowestScoringStaff = new List<StaffModel>();
-
     private List<SurveyModel> surveys = new();
     private List<string> departments = new();
     protected SurveyModel? _selectedSurvey;

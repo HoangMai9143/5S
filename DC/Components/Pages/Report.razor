@@ -79,6 +79,23 @@
             </MudCard>
           </MudItem>
         }
+        @if (selectedSurvey != null && selectedSurvey.Title != ALL_SURVEYS && lowestScoringStaff.Any())
+        {
+          <MudItem xs="12" sm="4">
+            <MudCard>
+              <MudCardContent>
+                <MudText Typo="Typo.h6">
+                  @(lowestScoringStaff.Count == 1 ? "Lowest Score: " : "Lowest Scores: ")
+                  @staffScores[lowestScoringStaff[0].Id].ToString("F0")/100
+                </MudText>
+                @foreach (var staff in lowestScoringStaff)
+                {
+                  <MudText Typo="Typo.h5">@staff.FullName - @staff.Department</MudText>
+                }
+              </MudCardContent>
+            </MudCard>
+          </MudItem>
+        }
         @if (selectedSurvey != null && selectedSurvey.Title != ALL_SURVEYS)
         {
           <MudItem xs="12">

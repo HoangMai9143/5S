@@ -25,6 +25,7 @@ namespace DC.Components.Pages
     private Dictionary<int, double> staffScores = new Dictionary<int, double>();
     private Dictionary<int, string> staffNotes = new Dictionary<int, string>();
     private List<StaffModel> topScoringStaff = new List<StaffModel>();
+    private List<StaffModel> lowestScoringStaff = new List<StaffModel>();
 
     private List<SurveyModel> surveys = new();
     private List<string> departments = new();
@@ -179,10 +180,17 @@ namespace DC.Components.Pages
           topScoringStaff = filteredStaff
               .Where(s => staffScores.TryGetValue(s.Id, out var score) && Math.Abs(score - topScore) < 0.001)
               .ToList();
+
+          // Find the lowest-scoring staff
+          var lowestScore = staffScores.Values.Min();
+          lowestScoringStaff = filteredStaff
+              .Where(s => staffScores.TryGetValue(s.Id, out var score) && Math.Abs(score - lowestScore) < 0.001)
+              .ToList();
         }
         else
         {
           topScoringStaff.Clear();
+          lowestScoringStaff.Clear();
         }
 
         isLoading = false;

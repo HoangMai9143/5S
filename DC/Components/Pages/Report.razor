@@ -19,18 +19,28 @@
     {
       <MudGrid>
         <MudItem xs="12" sm="4">
-          <MudSelect T="SurveyModel" Label="Select Survey" @bind-Value="selectedSurvey" AnchorOrigin="Origin.BottomCenter">
-            @foreach (var survey in surveys)
-            {
-              <MudSelectItem Value="@survey">@survey.Title</MudSelectItem>
-            }
-          </MudSelect>
-          <MudSelect T="string" Label="Select Department" @bind-Value="selectedDepartment" AnchorOrigin="Origin.BottomCenter">
-            @foreach (var department in departments)
-            {
-              <MudSelectItem Value="@department">@department</MudSelectItem>
-            }
-          </MudSelect>
+          <MudAutocomplete T="SurveyModel" 
+                 Label="Select Survey" 
+                 @bind-Value="selectedSurvey" 
+                 SearchFunc="@SearchSurveys"
+                 ToStringFunc="@(s => s?.Title ?? string.Empty)"
+                 AnchorOrigin="Origin.BottomCenter"
+                 ResetValueOnEmptyText="true"
+                 CoerceText="true"
+                 AdornmentColor="Color.Primary"
+                 Clearable="true">
+</MudAutocomplete>
+
+<MudAutocomplete T="string" 
+                 Label="Select Department" 
+                 @bind-Value="selectedDepartment" 
+                 SearchFunc="@SearchDepartments"
+                 AnchorOrigin="Origin.BottomCenter"
+                 ResetValueOnEmptyText="true"
+                 CoerceText="true"
+                 AdornmentColor="Color.Primary"
+                 Clearable="true">
+</MudAutocomplete>
         </MudItem>
         <MudItem xs="12" sm="4">
           <MudCard>
@@ -57,7 +67,14 @@
         <MudItem xs="12">
           <MudCard>
             <MudCardContent>
-              <MudText Typo="Typo.h6">Score distribution of @selectedSurvey.Title.ToLower()</MudText>
+              @if (selectedSurvey != null)
+              {
+                  <MudText Typo="Typo.h6">Score distribution of @selectedSurvey.Title.ToLower()</MudText>
+              }
+              else
+              {
+                  <MudText Typo="Typo.h6">Score distribution of all surveys</MudText>
+              }
               <MudChart ChartType="ChartType.Bar" ChartSeries="@series" XAxisLabels="@xAxisLabels" Width="100%" Height="350px" ChartOptions="new ChartOptions { YAxisTicks = 1 }"></MudChart>
             </MudCardContent>
           </MudCard>

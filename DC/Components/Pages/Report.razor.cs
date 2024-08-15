@@ -75,7 +75,7 @@ namespace DC.Components.Pages
         departments.AddRange(await appDbContext.StaffModel.Select(s => s.Department).Distinct().OrderBy(d => d).ToListAsync());
 
         _selectedDepartment = ALL_DEPARTMENTS;
-        _selectedSurvey = surveys.First(s => s.Title == ALL_SURVEYS);
+        _selectedSurvey = surveys.FirstOrDefault(s => s.Title == ALL_SURVEYS) ?? surveys.FirstOrDefault();
 
         await LoadReportData();
         isLoading = false;
@@ -254,6 +254,24 @@ namespace DC.Components.Pages
         return true;
 
       return false;
+    }
+
+    private async Task<IEnumerable<SurveyModel>> SearchSurveys(string value, CancellationToken cancellationToken)
+    {
+      // If string is empty, return all surveys
+      if (string.IsNullOrEmpty(value))
+        return surveys;
+
+      return surveys.Where(s => s.Title.Contains(value, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private async Task<IEnumerable<string>> SearchDepartments(string value, CancellationToken cancellationToken)
+    {
+      // If string is empty, return all departments
+      if (string.IsNullOrEmpty(value))
+        return departments;
+
+      return departments.Where(d => d.Contains(value, StringComparison.OrdinalIgnoreCase));
     }
   }
 }

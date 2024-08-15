@@ -292,7 +292,7 @@ namespace DC.Components.Pages
         var ws = workbook.Worksheet(1);
 
         // Insert survey title
-        ws.Cell("A1").Value = $"Survey: {selectedSurvey?.Title ?? "N/A"}";
+        ws.Cell("A1").Value = $"{selectedSurvey?.Title ?? "N/A"}";
 
         // Insert export time
         ws.Cell("G1").Value = $"Export time: {DateTime.Now:HH:mm:ss dd/MM/yyyy}";

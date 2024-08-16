@@ -181,7 +181,7 @@ namespace DC.Components.Pages
 		{
 			if (selectedSurvey == null)
 			{
-				sb.Add("Please select a survey first", Severity.Error);
+				sb.Add("Please choose a survey first", Severity.Error);
 				return;
 			}
 
@@ -301,7 +301,7 @@ namespace DC.Components.Pages
 		{
 			if (index == 1 && selectedSurvey == null)
 			{
-				sb.Add("Please select a survey first", Severity.Error);
+				sb.Add("Please choose a survey first", Severity.Error);
 				return;
 			}
 			activeIndex = index;

@@ -10,6 +10,7 @@
 
 <MudDialog>
   <DialogContent>
+    <MudText Typo="Typo.h5" Class="mb-4">Curently grading for: @Staff.FullName - @Staff.Department</MudText>
     @if (isLoading)
     {
       <MudProgressCircular Color="Color.Default" Indeterminate="true" />
@@ -25,10 +26,10 @@
             {
               <MudRadioGroup T="int" @bind-Value="@selectedAnswer[question.QuestionId]" SelectedValueChanged="@((int val) => OnSingleChoiceChanged(question.QuestionId, val))">
                 <div class="vertical-stack">
-                @foreach (var answer in question.Question.Answers)
-                {
-                  <MudRadio T="int" Value="@answer.Id" Color="Color.Primary">@answer.AnswerText</MudRadio>
-                }
+                  @foreach (var answer in question.Question.Answers)
+                  {
+                    <MudRadio T="int" Value="@answer.Id" Color="Color.Primary">@answer.AnswerText</MudRadio>
+                  }
                 </div>
               </MudRadioGroup>
             }

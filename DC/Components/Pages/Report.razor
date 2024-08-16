@@ -56,7 +56,7 @@
               {
                 <MudText Typo="Typo.h6">Score distribution of all surveys</MudText>
               }
-              <MudChart ChartType="ChartType.Bar" ChartSeries="@series" XAxisLabels="@xAxisLabels" Height="350px" ChartOptions="new ChartOptions { YAxisTicks = 1 }"></MudChart>
+              <MudChart ChartType="ChartType.Bar" ChartSeries="@series" XAxisLabels="@xAxisLabels" Width="100%" Height="350px" ChartOptions="new ChartOptions { YAxisTicks = 1 }"></MudChart>
             </MudCardContent>
           </MudCard>
         </MudItem>
@@ -105,7 +105,7 @@
                 <MudTextField @bind-Value="_staffSearchString" Placeholder="Search by name, department, or score" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" DebounceInterval="300" />
               </ToolBarContent>
               <Columns>
-                <PropertyColumn Property="x => x.FullName" Title="Full Name" Sortable="false"/>
+                <PropertyColumn Property="x => x.FullName" Title="Full Name" Sortable="false" />
                 <PropertyColumn Property="x => x.Department" Title="Department" />
                 <TemplateColumn Title="Score" CellClass="auto">
                   <CellTemplate Context="staffContext">

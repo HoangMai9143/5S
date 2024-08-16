@@ -279,6 +279,21 @@ namespace DC.Components.Pages
       if (staff.Department.Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase))
         return true;
 
+      // Add score filtering
+      if (staffScores.TryGetValue(staff.Id, out var score))
+      {
+        if (double.TryParse(_staffSearchString, out var searchScore))
+        {
+          // Check if the score is within ±1 of the searched score
+          if (Math.Abs(score - searchScore) <= 1)
+            return true;
+        }
+        else if (score.ToString("F0").Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase))
+        {
+          return true;
+        }
+      }
+
       return false;
     }
 

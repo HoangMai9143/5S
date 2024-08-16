@@ -73,8 +73,8 @@ namespace DC.Components.Layout
 
     public string DarkLightModeButtonIcon => _isDarkMode switch
     {
-      true => Icons.Material.Rounded.DarkMode,
-      false => Icons.Material.Outlined.LightMode,
+      true => Icons.Material.Rounded.LightMode,
+      false => Icons.Material.Outlined.DarkMode,
     };
   }
 }

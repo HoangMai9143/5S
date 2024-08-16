@@ -65,7 +65,7 @@ namespace DC.Components.Pages.Account
       catch (Exception ex)
       {
         Console.WriteLine($"Error loading users: {ex.Message}");
-        sb.Add("Error loading users, please reload page!", Severity.Error);
+        sb.Add("Error loading users, reloading page...", Severity.Error);
         userList = new List<UserAccountModel>();
         await Task.Delay(1000);
         await LoadUsers();
@@ -82,31 +82,31 @@ namespace DC.Components.Pages.Account
 
         if (userExists)
         {
-            sb.Add("User already exists", Severity.Error);
+          sb.Add("User already exists", Severity.Error);
         }
         else
         {
-            // Hash the password
-            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(newPassword);
+          // Hash the password
+          string hashedPassword = BCrypt.Net.BCrypt.HashPassword(newPassword);
 
-            var newUser = new UserAccountModel
-            {
-                Username = newUsername,
-                Password = hashedPassword, // Store the hashed password
-                Role = newRole,
-                IsActive = true
-            };
+          var newUser = new UserAccountModel
+          {
+            Username = newUsername,
+            Password = hashedPassword, // Store the hashed password
+            Role = newRole,
+            IsActive = true
+          };
 
-            await appDbContext.Set<UserAccountModel>().AddAsync(newUser);
-            await appDbContext.SaveChangesAsync();
+          await appDbContext.Set<UserAccountModel>().AddAsync(newUser);
+          await appDbContext.SaveChangesAsync();
 
-            await LoadUsers(); // Refresh the user list
+          await LoadUsers(); // Refresh the user list
 
-            newUsername = string.Empty;
-            newPassword = string.Empty;
-            _searchString = string.Empty; // Clear the search filter
-            sb.Add($"User added successfully with ID: {newUser.Id}", Severity.Success);
-            StateHasChanged();
+          newUsername = string.Empty;
+          newPassword = string.Empty;
+          _searchString = string.Empty; // Clear the search filter
+          sb.Add($"User added successfully with ID: {newUser.Id}", Severity.Success);
+          StateHasChanged();
         }
       }
     }

@@ -61,7 +61,7 @@ namespace DC.Components.Pages
       catch (Exception ex)
       {
         Console.WriteLine($"Error loading questions: {ex.Message}");
-        sb.Add("Error loading , please reload page!", Severity.Error);
+        sb.Add("Error loading , reloading page...", Severity.Error);
         questions = new List<QuestionModel>();
         await Task.Delay(1000);
         await LoadQuestions();

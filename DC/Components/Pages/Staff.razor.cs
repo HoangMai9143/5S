@@ -67,7 +67,7 @@ namespace DC.Components.Pages
       catch (Exception ex)
       {
         Console.WriteLine($"Error loading staff: {ex.Message}");
-        sb.Add("Error loading staff, please reload page!", Severity.Error);
+        sb.Add("Error loading staff, reloading page...", Severity.Error);
         staffList = new List<StaffModel>();
         await Task.Delay(1000);
         await LoadStaff();

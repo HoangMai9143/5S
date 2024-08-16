@@ -47,15 +47,15 @@
               }
             </CellTemplate>
           </PropertyColumn>
-          <TemplateColumn CellClass="justify-center" Width="150px">
+          <TemplateColumn CellClass="justify-center" >
             <CellTemplate Context="cellContext">
               <MudStack Row>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenChooseQuestionsDialog(cellContext.Item))">
                   Choose Questions
                 </MudButton>
-                <MudIconButton Label="Edit" Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenEditSurveyDialog(cellContext.Item))" />
-                <MudIconButton Label="Delete" Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="Size.Small" OnClick="@(() => DeleteSurvey(cellContext.Item))" />
-                <MudIconButton Label="Clone" Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Info" Size="Size.Small" OnClick="@(() => CloneSurvey(cellContext.Item))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenEditSurveyDialog(cellContext.Item))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="Size.Small" OnClick="@(() => DeleteSurvey(cellContext.Item))" />
+                <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Info" Size="Size.Small" OnClick="@(() => CloneSurvey(cellContext.Item))" />
               </MudStack>
             </CellTemplate>
           </TemplateColumn>

@@ -53,17 +53,17 @@
 						<Columns>
 							<PropertyColumn Property="x => x.FullName" Title="Full Name" />
 							<PropertyColumn Property="x => x.Department" Title="Department" />
-							<TemplateColumn Title="Score" CellClass="auto" Width="150px">
+							<TemplateColumn Title="Score" CellClass="auto" >
     <CellTemplate Context="staffContext">
         <div Elevation="0" Class="d-flex flex-column justify-center align-center pa-2" Style="height: 100%;width:80%;">
             @if (staffScores.TryGetValue(staffContext.Item.Id, out var score))
             {
                 <MudProgressLinear Size="Size.Medium" Rounded="true" Value="@score" Min="0" Max="100" Color="Color.Primary" Class="my-2 w-100" Style="min-width: 150px;" />
-                <MudText Width="150px">@score.ToString("F0")</MudText>
+                <MudText >@score.ToString("F0")</MudText>
             }
             else
             {
-                <MudText Width="150px" Color="Color.Warning">Not graded yet</MudText>
+                <MudText  Color="Color.Warning">Not graded yet</MudText>
             }
         </div>
     </CellTemplate>

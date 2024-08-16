@@ -225,7 +225,7 @@ namespace DC.Components.Pages
       catch (Exception ex)
       {
         Console.WriteLine($"Error loading report data: {ex.Message}");
-        sb.Add("Error loading report data, please reload page!", Severity.Error);
+        sb.Add("Error loading report data, reloading page...", Severity.Error);
         await Task.Delay(1000);
         await LoadReportData();
       }

@@ -15,7 +15,7 @@ namespace DC.Components.Pages
 		private List<SurveyModel> surveys = [];
 		private List<StaffModel> allStaff = [];
 		private SurveyModel? selectedSurvey;
-		private string _searchString = "";
+		private string _surveySearchString = "";
 		private string _staffSearchString = "";
 		private System.Timers.Timer? _surveyDebounceTimer;
 		private System.Timers.Timer? _staffDebounceTimer;
@@ -42,13 +42,13 @@ namespace DC.Components.Pages
 		//* Filter function
 		private Func<SurveyModel, bool> _surveyQuickFilter => x =>
 		{
-			if (string.IsNullOrWhiteSpace(_searchString))
+			if (string.IsNullOrWhiteSpace(_surveySearchString))
 				return true;
 
-			if (x.Title.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+			if (x.Title.Contains(_surveySearchString, StringComparison.OrdinalIgnoreCase))
 				return true;
 
-			if (x.Id.ToString().Contains(_searchString))
+			if (x.Id.ToString().Contains(_surveySearchString))
 				return true;
 
 			return false;
@@ -237,7 +237,7 @@ namespace DC.Components.Pages
 
 		private void OnSurveySearchInput(string value)
 		{
-			_searchString = value;
+			_surveySearchString = value;
 			_surveyDebounceTimer.Stop();
 			_surveyDebounceTimer.Start();
 		}
@@ -245,7 +245,7 @@ namespace DC.Components.Pages
 		{
 			await InvokeAsync(async () =>
 			{
-				await SearchSurveys(_searchString);
+				await SearchSurveys(_surveySearchString);
 				StateHasChanged();
 			});
 		}

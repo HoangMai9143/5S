@@ -39,7 +39,7 @@
     </MudStack>
     <MudStack>
       <MudDateRangePicker @bind-DateRange="_dateRange" Margin="Margin.Dense" PlaceholderStart="Start Date" PlaceholderEnd="End Date" MinDate="@DateTime.Today.AddYears(-1)" MaxDate="@DateTime.Today.AddYears(1)" />
-      <MudSwitch @bind-Value="_isActive" Color="Color.Success" UncheckedColor="Color.Error">Is Active</MudSwitch>
+      <MudSwitch Style="padding-left: 15px;" @bind-Value="_isActive" Color="Color.Success" UncheckedColor="Color.Error">Is Active</MudSwitch>
     </MudStack>
   </DialogContent>
   <DialogActions>

@@ -11,17 +11,17 @@ namespace DC.Components.Dialog
   {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
-    [Parameter] public int QuestionId { get; set; }
+    [Parameter] public int QuestionId { get; set; } // Question ID to edit
 
-    private QuestionModel currentQuestion = new();
-    private List<AnswerModel> currentAnswers = new();
+    private QuestionModel currentQuestion = new(); // Current question to edit
+    private List<AnswerModel> currentAnswers = new(); // Current answers of the question
 
     protected override async Task OnInitializedAsync()
     {
       await LoadQuestion(QuestionId);
     }
 
-    private async Task SaveQuestion()
+    private async Task SaveChanges()
     {
       try
       {
@@ -70,13 +70,13 @@ namespace DC.Components.Dialog
         }
 
         await appDbContext.SaveChangesAsync();
-        sb.Add("Question saved successfully.", Severity.Success);
+        sb.Add("Changes saved successfully.", Severity.Success);
         // Close the dialog
         MudDialog.Close(DialogResult.Ok(true));
       }
       catch (Exception ex)
       {
-        sb.Add($"Error saving question: {ex.Message}", Severity.Error);
+        sb.Add($"Error saving changes: {ex.Message}", Severity.Error);
       }
     }
 

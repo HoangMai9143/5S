@@ -4,7 +4,7 @@
 
 <MudDialog>
   <DialogContent>
-    <EditForm Model="@currentQuestion" OnValidSubmit="@SaveQuestion">
+    <EditForm Model="@currentQuestion" OnValidSubmit="@SaveChanges">
       <DataAnnotationsValidator />
       <MudCard Class="mb-4" Elevation="0">
         <MudText Typo="Typo.h6" Class="pa-4">Editing question: @currentQuestion.Id</MudText>
@@ -43,7 +43,7 @@
   </DialogContent>
   <DialogActions>
     <MudButton OnClick="Cancel">Cancel</MudButton>
-    <MudButton Color="Color.Primary" OnClick="SaveQuestion">Save</MudButton>
+    <MudButton Color="Color.Primary" OnClick="SaveChanges">Save</MudButton>
   </DialogActions>
 </MudDialog>
 

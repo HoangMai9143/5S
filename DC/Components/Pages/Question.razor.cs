@@ -9,16 +9,15 @@ namespace DC.Components.Pages
 {
   public partial class Question
   {
-    private bool isLoading = true;
-    private List<QuestionModel> questions = new();
-    private List<AnswerModel> currentAnswers = [];
-    private string _searchString = string.Empty;
-    private AnswerType _selectedAnswerType = AnswerType.SingleChoice;
-    private System.Timers.Timer _questionDebounceTimer;
-    private const int DebounceDelay = 300; // ms
-    private int selectedAnswerIndex = -1;
+    private const int DEBOUNCE_DELAY = 300; // ms
 
-    //* Filter function
+    private bool isLoading = true; // Loading bar
+
+    private List<QuestionModel> questionsList = new(); // List of questions to display
+    private string _searchString = string.Empty; // Search bar string to filter questions
+    private AnswerType _selectedAnswerType = AnswerType.SingleChoice; // Default answer type
+    private System.Timers.Timer? _questionDebounceTimer; // Timer for search debounce
+
     private Func<QuestionModel, bool> _questionQuickFilter => x =>
     {
       if (string.IsNullOrWhiteSpace(_searchString))
@@ -33,13 +32,12 @@ namespace DC.Components.Pages
       return false;
     };
 
-    //* Initialize
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
       if (firstRender)
       {
         await LoadQuestions();
-        _questionDebounceTimer = new System.Timers.Timer(DebounceDelay);
+        _questionDebounceTimer = new System.Timers.Timer(DEBOUNCE_DELAY);
         _questionDebounceTimer.Elapsed += async (sender, e) => await QuestionDebounceTimerElapsed();
         _questionDebounceTimer.AutoReset = false;
 
@@ -48,12 +46,11 @@ namespace DC.Components.Pages
       }
     }
 
-    //* Question CRUD
     private async Task LoadQuestions()
     {
       try
       {
-        questions = await appDbContext.Set<QuestionModel>()
+        questionsList = await appDbContext.Set<QuestionModel>()
             .Include(q => q.Answers)
             .OrderByDescending(q => q.Id)
             .ToListAsync();
@@ -62,12 +59,13 @@ namespace DC.Components.Pages
       {
         Console.WriteLine($"Error loading questions: {ex.Message}");
         sb.Add("Error loading , reloading page...", Severity.Error);
-        questions = new List<QuestionModel>();
+        questionsList = new List<QuestionModel>();
         await Task.Delay(1000);
         await LoadQuestions();
       }
     }
 
+    //* Use search string to check if question already exists in database else insert new question with selected answer type (or default to SingleChoice). 
     private async Task InsertQuestion()
     {
       if (!string.IsNullOrWhiteSpace(_searchString))
@@ -100,20 +98,21 @@ namespace DC.Components.Pages
       }
     }
 
-    private async Task SearchQuestions(string searchTerm)
+    //* Search for questions based on search term (ID or question context)
+    private async Task SearchQuestions(string _searchTerm)
     {
       try
       {
-        if (string.IsNullOrWhiteSpace(searchTerm))
+        if (string.IsNullOrWhiteSpace(_searchTerm))
         {
           await LoadQuestions();
         }
         else
         {
-          searchTerm = searchTerm.ToLower();
-          questions = await appDbContext.Set<QuestionModel>()
-              .Where(q => q.Id.ToString().Contains(searchTerm) ||
-                          q.QuestionContext.ToLower().Contains(searchTerm))
+          _searchTerm = _searchTerm.ToLower();
+          questionsList = await appDbContext.Set<QuestionModel>()
+              .Where(q => q.Id.ToString().Contains(_searchTerm) ||
+                          q.QuestionContext.ToLower().Contains(_searchTerm))
               .OrderByDescending(q => q.Id)
               .ToListAsync();
         }
@@ -125,55 +124,65 @@ namespace DC.Components.Pages
       }
     }
 
+    //* Open dialog to confirm deletion of question (ConfirmDialog)
+    private async Task OpenQuestionDeleteDialog(QuestionModel questionToDelete)
+    {
+      var parameters = new DialogParameters
+    {
+        { "ContentText", "Are you sure you want to delete this question?" },
+        { "ButtonText", "Delete" },
+        { "Color", Color.Error }
+    };
+
+      var options = new DialogOptions()
+      {
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true,
+        Position = DialogPosition.Center,
+        CloseOnEscapeKey = true,
+        FullScreen = false,
+      };
+
+      var dialog = await dialogService.ShowAsync<ConfirmDialog>("Delete Question", parameters, options);
+      var result = await dialog.Result;
+
+      if (!result.Canceled)
+      {
+        await DeleteQuestion(questionToDelete);
+      }
+    }
+
+    //* Delete question and reload question list if that question is not being used (because of foreign key constraint)
     private async Task DeleteQuestion(QuestionModel questionToDelete)
     {
       try
       {
-        var parameters = new DialogParameters
-        {
-          { "ContentText", "Are you sure you want to delete this question?" },
-          { "ButtonText", "Delete" },
-          { "Color", Color.Error }
-        };
-
-        var options = new DialogOptions()
-        {
-          MaxWidth = MaxWidth.Small,
-          FullWidth = true,
-          Position = DialogPosition.Center,
-          CloseOnEscapeKey = true,
-          FullScreen = false,
-        };
-
-        var dialog = await dialogService.ShowAsync<ConfirmDialog>("Delete Question", parameters, options);
-        var result = await dialog.Result;
-
-        if (!result.Canceled)
-        {
-          await ConfirmedDeleteQuestion(questionToDelete);
-          sb.Add($"Question {questionToDelete.Id} deleted successfully.", Severity.Success);
-        }
+        appDbContext.Set<QuestionModel>().Remove(questionToDelete);
+        await appDbContext.SaveChangesAsync();
+        await LoadQuestions();
+        sb.Add($"Question {questionToDelete.Id} deleted successfully.", Severity.Success);
       }
       catch (Exception ex)
       {
-        sb.Add($"Can't delete this question, it already been used", Severity.Error);
+        sb.Add("Can't delete this question, it's currently being used", Severity.Error);
       }
     }
 
-    private async Task CloneQuestion(QuestionModel questionToClone)
+    //* Clone question with question context, answer type and answers
+    private async Task CloneQuestion(QuestionModel _questionToClone)
     {
       try
       {
         var clonedQuestion = new QuestionModel
         {
-          QuestionContext = questionToClone.QuestionContext,
-          AnswerType = questionToClone.AnswerType
+          QuestionContext = _questionToClone.QuestionContext,
+          AnswerType = _questionToClone.AnswerType
         };
 
         await appDbContext.Set<QuestionModel>().AddAsync(clonedQuestion);
         await appDbContext.SaveChangesAsync();
 
-        foreach (var answer in questionToClone.Answers)
+        foreach (var answer in _questionToClone.Answers)
         {
           var clonedAnswer = new AnswerModel
           {
@@ -186,7 +195,7 @@ namespace DC.Components.Pages
 
         await appDbContext.SaveChangesAsync();
         await LoadQuestions();
-        sb.Add($"Question {questionToClone.Id} cloned successfully with ID: {clonedQuestion.Id}", Severity.Success);
+        sb.Add($"Question {_questionToClone.Id} cloned successfully with ID: {clonedQuestion.Id}", Severity.Success);
       }
       catch (Exception ex)
       {
@@ -194,19 +203,15 @@ namespace DC.Components.Pages
       }
     }
 
-    //* Event handler
-    private void OnMultipleChoiceChanged(AnswerModel changedAnswer)
-    {
-      StateHasChanged();
-    }
-
+    //* Update datagrid according on search input with debounce (to prevent multiple queries)
     private async Task OnQuestionSearchInput(string value)
     {
       _searchString = value;
-      _questionDebounceTimer.Stop();
-      _questionDebounceTimer.Start();
+      _questionDebounceTimer?.Stop();
+      _questionDebounceTimer?.Start();
     }
 
+    //* Debounce timer elapsed
     private async Task QuestionDebounceTimerElapsed()
     {
       await InvokeAsync(async () =>
@@ -216,28 +221,28 @@ namespace DC.Components.Pages
       });
     }
 
-    //* Dialog function
-    private async Task ConfirmedDeleteQuestion(QuestionModel questionToDelete)
-    {
-      appDbContext.Set<QuestionModel>().Remove(questionToDelete);
-      await appDbContext.SaveChangesAsync();
-      await LoadQuestions();
-    }
-
+    //* Open dialog to edit question (QuestionEditDialog)
     private async Task OpenQuestionEditDialog(int questionId)
     {
-      var parameters = new DialogParameters
+      try
+      {
+        var parameters = new DialogParameters
       {
         { "QuestionId", questionId }
       };
-      var options = new DialogOptions { CloseOnEscapeKey = true, FullScreen = true, CloseButton = true };
-      var dialog = await dialogService.ShowAsync<QuestionEditDialog>("Edit Question", parameters, options);
-      var result = await dialog.Result;
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullScreen = true, CloseButton = true };
+        var dialog = await dialogService.ShowAsync<QuestionEditDialog>("Edit Question", parameters, options);
+        var result = await dialog.Result;
 
-      if (!result.Canceled)
+        if (!result.Canceled)
+        {
+          await LoadQuestions();
+          StateHasChanged();
+        }
+      }
+      catch (Exception ex)
       {
-        await LoadQuestions();
-        StateHasChanged();
+        sb.Add("An error occurred while opening the dialog. Please try again later.", Severity.Error);
       }
     }
   }

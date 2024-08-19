@@ -35,7 +35,7 @@
                 </MudGrid>
             </EditForm>
 
-            <MudDataGrid T="QuestionModel" Items="@questions" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_questionQuickFilter" Elevation="0">
+            <MudDataGrid T="QuestionModel" Items="@questionsList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_questionQuickFilter" Elevation="0">
                 <ToolBarContent>
                     <MudText Typo="Typo.h6">Questions</MudText>
                     <MudSpacer />
@@ -50,7 +50,7 @@
                                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenQuestionEditDialog(cellContext.Item.Id))">
                                     Edit
                                 </MudButton>
-                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="Size.Small" OnClick="@(() => DeleteQuestion(cellContext.Item))" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="Size.Small" OnClick="@(() => OpenQuestionDeleteDialog(cellContext.Item))" />
                                 <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Info" Size="Size.Small" OnClick="@(() => CloneQuestion(cellContext.Item))" />
                             </MudStack>
                         </CellTemplate>

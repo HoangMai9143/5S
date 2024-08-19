@@ -35,11 +35,11 @@
 <MudDialog>
   <DialogContent>
     <MudStack>
-      <MudTextField Required @bind-Value="_title" Label="Title" FullWidth="true" />
+      <MudTextField Required @bind-Value="title" Label="Title" FullWidth="true" />
     </MudStack>
     <MudStack>
-      <MudDateRangePicker @bind-DateRange="_dateRange" Margin="Margin.Dense" PlaceholderStart="Start Date" PlaceholderEnd="End Date" MinDate="@DateTime.Today.AddYears(-1)" MaxDate="@DateTime.Today.AddYears(1)" />
-      <MudSwitch Style="padding-left: 15px;" @bind-Value="_isActive" Color="Color.Success" UncheckedColor="Color.Error">Is Active</MudSwitch>
+      <MudDateRangePicker @bind-DateRange="dateRange" Margin="Margin.Dense" PlaceholderStart="Start Date" PlaceholderEnd="End Date" MinDate="@DateTime.Today.AddYears(-1)" MaxDate="@DateTime.Today.AddYears(1)" />
+      <MudSwitch Style="padding-left: 15px;" @bind-Value="isActive" Color="Color.Success" UncheckedColor="Color.Error">Is Active</MudSwitch>
     </MudStack>
   </DialogContent>
   <DialogActions>
@@ -52,15 +52,15 @@
   [CascadingParameter] MudDialogInstance MudDialog { get; set; }
   [Parameter] public SurveyModel Survey { get; set; }
 
-  private string _title;
-  private DateRange _dateRange;
-  private bool _isActive;
+  private string title;
+  private DateRange dateRange;
+  private bool isActive;
 
   protected override void OnInitialized()
   {
-    _title = Survey.Title;
-    _dateRange = new DateRange(Survey.StartDate, Survey.EndDate);
-    _isActive = Survey.IsActive;
+    title = Survey.Title;
+    dateRange = new DateRange(Survey.StartDate, Survey.EndDate);
+    isActive = Survey.IsActive;
   }
 
   private void Cancel()
@@ -70,24 +70,24 @@
 
   private async Task Submit()
   {
-    if (_dateRange.Start.HasValue && _dateRange.End.HasValue)
+    if (dateRange.Start.HasValue && dateRange.End.HasValue)
     {
-      if (_dateRange.Start.Value > _dateRange.End.Value)
+      if (dateRange.Start.Value > dateRange.End.Value)
       {
         sb.Add("End date must be after start date", Severity.Error);
         return;
       }
 
-      Survey.Title = _title;
-      Survey.StartDate = _dateRange.Start.Value;
-      Survey.EndDate = _dateRange.End.Value;
-      Survey.IsActive = _isActive;
+      Survey.Title = title;
+      Survey.StartDate = dateRange.Start.Value;
+      Survey.EndDate = dateRange.End.Value;
+      Survey.IsActive = isActive;
 
       if (Survey.EndDate < DateTime.Today)
       {
         Survey.IsActive = false;
       }
-      if (string.IsNullOrEmpty(_title))
+      if (string.IsNullOrEmpty(title))
       {
         sb.Add("Title can't be empty", Severity.Warning);
         return;

@@ -11,8 +11,8 @@ namespace DC.Components.Dialog
 
     [CascadingParameter] MudDialogInstance mudDialog { get; set; }
 
-    private DateRange _dateRange = new DateRange(DateTime.Today, DateTime.Today);
-    private string _title = string.Empty;
+    private DateRange dateRange = new DateRange(DateTime.Today, DateTime.Today);
+    private string title = string.Empty;
 
     private void Cancel()
     {
@@ -21,10 +21,10 @@ namespace DC.Components.Dialog
 
     private async Task Submit()
     {
-      if (_dateRange.Start.HasValue || _dateRange.End.HasValue)
+      if (dateRange.Start.HasValue || dateRange.End.HasValue)
       {
-        var startDate = _dateRange.Start.Value;
-        var endDate = _dateRange.End.HasValue ? _dateRange.End.Value : startDate;
+        var startDate = dateRange.Start.Value;
+        var endDate = dateRange.End.HasValue ? dateRange.End.Value : startDate;
 
         if (startDate > endDate)
         {
@@ -34,7 +34,7 @@ namespace DC.Components.Dialog
 
         var newSurvey = new SurveyModel
         {
-          Title = _title,
+          Title = title,
           StartDate = startDate,
           EndDate = endDate,
           CreatedDate = DateTime.Now,
@@ -42,8 +42,8 @@ namespace DC.Components.Dialog
         };
 
         // Edit
-        // if (_title == string.Empty)
-        if (string.IsNullOrEmpty(_title))
+        // if (title == string.Empty)
+        if (string.IsNullOrEmpty(title))
         {
           sb.Add("Title can't be empty", Severity.Warning);
           return;

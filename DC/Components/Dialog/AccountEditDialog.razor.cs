@@ -23,8 +23,8 @@ namespace DC.Components.Dialog
     private string newPassword = string.Empty;
 
     private bool _isPasswordVisible;
-    private InputType _passwordInput = InputType.Password;
-    private string _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+    private InputType passwordInput = InputType.Password;
+    private string passwordInputIcon = Icons.Material.Filled.VisibilityOff;
 
     protected override void OnInitialized()
     {
@@ -88,14 +88,14 @@ namespace DC.Components.Dialog
       if (_isPasswordVisible)
       {
         _isPasswordVisible = false;
-        _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
-        _passwordInput = InputType.Password;
+        passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+        passwordInput = InputType.Password;
       }
       else
       {
         _isPasswordVisible = true;
-        _passwordInputIcon = Icons.Material.Filled.Visibility;
-        _passwordInput = InputType.Text;
+        passwordInputIcon = Icons.Material.Filled.Visibility;
+        passwordInput = InputType.Text;
       }
     }
   }

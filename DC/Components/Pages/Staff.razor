@@ -34,13 +34,13 @@
         </MudGrid>
       </EditForm>
 
-      <MudDataGrid T="StaffModel" Items="@staffList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Elevation="0" Class="custom-mudtable no-scroll pa6">
+      <MudDataGrid T="StaffModel" Items="@staffList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@quickFilter" Elevation="0" Class="custom-mudtable no-scroll pa6">
         <Columns>
           <PropertyColumn Property="x => x.Id" Title="ID" InitialDirection="SortDirection.Descending" Sortable="true" />
           <PropertyColumn Property="x => x.FullName" Title="Full Name" />
           <PropertyColumn Property="x => x.Department" Title="Department" />
           <PropertyColumn Property="x => x.IsActive" Title="Is Active" />
-          <TemplateColumn CellClass="d-flex justify-end" >
+          <TemplateColumn CellClass="d-flex justify-end">
             <CellTemplate Context="cellContext">
               <MudStack Row>
                 <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenEditDialog(cellContext.Item))" />

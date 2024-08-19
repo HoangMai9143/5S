@@ -15,17 +15,17 @@ namespace DC.Components.Dialog
     [Parameter] public HashSet<QuestionModel> SelectedQuestions { get; set; }
     [Parameter] public HashSet<int> ExistingQuestionIds { get; set; }
 
-    private string _searchString = string.Empty;
+    private string searchString = string.Empty;
 
-    private Func<QuestionModel, bool> _quickFilter => x =>
+    private Func<QuestionModel, bool> quickFilter => x =>
     {
-      if (string.IsNullOrWhiteSpace(_searchString))
+      if (string.IsNullOrWhiteSpace(searchString))
         return true;
 
-      if (x.Id.ToString().Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+      if (x.Id.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase))
         return true;
 
-      if (x.QuestionContext.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+      if (x.QuestionContext.Contains(searchString, StringComparison.OrdinalIgnoreCase))
         return true;
 
       return false;

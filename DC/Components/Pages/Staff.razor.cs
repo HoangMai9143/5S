@@ -21,7 +21,7 @@ namespace DC.Components.Pages
     private bool isLoading = true;
 
     //* Filter function
-    private Func<StaffModel, bool> _quickFilter => x =>
+    private Func<StaffModel, bool> quickFilter => x =>
     {
       if (string.IsNullOrWhiteSpace(_searchString))
         return true;

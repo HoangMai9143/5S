@@ -6,9 +6,9 @@
     <MudCard Elevation="0">
       <MudCardContent>
         <MudText Typo="Typo.h6">Currently choosing for survey: @Survey.Title</MudText>
-        <MudDataGrid T="QuestionModel" Items="@Questions" MultiSelection="true" @bind-SelectedItems="SelectedQuestions" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Elevation="0">
+        <MudDataGrid T="QuestionModel" Items="@Questions" MultiSelection="true" @bind-SelectedItems="SelectedQuestions" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@quickFilter" Elevation="0">
           <ToolBarContent>
-            <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" DebounceInterval="300" Clearable="true">
+            <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" DebounceInterval="300" Clearable="true">
             </MudTextField>
           </ToolBarContent>
           <Columns>

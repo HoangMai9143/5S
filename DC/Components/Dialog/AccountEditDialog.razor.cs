@@ -19,6 +19,10 @@ namespace DC.Components.Dialog
     private UserAccountModel currentUser;
     private string newPassword = string.Empty;
 
+    private bool _isPasswordVisible;
+    private InputType _passwordInput = InputType.Password;
+    private string _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+
     protected override void OnInitialized()
     {
       currentUser = new UserAccountModel
@@ -74,6 +78,22 @@ namespace DC.Components.Dialog
     private void Cancel()
     {
       MudDialog.Cancel();
+    }
+
+    private void TogglePasswordVisibility()
+    {
+      if (_isPasswordVisible)
+      {
+        _isPasswordVisible = false;
+        _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+        _passwordInput = InputType.Password;
+      }
+      else
+      {
+        _isPasswordVisible = true;
+        _passwordInputIcon = Icons.Material.Filled.Visibility;
+        _passwordInput = InputType.Text;
+      }
     }
   }
 }

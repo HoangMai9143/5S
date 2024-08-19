@@ -11,8 +11,7 @@
       <MudCard Class="mb-4" Elevation="0">
         <MudText Typo="Typo.h6" Class="pa-4">Editing: @currentUser.Username</MudText>
         <MudCardContent>
-          <MudTextField @bind-Value="currentUser.Username" Label="Username" Class="mb-4" />
-          <MudTextField @bind-Value="newPassword" Label="New Password" Type="InputType.Password" Class="mb-4" />
+          <MudTextField @bind-Value="currentUser.Password" Label="New Password" Type="@_passwordInput" InputType="@_passwordInput" Adornment="Adornment.End" AdornmentIcon="@_passwordInputIcon" OnAdornmentClick="TogglePasswordVisibility" AdornmentAriaLabel="Show Password" Class="mb-4" />
           <MudSelect @bind-Value="currentUser.Role" Label="Role" Class="mb-4">
             <MudSelectItem Value="@("Admin")">Admin</MudSelectItem>
             <MudSelectItem Value="@("Mod")">Mod</MudSelectItem>

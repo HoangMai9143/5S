@@ -65,22 +65,11 @@ namespace DC.Components.Pages
       }
     }
 
-    //* Use search string to check if question already exists in database else insert new question with selected answer type (or default to SingleChoice). 
+    //* Insert new question with question context and answer type
     private async Task InsertQuestion()
     {
       if (!string.IsNullOrWhiteSpace(_searchString))
       {
-        var existingQuestion = await appDbContext.Set<QuestionModel>()
-            .FirstOrDefaultAsync(q => q.QuestionContext.ToLower() == _searchString.ToLower());
-
-        if (existingQuestion != null)
-        {
-          sb.Add("This question already exists.", Severity.Warning);
-          await SearchQuestions(_searchString);
-          StateHasChanged();
-          return;
-        }
-
         var newQuestion = new QuestionModel
         {
           QuestionContext = _searchString,
@@ -227,9 +216,9 @@ namespace DC.Components.Pages
       try
       {
         var parameters = new DialogParameters
-      {
-        { "QuestionId", questionId }
-      };
+        {
+          { "QuestionId", questionId }
+        };
         var options = new DialogOptions { CloseOnEscapeKey = true, FullScreen = true, CloseButton = true };
         var dialog = await dialogService.ShowAsync<QuestionEditDialog>("Edit Question", parameters, options);
         var result = await dialog.Result;

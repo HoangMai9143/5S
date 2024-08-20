@@ -4,99 +4,99 @@
 @inject ISnackbar sb
 
 <MudDialog>
-  <TitleContent>
-    <MudText Typo="Typo.h6">Detail report for @Staff.FullName</MudText>
-  </TitleContent>
-  <DialogContent>
-    <MudGrid>
-      <MudItem xs="12" sm="6">
-        <MudPaper Class="pa-4">
-          <MudText Typo="Typo.h6">Personal information</MudText>
-          <MudText><strong>Name:</strong> @Staff.FullName</MudText>
-          <MudText><strong>Department:</strong> @Staff.Department</MudText>
-        </MudPaper>
-      </MudItem>
-      <MudItem xs="12" sm="6">
-        <MudPaper Class="pa-4">
-          <MudText Typo="Typo.h6">Overall score</MudText>
-          @if (score.HasValue)
-          {
-            <MudText><strong>Score:</strong> @score.Value.ToString("F2")</MudText>
-            <MudProgressLinear Color="Color.Primary" Value="@score.Value" Class="my-4" />
-          }
-          else
-          {
-            <MudText>No score available for this survey.</MudText>
-          }
-        </MudPaper>
-      </MudItem>
-      <MudItem xs="12">
-        <MudPaper Class="pa-4">
-          @foreach (var question in surveyQuestions)
-          {
-            <MudCard Elevation="3" Class="my-4">
-              <MudCardContent>
-                <MudText Typo="Typo.subtitle1"><strong>@question.Question.QuestionContext</strong></MudText>
-                @if (question.Question.AnswerType == AnswerType.SingleChoice)
-                {
-                  var selectedAnswer = questionAnswers.FirstOrDefault(qa => qa.QuestionId == question.QuestionId);
-                  if (selectedAnswer != null)
-                  {
-                    var answer = question.Question.Answers.FirstOrDefault(a => a.Id == selectedAnswer.AnswerId);
-                    if (answer != null)
-                    {
-                      <MudChip T="string" Color="@GetChipColor(answer.Points)">
-                        @answer.AnswerText (@answer.Points)
-                      </MudChip>
-                    }
-                  }
-                  else
-                  {
-                    <MudText>No answer selected</MudText>
-                  }
-                }
-                else if (question.Question.AnswerType == AnswerType.MultipleChoice)
-                {
-                  var selectedAnswers = questionAnswers.Where(qa => qa.QuestionId == question.QuestionId).ToList();
-                  if (selectedAnswers.Any())
-                  {
-                    <MudStack Row="true" Spacing="2">
-                      @foreach (var selectedAnswer in selectedAnswers)
-                      {
-                        var answer = question.Question.Answers.FirstOrDefault(a => a.Id == selectedAnswer.AnswerId);
-                        if (answer != null)
-                        {
-                          <MudChip T="string" Color="@GetChipColor(answer.Points)">
-                            @answer.AnswerText (@answer.Points)
-                          </MudChip>
-                        }
-                      }
-                    </MudStack>
-                  }
-                  else
-                  {
-                    <MudText>No answer selected</MudText>
-                  }
-                }
-                @if (questionNotes.TryGetValue(question.QuestionId, out var note))
-                {
-                  <MudTextField @bind-Value="questionNotes[question.QuestionId]" />
-                }
-              </MudCardContent>
-            </MudCard>
-          }
-        </MudPaper>
-      </MudItem>
-      <MudItem xs="12">
-        <MudPaper Class="pa-4">
-          <MudText Typo="Typo.h6">Overal Note</MudText>
-          <MudTextField @bind-Value="surveyNote" />
-        </MudPaper>
-      </MudItem>
-    </MudGrid>
-  </DialogContent>
-  <DialogActions>
-    <MudButton OnClick="Cancel">Close</MudButton>
-    <MudButton Color="Color.Primary" OnClick="Submit">Save</MudButton>
-  </DialogActions>
+	<TitleContent>
+		<MudText Typo="Typo.h6">Detail report for @Staff.FullName</MudText>
+	</TitleContent>
+	<DialogContent>
+		<MudGrid>
+			<MudItem xs="12" sm="6">
+				<MudPaper Class="pa-4">
+					<MudText Typo="Typo.h6">Personal information</MudText>
+					<MudText><strong>Name:</strong> @Staff.FullName</MudText>
+					<MudText><strong>Department:</strong> @Staff.Department</MudText>
+				</MudPaper>
+			</MudItem>
+			<MudItem xs="12" sm="6">
+				<MudPaper Class="pa-4">
+					<MudText Typo="Typo.h6">Overall score</MudText>
+					@if (score.HasValue)
+					{
+						<MudText><strong>Score:</strong> @score.Value.ToString("F2")</MudText>
+						<MudProgressLinear Color="Color.Primary" Value="@score.Value" Class="my-4" />
+					}
+					else
+					{
+						<MudText>No score available for this survey.</MudText>
+					}
+				</MudPaper>
+			</MudItem>
+			<MudItem xs="12">
+				<MudPaper Class="pa-4">
+					@foreach (var question in surveyQuestions)
+					{
+						<MudCard Elevation="3" Class="my-4">
+							<MudCardContent>
+								<MudText Typo="Typo.subtitle1"><strong>@question.Question.QuestionContext</strong></MudText>
+								@if (question.Question.AnswerType == AnswerType.SingleChoice)
+								{
+									var selectedAnswer = questionAnswers.FirstOrDefault(qa => qa.QuestionId == question.QuestionId);
+									if (selectedAnswer != null)
+									{
+										var answer = question.Question.Answers.FirstOrDefault(a => a.Id == selectedAnswer.AnswerId);
+										if (answer != null)
+										{
+											<MudChip T="string" Color="@GetChipColor(answer.Points)">
+												@answer.AnswerText (@answer.Points)
+											</MudChip>
+										}
+									}
+									else
+									{
+										<MudText>No answer selected</MudText>
+									}
+								}
+								else if (question.Question.AnswerType == AnswerType.MultipleChoice)
+								{
+									var selectedAnswers = questionAnswers.Where(qa => qa.QuestionId == question.QuestionId).ToList();
+									if (selectedAnswers.Any())
+									{
+										<MudStack Row="true" Spacing="2">
+											@foreach (var selectedAnswer in selectedAnswers)
+											{
+												var answer = question.Question.Answers.FirstOrDefault(a => a.Id == selectedAnswer.AnswerId);
+												if (answer != null)
+												{
+													<MudChip T="string" Color="@GetChipColor(answer.Points)">
+														@answer.AnswerText (@answer.Points)
+													</MudChip>
+												}
+											}
+										</MudStack>
+									}
+									else
+									{
+										<MudText>No answer selected</MudText>
+									}
+								}
+								@if (questionNotes.TryGetValue(question.QuestionId, out var note))
+								{
+									<MudTextField T="string" @bind-Value="questionNotes[question.QuestionId]" Lines="1" AutoGrow="true" Variant="Variant.Outlined" />
+								}
+							</MudCardContent>
+						</MudCard>
+					}
+				</MudPaper>
+			</MudItem>
+			<MudItem xs="12">
+				<MudPaper Class="pa-4">
+					<MudText Typo="Typo.h6">Overal Note</MudText>
+					<MudTextField T="string" @bind-Value="surveyNote" Lines="1" AutoGrow="true" Variant="Variant.Outlined" />
+				</MudPaper>
+			</MudItem>
+		</MudGrid>
+	</DialogContent>
+	<DialogActions>
+		<MudButton OnClick="Cancel">Close</MudButton>
+		<MudButton Color="Color.Primary" OnClick="Submit">Save</MudButton>
+	</DialogActions>
 </MudDialog>

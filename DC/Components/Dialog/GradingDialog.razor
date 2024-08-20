@@ -44,7 +44,7 @@
                 }
               </div>
             }
-            <MudTextField T="string" Label="Note" @bind-Value="@questionNotes[question.QuestionId]" />
+            <MudTextField T="string" Lines="1" AutoGrow="true" Label="Note" @bind-Value="@questionNotes[question.QuestionId]" />
           </MudCardContent>
         </MudCard>
       }

@@ -14,23 +14,37 @@ namespace DC.Components.Pages
 {
   public partial class Report
   {
+    // Constants
+    private const string ALL_DEPARTMENTS = "All departments";
+    private const string ALL_SURVEYS = "All surveys";
+
+    // Injected Services
     [Inject] private IServiceScopeFactory ScopeFactory { get; set; } = default!;
 
+    // State Variables
     private bool isLoading = true;
-    private int gradedStaff;
-    private int totalStaff;
-    private double averageScore;
-    private List<ChartSeries> series = new();
-    private string[] xAxisLabels = { "0-10", "11-20", "21-30", "31-40", "41-50", "51-60", "61-70", "71-80", "81-90", "91-100" };
-    private double yAxisMax;
     private string _staffSearchString = "";
+
+    // Data Collections
+    private List<SurveyModel> surveys = new();
+    private List<string> departments = new();
     private IEnumerable<StaffModel> filteredStaff = new List<StaffModel>();
     private Dictionary<int, double> staffScores = new Dictionary<int, double>();
     private Dictionary<int, string> staffNotes = new Dictionary<int, string>();
     private List<StaffModel> topScoringStaff = new List<StaffModel>();
     private List<StaffModel> lowestScoringStaff = new List<StaffModel>();
-    private List<SurveyModel> surveys = new();
-    private List<string> departments = new();
+
+    // Chart Data
+    private List<ChartSeries> series = new();
+    private readonly string[] xAxisLabels = { "0-10", "11-20", "21-30", "31-40", "41-50", "51-60", "61-70", "71-80", "81-90", "91-100" };
+    private double yAxisMax;
+
+    // Statistics
+    private int gradedStaff;
+    private int totalStaff;
+    private double averageScore;
+
+    // Selection Properties
     protected SurveyModel? _selectedSurvey;
     private SurveyModel? selectedSurvey
     {
@@ -44,6 +58,7 @@ namespace DC.Components.Pages
         }
       }
     }
+
     private string? _selectedDepartment;
     private string? selectedDepartment
     {
@@ -58,9 +73,9 @@ namespace DC.Components.Pages
       }
     }
 
-    private const string ALL_DEPARTMENTS = "All departments";
-    private const string ALL_SURVEYS = "All surveys";
 
+
+    //* 1. Initialization and Loading
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
       if (firstRender)
@@ -84,73 +99,7 @@ namespace DC.Components.Pages
       }
     }
 
-    private async Task LoadStaffData()
-    {
-      using var scope = ScopeFactory.CreateScope();
-      var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-      var staffQuery = appDbContext.StaffModel.AsQueryable();
-      var surveyResultsQuery = appDbContext.SurveyResultModel.AsQueryable();
-
-      if (selectedSurvey != null && selectedSurvey.Title != ALL_SURVEYS)
-      {
-        surveyResultsQuery = surveyResultsQuery.Where(sr => sr.SurveyId == selectedSurvey.Id);
-      }
-
-      if (selectedDepartment != ALL_DEPARTMENTS)
-      {
-        staffQuery = staffQuery.Where(s => s.Department == selectedDepartment);
-      }
-
-      // Fetch all staff and survey results
-      var allStaff = await staffQuery.ToListAsync();
-      var surveyResults = await surveyResultsQuery.ToListAsync();
-
-      // Calculate staff scores
-      staffScores = surveyResults
-          .GroupBy(sr => sr.StaffId)
-          .ToDictionary(g => g.Key, g => g.Average(sr => sr.FinalGrade));
-
-      // Fetch all survey questions
-      var surveyQuestions = await appDbContext.SurveyQuestionModel
-          .Where(sq => selectedSurvey == null || selectedSurvey.Title == ALL_SURVEYS || sq.SurveyId == selectedSurvey.Id)
-          .ToListAsync();
-
-      // Fetch all answers
-      var allAnswers = await appDbContext.QuestionAnswerModel
-          .Where(qa => selectedSurvey == null || selectedSurvey.Title == ALL_SURVEYS || qa.SurveyId == selectedSurvey.Id)
-          .ToListAsync();
-
-      // Determine which staff are fully graded
-      var fullyGradedStaffIds = allStaff
-          .Where(staff => surveyQuestions.All(sq =>
-              allAnswers.Any(a => a.StaffId == staff.Id && a.QuestionId == sq.QuestionId)))
-          .Select(staff => staff.Id)
-          .ToHashSet();
-
-      // Update staffScores to only include fully graded staff
-      staffScores = staffScores
-          .Where(kvp => fullyGradedStaffIds.Contains(kvp.Key))
-          .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-
-      // Sort staff by score on the client side
-      filteredStaff = allStaff
-          .OrderByDescending(s => staffScores.TryGetValue(s.Id, out var score) ? score : double.MinValue)
-          .ToList();
-
-      gradedStaff = fullyGradedStaffIds.Count;
-    }
-
-    private string GetStaffNote(int staffId)
-    {
-      return staffNotes.TryGetValue(staffId, out var note) ? note : "";
-    }
-
-    private void UpdateStaffNote(int staffId, string newNote)
-    {
-      staffNotes[staffId] = newNote;
-    }
-
+    //* 2. Data Loading and Processing
     private async Task LoadReportData()
     {
       try
@@ -231,6 +180,64 @@ namespace DC.Components.Pages
       }
     }
 
+    private async Task LoadStaffData()
+    {
+      using var scope = ScopeFactory.CreateScope();
+      var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+      var staffQuery = appDbContext.StaffModel.AsQueryable();
+      var surveyResultsQuery = appDbContext.SurveyResultModel.AsQueryable();
+
+      if (selectedSurvey != null && selectedSurvey.Title != ALL_SURVEYS)
+      {
+        surveyResultsQuery = surveyResultsQuery.Where(sr => sr.SurveyId == selectedSurvey.Id);
+      }
+
+      if (selectedDepartment != ALL_DEPARTMENTS)
+      {
+        staffQuery = staffQuery.Where(s => s.Department == selectedDepartment);
+      }
+
+      // Fetch all staff and survey results
+      var allStaff = await staffQuery.ToListAsync();
+      var surveyResults = await surveyResultsQuery.ToListAsync();
+
+      // Calculate staff scores
+      staffScores = surveyResults
+          .GroupBy(sr => sr.StaffId)
+          .ToDictionary(g => g.Key, g => g.Average(sr => sr.FinalGrade));
+
+      // Fetch all survey questions
+      var surveyQuestions = await appDbContext.SurveyQuestionModel
+          .Where(sq => selectedSurvey == null || selectedSurvey.Title == ALL_SURVEYS || sq.SurveyId == selectedSurvey.Id)
+          .ToListAsync();
+
+      // Fetch all answers
+      var allAnswers = await appDbContext.QuestionAnswerModel
+          .Where(qa => selectedSurvey == null || selectedSurvey.Title == ALL_SURVEYS || qa.SurveyId == selectedSurvey.Id)
+          .ToListAsync();
+
+      // Determine which staff are fully graded
+      var fullyGradedStaffIds = allStaff
+          .Where(staff => surveyQuestions.All(sq =>
+              allAnswers.Any(a => a.StaffId == staff.Id && a.QuestionId == sq.QuestionId)))
+          .Select(staff => staff.Id)
+          .ToHashSet();
+
+      // Update staffScores to only include fully graded staff
+      staffScores = staffScores
+          .Where(kvp => fullyGradedStaffIds.Contains(kvp.Key))
+          .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+      // Sort staff by score on the client side
+      filteredStaff = allStaff
+          .OrderByDescending(s => staffScores.TryGetValue(s.Id, out var score) ? score : double.MinValue)
+          .ToList();
+
+      gradedStaff = fullyGradedStaffIds.Count;
+    }
+
+    //* 3. UI Event Handlers
     private async Task OnSurveySelected(SurveyModel value)
     {
       selectedSurvey = value;
@@ -268,6 +275,7 @@ namespace DC.Components.Pages
       }
     }
 
+    //* 4. Filtering and Searching
     private bool _staffQuickFilter(StaffModel staff)
     {
       if (string.IsNullOrWhiteSpace(_staffSearchString))
@@ -315,6 +323,7 @@ namespace DC.Components.Pages
       return departments.Where(d => d.Contains(value, StringComparison.OrdinalIgnoreCase));
     }
 
+    //* 5. Data Export
     private async Task ExportToExcel()
     {
       try
@@ -402,6 +411,17 @@ namespace DC.Components.Pages
       {
         sb.Add($"Error exporting report data to Excel: {ex.Message}", Severity.Error);
       }
+    }
+
+    //* 6. Utility Functions
+    private string GetStaffNote(int staffId)
+    {
+      return staffNotes.TryGetValue(staffId, out var note) ? note : "";
+    }
+
+    private void UpdateStaffNote(int staffId, string newNote)
+    {
+      staffNotes[staffId] = newNote;
     }
   }
 }

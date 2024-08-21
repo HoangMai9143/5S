@@ -306,10 +306,17 @@ namespace DC.Components.Pages
 
 		private async Task OnSelectSurvey(SurveyModel survey)
 		{
-			selectedSurvey = survey;
-			await LoadStaff();
-			activeIndex = 1;
-			StateHasChanged();
+			try
+			{
+				selectedSurvey = survey;
+				await LoadStaff();
+				activeIndex = 1;
+				StateHasChanged();
+			}
+			catch (Exception ex)
+			{
+				sb.Add("Something went wrong. Please try again", Severity.Error);
+			}
 		}
 
 		private void HandleTabChanged(int index)

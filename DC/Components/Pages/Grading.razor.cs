@@ -22,6 +22,7 @@ namespace DC.Components.Pages
 		private const int DebounceDelay = 300;
 		private Dictionary<int, double> staffScores = [];
 		private Dictionary<int, string> staffNotes = [];
+		private Dictionary<int, double> surveyProgress = new Dictionary<int, double>();
 		private readonly Dictionary<int, string> tempStaffNotes = [];
 
 
@@ -88,6 +89,8 @@ namespace DC.Components.Pages
 			{
 				await LoadSurveys();
 				await LoadStaff();
+				await InitializeSurveyProgress();
+
 
 				_surveyDebounceTimer = new System.Timers.Timer(DebounceDelay);
 				_surveyDebounceTimer.Elapsed += async (sender, e) => await SurveyDebounceTimerElapsed();
@@ -100,6 +103,28 @@ namespace DC.Components.Pages
 				isLoading = false;
 				StateHasChanged();
 			}
+		}
+
+		private async Task InitializeSurveyProgress()
+		{
+			foreach (var survey in surveys)
+			{
+				var totalStaff = await appDbContext.StaffModel.CountAsync(s => s.IsActive);
+				var gradedStaff = await appDbContext.SurveyResultModel.CountAsync(sr => sr.SurveyId == survey.Id);
+
+				surveyProgress[survey.Id] = totalStaff > 0 ? (double)gradedStaff / totalStaff * 100 : 0;
+			}
+		}
+
+		private double GetSurveyProgress(int surveyId)
+		{
+			return surveyProgress.TryGetValue(surveyId, out var progress) ? progress : 0;
+		}
+
+		private string GetSurveyProgressText(int surveyId)
+		{
+			var progress = GetSurveyProgress(surveyId);
+			return $"{progress:F0}% Graded";
 		}
 
 		//* Load functions

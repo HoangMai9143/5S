@@ -24,6 +24,7 @@ namespace DC.Components.Pages
 		private Dictionary<int, string> staffNotes = [];
 		private Dictionary<int, double> surveyProgress = new Dictionary<int, double>();
 		private readonly Dictionary<int, string> tempStaffNotes = [];
+		private double totalPossiblePoints = 0.0;
 
 
 		private List<StaffModel> filteredStaff => allStaff.Where(FilterStaff).ToList();
@@ -74,7 +75,7 @@ namespace DC.Components.Pages
 					if (Math.Abs(score - searchScore) <= 1)
 						return true;
 				}
-				else if (score.ToString("F0").Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase))
+				else if (score.ToString("F1").Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase))
 				{
 					return true;
 				}
@@ -115,6 +116,30 @@ namespace DC.Components.Pages
 				surveyProgress[survey.Id] = totalStaff > 0 ? (double)gradedStaff / totalStaff * 100 : 0;
 			}
 		}
+		private async Task<double> CalculateMaxPoints(int surveyId)
+		{
+			var surveyQuestions = await appDbContext.SurveyQuestionModel
+					.Where(sq => sq.SurveyId == surveyId)
+					.Include(sq => sq.Question)
+					.ThenInclude(q => q.Answers)
+					.ToListAsync();
+
+			double maxPoints = 0;
+
+			foreach (var sq in surveyQuestions)
+			{
+				if (sq.Question.AnswerType == AnswerType.SingleChoice)
+				{
+					maxPoints += sq.Question.Answers.Max(a => a.Points);
+				}
+				else if (sq.Question.AnswerType == AnswerType.MultipleChoice)
+				{
+					maxPoints += sq.Question.Answers.Where(a => a.Points > 0).Sum(a => a.Points);
+				}
+			}
+
+			return maxPoints;
+		}
 
 		private double GetSurveyProgress(int surveyId)
 		{
@@ -153,17 +178,6 @@ namespace DC.Components.Pages
 
 				if (selectedSurvey != null)
 				{
-					// Load all survey questions
-					var surveyQuestions = await appDbContext.SurveyQuestionModel
-							.Where(sq => sq.SurveyId == selectedSurvey.Id)
-							.ToListAsync();
-
-					// Load all answers for this survey
-					var allAnswers = await appDbContext.QuestionAnswerModel
-							.Where(qa => qa.SurveyId == selectedSurvey.Id)
-							.ToListAsync();
-
-					// Load scores and notes
 					var results = await appDbContext.SurveyResultModel
 							.Where(sr => sr.SurveyId == selectedSurvey.Id)
 							.ToListAsync();
@@ -173,20 +187,15 @@ namespace DC.Components.Pages
 
 					foreach (var staff in allStaff)
 					{
-						var staffAnswers = allAnswers.Where(a => a.StaffId == staff.Id).ToList();
-						bool allQuestionsAnswered = surveyQuestions.All(sq =>
-								staffAnswers.Any(a => a.QuestionId == sq.QuestionId));
-
 						var result = results.FirstOrDefault(r => r.StaffId == staff.Id);
 
-						if (allQuestionsAnswered && result != null)
+						if (result != null)
 						{
 							staffScores[staff.Id] = result.FinalGrade;
 							staffNotes[staff.Id] = result.Note ?? "";
 						}
 						else
 						{
-							// Mark as not graded by not adding to staffScores
 							staffNotes[staff.Id] = "";
 						}
 					}
@@ -199,7 +208,7 @@ namespace DC.Components.Pages
 			}
 			catch (Exception ex)
 			{
-				sb.Add("Error Loading Staffs", Severity.Error);
+				sb.Add("Error Loading Staff", Severity.Error);
 				await Task.Delay(1000);
 				await LoadStaff();
 			}
@@ -331,6 +340,7 @@ namespace DC.Components.Pages
 		private async Task OnSelectSurvey(SurveyModel survey)
 		{
 			selectedSurvey = survey;
+			totalPossiblePoints = await CalculateMaxPoints(survey.Id);
 			await LoadStaff();
 			activeIndex = 1;
 			StateHasChanged();
@@ -368,6 +378,7 @@ namespace DC.Components.Pages
 				StateHasChanged();
 			}
 		}
+
 
 		private async Task SaveGradingResult(List<QuestionAnswerModel> gradingResult, bool changes)
 		{
@@ -428,104 +439,40 @@ namespace DC.Components.Pages
 		{
 			try
 			{
-				var surveyQuestions = await appDbContext.SurveyQuestionModel
-								.Where(sq => sq.SurveyId == surveyId)
-								.Select(sq => new { sq.QuestionId, sq.Question.AnswerType })
-								.ToListAsync();
-
-				var totalPossiblePoints = 0.0;
-				foreach (var sq in surveyQuestions)
-				{
-					var question = await appDbContext.QuestionModel
-									.Include(q => q.Answers)
-									.FirstOrDefaultAsync(q => q.Id == sq.QuestionId);
-
-					if (question != null)
-					{
-						if (sq.AnswerType == AnswerType.SingleChoice && question.Answers.Any())
-						{
-							totalPossiblePoints += question.Answers.Where(a => a.Points > 0).Max(a => a.Points);
-						}
-						else if (sq.AnswerType == AnswerType.MultipleChoice && question.Answers.Any())
-						{
-							totalPossiblePoints += question.Answers.Where(a => a.Points > 0).Sum(a => a.Points);
-						}
-					}
-				}
+				totalPossiblePoints = await CalculateMaxPoints(surveyId);
 
 				var staffAnswerGroups = await appDbContext.QuestionAnswerModel
-								.Where(qa => qa.SurveyId == surveyId && qa.Answer != null)
-								.Include(qa => qa.Answer)
-								.GroupBy(qa => qa.StaffId)
-								.ToListAsync();
-
-				var scores = new Dictionary<int, double>();
+						.Where(qa => qa.SurveyId == surveyId && qa.Answer != null)
+						.Include(qa => qa.Answer)
+						.GroupBy(qa => qa.StaffId)
+						.ToListAsync();
 
 				foreach (var staffGroup in staffAnswerGroups)
 				{
 					int staffId = staffGroup.Key;
-					double totalPositivePoints = 0.0;
-					double totalNegativePoints = 0.0;
+					double totalPoints = 0.0;
 
-					foreach (var sq in surveyQuestions)
+					foreach (var answer in staffGroup)
 					{
-						var answers = staffGroup.Where(qa => qa.QuestionId == sq.QuestionId).Select(qa => qa.Answer);
-						if (sq.AnswerType == AnswerType.SingleChoice && answers.Any())
-						{
-							var maxPoints = answers.Max(a => a.Points);
-							if (maxPoints > 0)
-								totalPositivePoints += maxPoints;
-							else
-								totalNegativePoints += Math.Abs(maxPoints);
-						}
-						else if (sq.AnswerType == AnswerType.MultipleChoice && answers.Any())
-						{
-							totalPositivePoints += answers.Where(a => a.Points > 0).Sum(a => a.Points);
-							totalNegativePoints += Math.Abs(answers.Where(a => a.Points < 0).Sum(a => a.Points));
-						}
+						totalPoints += answer.Answer.Points;
 					}
 
-					// Calculate score percentage considering both positive and negative points
-					double scorePercentage = totalPossiblePoints > 0
-									? ((totalPositivePoints - totalNegativePoints) / totalPossiblePoints) * 100
-									: 0;
-					scores[staffId] = Math.Max(0, Math.Min(scorePercentage, 100)); // Ensure score is between 0 and 100
-
 					var surveyResult = await appDbContext.SurveyResultModel
-									.FirstOrDefaultAsync(r => r.SurveyId == surveyId && r.StaffId == staffId)
-									?? new SurveyResultModel
-									{
-										SurveyId = surveyId,
-										StaffId = staffId
-									};
+							.FirstOrDefaultAsync(r => r.SurveyId == surveyId && r.StaffId == staffId)
+							?? new SurveyResultModel
+							{
+								SurveyId = surveyId,
+								StaffId = staffId
+							};
 
-					surveyResult.FinalGrade = scores[staffId];
+					surveyResult.FinalGrade = totalPoints;
 					appDbContext.Update(surveyResult);
+
+					staffScores[staffId] = totalPoints;
 				}
 
 				await appDbContext.SaveChangesAsync();
-
-				foreach (var kvp in scores)
-				{
-					var staff = await appDbContext.StaffModel.FindAsync(kvp.Key);
-					if (staff != null)
-					{
-						scores[kvp.Key] = kvp.Value;
-					}
-				}
-
 				StateHasChanged();
-			}
-			catch (DbUpdateException ex)
-			{
-				if (ex.InnerException is SqlException sqlEx)
-				{
-					HandleSqlException(sqlEx);
-				}
-				else
-				{
-					sb.Add("Error saving changes. Please try again.", Severity.Error);
-				}
 			}
 			catch (Exception ex)
 			{

@@ -44,6 +44,7 @@ namespace DC.Components.Pages
     private int gradedStaff;
     private int totalStaff;
     private double averageScore;
+    private double totalPossiblePoints = 0.0;
 
     // Selection Properties
     protected SurveyModel? _selectedSurvey;
@@ -116,8 +117,12 @@ namespace DC.Components.Pages
 
         if (selectedSurvey != null && selectedSurvey.Title != ALL_SURVEYS)
         {
+          totalPossiblePoints = await CalculateMaxPoints(selectedSurvey.Id);
           surveyResultsQuery = surveyResultsQuery.Where(sr => sr.SurveyId == selectedSurvey.Id);
-          staffQuery = staffQuery.Where(s => surveyResultsQuery.Any(sr => sr.StaffId == s.Id));
+        }
+        else
+        {
+          totalPossiblePoints = await CalculateMaxPointsForAllSurveys();
         }
 
         if (selectedDepartment != ALL_DEPARTMENTS)
@@ -126,25 +131,26 @@ namespace DC.Components.Pages
           surveyResultsQuery = surveyResultsQuery.Where(sr => sr.Staff.Department == selectedDepartment);
         }
 
-        // totalStaff = await staffQuery.CountAsync();
-
+        // Materialize the survey results
         var surveyResults = await surveyResultsQuery.ToListAsync();
-        gradedStaff = surveyResults.Select(sr => sr.StaffId).Distinct().Count();
+
+        // Update averageScore calculation
         averageScore = surveyResults.Any() ? surveyResults.Average(sr => sr.FinalGrade) : 0;
 
+        // Update score distribution calculation
         var scoreDistribution = new int[10];
         foreach (var result in surveyResults)
         {
-          int index = (int)(result.FinalGrade / 10);
+          int index = (int)(result.FinalGrade / (totalPossiblePoints / 10));
           if (index == 10) index = 9;
           scoreDistribution[index]++;
         }
 
         yAxisMax = scoreDistribution.Max() * 1.1;
         series = new List<ChartSeries>
-        {
-            new ChartSeries { Name = "Staff Count", Data = scoreDistribution.Select(x => (double)x).ToArray() }
-        };
+    {
+        new ChartSeries { Name = "Staff Count", Data = scoreDistribution.Select(x => (double)x).ToArray() }
+    };
 
         // Load staff data, which will populate filteredStaff and staffScores
         await LoadStaffData();
@@ -179,6 +185,50 @@ namespace DC.Components.Pages
         await Task.Delay(1000);
         await LoadReportData();
       }
+    }
+
+    private async Task<double> CalculateMaxPoints(int surveyId)
+    {
+      using var scope = ScopeFactory.CreateScope();
+      var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+      var surveyQuestions = await appDbContext.SurveyQuestionModel
+          .Where(sq => sq.SurveyId == surveyId)
+          .Include(sq => sq.Question)
+          .ThenInclude(q => q.Answers)
+          .ToListAsync();
+
+      double maxPoints = 0;
+
+      foreach (var sq in surveyQuestions)
+      {
+        if (sq.Question.AnswerType == AnswerType.SingleChoice)
+        {
+          maxPoints += sq.Question.Answers.Max(a => a.Points);
+        }
+        else if (sq.Question.AnswerType == AnswerType.MultipleChoice)
+        {
+          maxPoints += sq.Question.Answers.Where(a => a.Points > 0).Sum(a => a.Points);
+        }
+      }
+
+      return maxPoints;
+    }
+
+    private async Task<double> CalculateMaxPointsForAllSurveys()
+    {
+      using var scope = ScopeFactory.CreateScope();
+      var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+      var allSurveyIds = await appDbContext.SurveyModel.Select(s => s.Id).ToListAsync();
+      double totalMaxPoints = 0;
+
+      foreach (var surveyId in allSurveyIds)
+      {
+        totalMaxPoints += await CalculateMaxPoints(surveyId);
+      }
+
+      return totalMaxPoints;
     }
 
     private async Task LoadStaffData()
@@ -354,7 +404,7 @@ namespace DC.Components.Pages
 
         // Insert highest score
         var highestScore = staffScores.Values.Any() ? staffScores.Values.Max() : 0;
-        ws.Cell("H2").Value = $"Highest Score: {highestScore:F2}/100";
+        ws.Cell("H2").Value = $"Highest Score: {highestScore:F2}/{totalPossiblePoints:F2}";
 
         // Insert names of highest scoring staff
         int row = 3;
@@ -366,7 +416,7 @@ namespace DC.Components.Pages
 
         // Insert lowest score
         var lowestScore = staffScores.Values.Any() ? staffScores.Values.Min() : 0;
-        ws.Cell("I2").Value = $"Lowest Score: {lowestScore:F2}/100";
+        ws.Cell("I2").Value = $"Lowest Score: {lowestScore:F2}/{totalPossiblePoints:F2}";
 
         // Insert names of lowest scoring staff
         row = 3;
@@ -376,7 +426,7 @@ namespace DC.Components.Pages
           row++;
         }
         // Insert average score
-        ws.Cell("G3").Value = $"{averageScore:F2}/100";
+        ws.Cell("G3").Value = $"{averageScore:F2}/{totalPossiblePoints:F2}";
 
         // Insert number of graded staff
         ws.Cell("G5").Value = $"{gradedStaff}/{totalStaff}";
@@ -399,8 +449,8 @@ namespace DC.Components.Pages
           ws.Cell(row, 3).Value = staff.FullName;
           ws.Cell(row, 4).Value = staff.Department;
           var scoreCell = ws.Cell(row, 5);
-          scoreCell.Value = currentScore;
-          scoreCell.Style.NumberFormat.Format = "0.00";
+          scoreCell.Value = $"{currentScore:F2}/{totalPossiblePoints:F2}";
+          scoreCell.Style.NumberFormat.Format = "@";
           row++;
         }
 

@@ -23,7 +23,7 @@ namespace DC.Components.Pages
 		private Dictionary<int, double> staffScores = [];
 		private Dictionary<int, string> staffNotes = [];
 		private readonly Dictionary<int, string> tempStaffNotes = [];
-
+		private double maxScore;
 
 		private List<StaffModel> filteredStaff => allStaff.Where(FilterStaff).ToList();
 
@@ -73,7 +73,7 @@ namespace DC.Components.Pages
 			if (Math.Abs(score - searchScore) <= 1)
 				return true;
 		}
-		else if (score.ToString("F0").Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase))
+		else if (score.ToString("F1").Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase))
 		{
 			return true;
 		}
@@ -162,7 +162,6 @@ namespace DC.Components.Pages
 						}
 						else
 						{
-							// Mark as not graded by not adding to staffScores
 							staffNotes[staff.Id] = "";
 						}
 					}
@@ -461,11 +460,9 @@ namespace DC.Components.Pages
 						}
 					}
 
-					// Calculate score percentage considering both positive and negative points
-					double scorePercentage = totalPossiblePoints > 0
-									? ((totalPositivePoints - totalNegativePoints) / totalPossiblePoints) * 100
-									: 0;
-					scores[staffId] = Math.Max(0, Math.Min(scorePercentage, 100)); // Ensure score is between 0 and 100
+					maxScore = totalPossiblePoints;
+
+					scores[staffId] = totalPositivePoints - totalNegativePoints; // Set the score
 
 					var surveyResult = await appDbContext.SurveyResultModel
 									.FirstOrDefaultAsync(r => r.SurveyId == surveyId && r.StaffId == staffId)

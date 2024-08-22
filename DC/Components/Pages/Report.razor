@@ -99,8 +99,16 @@
           <MudItem xs="12">
             <MudDataGrid T="StaffModel" Items="@filteredStaff" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_staffQuickFilter">
               <ToolBarContent>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.FileDownload" OnClick="@ExportToExcel" Class="mr-2">
-                  Export to Excel
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.FileDownload" OnClick="@ExportToExcel" Class="mr-2" Disabled="@isExporting">
+                  @if (isExporting)
+                  {
+                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                    <MudText Class="ms-2">Exporting...</MudText>
+                  }
+                  else
+                  {
+                    <MudText>Export to Excel</MudText>
+                  }
                 </MudButton>
                 <MudTextField @bind-Value="_staffSearchString" Placeholder="Search by name, department, or score" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" DebounceInterval="300" />
               </ToolBarContent>

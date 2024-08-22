@@ -23,6 +23,7 @@ namespace DC.Components.Pages
 
     // State Variables
     private bool isLoading = true;
+    private bool isExporting = false;
     private string _staffSearchString = "";
 
     // Data Collections
@@ -326,8 +327,14 @@ namespace DC.Components.Pages
     //* 5. Data Export
     private async Task ExportToExcel()
     {
+      if (isExporting) return;
+
       try
       {
+        isExporting = true;
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(1000); // Add a 1-second delay to prevent spamming
+
         var templatePath = "Template/5SReportTemplate.xlsx";
 
         if (!File.Exists(templatePath))
@@ -410,6 +417,11 @@ namespace DC.Components.Pages
       catch (Exception ex)
       {
         sb.Add($"Error exporting report data to Excel: {ex.Message}", Severity.Error);
+      }
+      finally
+      {
+        isExporting = false;
+        await InvokeAsync(StateHasChanged);
       }
     }
 

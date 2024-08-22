@@ -27,7 +27,7 @@
           </MudAutocomplete>
         </MudItem>
         
-        @if (selectedSurvey != null && selectedSurvey.Title != ALL_SURVEYS)
+        @if (selectedSurvey != null)
         {
           <MudItem xs="12" sm="4">
           <MudCard>
@@ -54,7 +54,7 @@
           </MudCard>
         </MudItem>
         }
-        @if (selectedSurvey != null && selectedSurvey.Title != ALL_SURVEYS && topScoringStaff.Any())
+        @if (selectedSurvey != null  && topScoringStaff.Any())
         {
           <MudItem xs="12" sm="6">
             <MudCard>
@@ -71,7 +71,7 @@
             </MudCard>
           </MudItem>
         }
-        @if (selectedSurvey != null && selectedSurvey.Title != ALL_SURVEYS && lowestScoringStaff.Any())
+        @if (selectedSurvey != null  && lowestScoringStaff.Any())
         {
           <MudItem xs="12" sm="6">
             <MudCard>
@@ -88,7 +88,7 @@
             </MudCard>
           </MudItem>
         }
-        @if (selectedSurvey != null && selectedSurvey.Title != ALL_SURVEYS)
+        @if (selectedSurvey != null)
         {
           <MudItem xs="12">
             <MudDataGrid T="StaffModel" Items="@filteredStaff" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_staffQuickFilter">

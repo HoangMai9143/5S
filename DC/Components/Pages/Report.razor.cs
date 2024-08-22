@@ -16,7 +16,6 @@ namespace DC.Components.Pages
   {
     // Constants
     private const string ALL_DEPARTMENTS = "All departments";
-    private const string ALL_SURVEYS = "All surveys";
 
     // Injected Services
     [Inject] private IServiceScopeFactory ScopeFactory { get; set; } = default!;
@@ -88,7 +87,6 @@ namespace DC.Components.Pages
         totalStaff = await appDbContext.StaffModel.CountAsync();
 
         surveys = await appDbContext.SurveyModel.OrderByDescending(s => s.Id).ToListAsync();
-        surveys.Insert(0, new SurveyModel { Id = 0, Title = ALL_SURVEYS });
 
         departments = new List<string> { ALL_DEPARTMENTS };
         departments.AddRange(await appDbContext.StaffModel.Select(s => s.Department).Distinct().OrderBy(d => d).ToListAsync());
@@ -115,7 +113,7 @@ namespace DC.Components.Pages
         var staffQuery = appDbContext.StaffModel.AsQueryable();
         var surveyResultsQuery = appDbContext.SurveyResultModel.AsQueryable();
 
-        if (selectedSurvey != null && selectedSurvey.Title != ALL_SURVEYS)
+        if (selectedSurvey != null)
         {
           totalPossiblePoints = await CalculateMaxPoints(selectedSurvey.Id);
           surveyResultsQuery = surveyResultsQuery.Where(sr => sr.SurveyId == selectedSurvey.Id);
@@ -155,7 +153,7 @@ namespace DC.Components.Pages
         // Load staff data, which will populate filteredStaff and staffScores
         await LoadStaffData();
 
-        if (selectedSurvey != null && selectedSurvey.Title != ALL_SURVEYS && staffScores.Any())
+        if (selectedSurvey != null && staffScores.Any())
         {
           // Find the top-scoring staff
           var topScore = staffScores.Values.Max();
@@ -239,7 +237,7 @@ namespace DC.Components.Pages
       var staffQuery = appDbContext.StaffModel.AsQueryable();
       var surveyResultsQuery = appDbContext.SurveyResultModel.AsQueryable();
 
-      if (selectedSurvey != null && selectedSurvey.Title != ALL_SURVEYS)
+      if (selectedSurvey != null)
       {
         surveyResultsQuery = surveyResultsQuery.Where(sr => sr.SurveyId == selectedSurvey.Id);
       }
@@ -260,12 +258,12 @@ namespace DC.Components.Pages
 
       // Fetch all survey questions
       var surveyQuestions = await appDbContext.SurveyQuestionModel
-          .Where(sq => selectedSurvey == null || selectedSurvey.Title == ALL_SURVEYS || sq.SurveyId == selectedSurvey.Id)
+          .Where(sq => selectedSurvey == null || sq.SurveyId == selectedSurvey.Id)
           .ToListAsync();
 
       // Fetch all answers
       var allAnswers = await appDbContext.QuestionAnswerModel
-          .Where(qa => selectedSurvey == null || selectedSurvey.Title == ALL_SURVEYS || qa.SurveyId == selectedSurvey.Id)
+          .Where(qa => selectedSurvey == null || qa.SurveyId == selectedSurvey.Id)
           .ToListAsync();
 
       // Determine which staff are fully graded

@@ -7,14 +7,3 @@
         <MudButton Color="@color" Variant="Variant.Filled" OnClick="Submit">@buttonText</MudButton>
     </DialogActions>
 </MudDialog>
-
-@code {
-    [CascadingParameter] MudDialogInstance mudDialog { get; set; }
-
-    [Parameter] public string contentText { get; set; }
-    [Parameter] public string buttonText { get; set; }
-    [Parameter] public Color color { get; set; }
-
-    void Submit() => mudDialog.Close(DialogResult.Ok(true));
-    void Cancel() => mudDialog.Cancel();
-}

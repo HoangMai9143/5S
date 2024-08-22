@@ -9,19 +9,21 @@ namespace DC.Components.Pages
 {
 	public partial class Survey
 	{
-		private List<SurveyModel> surveyList = new List<SurveyModel>(); // List of surveys to display
-		private List<QuestionModel> questionsList = new List<QuestionModel>(); // List of questions to display
+		private List<SurveyModel> surveyList = []; // List of surveys to display
+		private List<QuestionModel> questionsList = []; // List of questions to display
 
-		private HashSet<QuestionModel> currentSelectedQuestion = new HashSet<QuestionModel>(); // Holds the questions that are currently selected by the user.
-		private HashSet<int> savedQuestionId = new HashSet<int>(); // The questions that are already saved in database
-		private HashSet<int> initialLoadedQuestionId = new HashSet<int>(); // Initial questions loaded from the database (to compare with currentSelectedQuestion)
+		private HashSet<QuestionModel> currentSelectedQuestion = []; // Holds the questions that are currently selected by the user.
+		private HashSet<int> savedQuestionId = []; // The questions that are already saved in database
+		private HashSet<int> initialLoadedQuestionId = []; // Initial questions loaded from the database (to compare with currentSelectedQuestion)
 
 		private string _surveySearchString = string.Empty; // Search string for surveys
 		private string _questionSearchString = string.Empty; // Search string for questions
-		private SurveyModel _selectedSurvey; // The survey that is currently selected by the user
+		private SurveyModel? _selectedSurvey; // The survey that is currently selected by the user
+		private const string DATE_FORMAT = "dd/MM/yyyy HH:mm";
 
-		private System.Timers.Timer _surveySearchDebounceTimer; // Timer to debounce survey search input
-		private System.Timers.Timer _questionSearchDebounceTimer; // Timer to debounce question search input
+
+		private System.Timers.Timer? _surveySearchDebounceTimer; // Timer to debounce survey search input
+		private System.Timers.Timer? _questionSearchDebounceTimer; // Timer to debounce question search input
 		private const int DebounceDelay = 300; // milliseconds
 		private bool isLoading = true;
 
@@ -97,7 +99,7 @@ namespace DC.Components.Pages
 			{
 				Console.WriteLine($"Error loading question(s): {ex.Message}");
 				sb.Add("Error loading question(s), reloading page...", Severity.Error);
-				questionsList = new List<QuestionModel>();
+				questionsList = [];
 				await Task.Delay(1000);
 				await LoadQuestions();
 			}
@@ -106,16 +108,31 @@ namespace DC.Components.Pages
 		//* Compare saved questions with the current selected questions
 		private async Task GetExistingQuestions()
 		{
-			var existingQuestionIdsList = await appDbContext.Set<SurveyQuestionModel>()
-					.Where(sq => sq.SurveyId == _selectedSurvey.Id)
-					.Select(sq => sq.QuestionId)
-					.ToListAsync();
+			try
+			{
+				if (_selectedSurvey == null) // e.g. when the page is first loaded (basically just a fail-safe check)
+				{
+					sb.Add("No survey selected.", Severity.Error);
+					return;
+				}
+				var existingQuestionIdsList = await appDbContext.Set<SurveyQuestionModel>()
+								.Where(sq => sq.SurveyId == _selectedSurvey.Id)
+								.Select(sq => sq.QuestionId)
+								.ToListAsync();
 
-			// Convert to hashset for faster lookup
-			savedQuestionId = new HashSet<int>(existingQuestionIdsList);
-			initialLoadedQuestionId = new HashSet<int>(savedQuestionId);
-			currentSelectedQuestion = new HashSet<QuestionModel>(questionsList.Where(q => savedQuestionId.Contains(q.Id)));
-			StateHasChanged();
+				// Convert to hashset for faster lookup
+				savedQuestionId = new HashSet<int>(existingQuestionIdsList);
+				initialLoadedQuestionId = new HashSet<int>(savedQuestionId);
+				currentSelectedQuestion = new HashSet<QuestionModel>(questionsList.Where(q => savedQuestionId.Contains(q.Id)));
+				StateHasChanged();
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Error getting existing questions: {ex.Message}");
+				sb.Add("Error getting existing questions, reloading page...", Severity.Error);
+				await Task.Delay(1000);
+				await GetExistingQuestions();
+			}
 		}
 
 		//* 2. Survey-related functions
@@ -135,13 +152,13 @@ namespace DC.Components.Pages
 				foreach (var questionId in questionsToRemove)
 				{
 					var surveyQuestion = await appDbContext.Set<SurveyQuestionModel>()
-							.FirstOrDefaultAsync(sq => sq.SurveyId == _selectedSurvey.Id && sq.QuestionId == questionId);
+						.FirstOrDefaultAsync(sq => _selectedSurvey != null && sq.SurveyId == _selectedSurvey.Id && sq.QuestionId == questionId);
 					if (surveyQuestion != null)
 						appDbContext.Set<SurveyQuestionModel>().Remove(surveyQuestion);
 				}
 
 				await appDbContext.Set<SurveyQuestionModel>().AddRangeAsync(
-						questionsToAdd.Select(questionId => new SurveyQuestionModel { SurveyId = _selectedSurvey.Id, QuestionId = questionId })
+						questionsToAdd.Select(questionId => new SurveyQuestionModel { SurveyId = _selectedSurvey!.Id, QuestionId = questionId })
 				);
 
 				await appDbContext.SaveChangesAsync();
@@ -164,7 +181,6 @@ namespace DC.Components.Pages
 
 		private async Task DeleteSurvey(SurveyModel surveyToDelete)
 		{
-			int deletedSurveyId = surveyToDelete.Id;
 			appDbContext.Set<SurveyModel>().Remove(surveyToDelete);
 			await appDbContext.SaveChangesAsync();
 			await LoadSurveys();
@@ -200,7 +216,7 @@ namespace DC.Components.Pages
 			await appDbContext.SaveChangesAsync();
 			await LoadSurveys();
 			sb.Add($"Survey {surveyToClone.Id} cloned successfully with ID: {clonedSurvey.Id}", Severity.Success);
-			OpenEditSurveyDialog(clonedSurvey);
+			await OpenEditSurveyDialog(clonedSurvey);
 		}
 
 		//* 3. Question-related functions
@@ -211,7 +227,7 @@ namespace DC.Components.Pages
 		}
 
 		//* 4. Search and Filter functions
-		private Func<SurveyModel, bool> surveyQuickFilter => x =>
+		private Func<SurveyModel, bool> SurveyQuickFilter => x =>
 		{
 			if (string.IsNullOrWhiteSpace(_surveySearchString))
 				return true;
@@ -220,13 +236,13 @@ namespace DC.Components.Pages
 				return true;
 			if (x.Title.Contains(_surveySearchString, StringComparison.OrdinalIgnoreCase))
 				return true;
-			if (x.StartDate.ToString("dd/MM/yyyy HH:mm").Contains(_surveySearchString, StringComparison.OrdinalIgnoreCase))
+			if (x.StartDate.ToString(DATE_FORMAT).Contains(_surveySearchString, StringComparison.OrdinalIgnoreCase))
 				return true;
 
-			if (x.EndDate.ToString("dd/MM/yyyy HH:mm").Contains(_surveySearchString, StringComparison.OrdinalIgnoreCase))
+			if (x.EndDate.ToString(DATE_FORMAT).Contains(_surveySearchString, StringComparison.OrdinalIgnoreCase))
 				return true;
 
-			if (x.CreatedDate.ToString("dd/MM/yyyy HH:mm").Contains(_surveySearchString, StringComparison.OrdinalIgnoreCase))
+			if (x.CreatedDate.ToString(DATE_FORMAT).Contains(_surveySearchString, StringComparison.OrdinalIgnoreCase))
 				return true;
 
 			if (x.IsActive.ToString().Contains(_surveySearchString, StringComparison.OrdinalIgnoreCase))
@@ -251,9 +267,9 @@ namespace DC.Components.Pages
 
 				surveyList = allSurveys.Where(s =>
 						s.Id.ToString().Contains(searchTerm) ||
-						s.StartDate.ToString("dd/MM/yyyy HH:mm").ToLower().Contains(searchTerm) ||
-						s.EndDate.ToString("dd/MM/yyyy HH:mm").ToLower().Contains(searchTerm) ||
-						s.CreatedDate.ToString("dd/MM/yyyy HH:mm").ToLower().Contains(searchTerm) ||
+						s.StartDate.ToString(DATE_FORMAT).ToLower().Contains(searchTerm) ||
+						s.EndDate.ToString(DATE_FORMAT).ToLower().Contains(searchTerm) ||
+						s.CreatedDate.ToString(DATE_FORMAT).ToLower().Contains(searchTerm) ||
 						s.IsActive.ToString().ToLower().Contains(searchTerm)
 				).ToList();
 			}
@@ -351,7 +367,7 @@ namespace DC.Components.Pages
 			var dialog = await dialogService.ShowAsync<SurveyEditDialog>("Edit Survey", parameters, options);
 			var result = await dialog.Result;
 
-			if (!result.Canceled)
+			if (result != null && !result.Canceled)
 			{
 				await LoadSurveys();
 				sb.Add($"Survey {surveyToEdit.Id} updated successfully.", Severity.Success);
@@ -414,10 +430,10 @@ namespace DC.Components.Pages
 		}
 
 		//* 6. Event handlers and Utility functions
-		private void OnSelectSurvey(SurveyModel survey)
+		private async void OnSelectSurvey(SurveyModel survey)
 		{
 			_selectedSurvey = survey;
-			GetExistingQuestions();
+			await GetExistingQuestions();
 		}
 	}
 }

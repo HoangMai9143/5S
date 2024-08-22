@@ -54,33 +54,32 @@ namespace DC.Components.Pages
 			return false;
 		};
 		private Func<StaffModel, bool> _staffQuickFilter => x =>
-{
-	if (string.IsNullOrWhiteSpace(_staffSearchString))
-		return true;
-
-	if (x.FullName.Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase))
-		return true;
-
-	if (x.Department?.Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase) == true)
-		return true;
-
-	// Add score filtering
-	if (staffScores.TryGetValue(x.Id, out var score))
-	{
-		if (double.TryParse(_staffSearchString, out var searchScore))
 		{
-			// Check if the score is within ±1 of the searched score
-			if (Math.Abs(score - searchScore) <= 1)
+			if (string.IsNullOrWhiteSpace(_staffSearchString))
 				return true;
-		}
-		else if (score.ToString("F0").Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase))
-		{
-			return true;
-		}
-	}
 
-	return false;
-};
+			if (x.FullName.Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase))
+				return true;
+
+			if (x.Department?.Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase) == true)
+				return true;
+
+			// Add score filtering
+			if (staffScores.TryGetValue(x.Id, out var score))
+			{
+				if (double.TryParse(_staffSearchString, out var searchScore))
+				{
+					// Check if the score is within ±1 of the searched score
+					if (Math.Abs(score - searchScore) <= 1)
+						return true;
+				}
+				else if (score.ToString("F0").Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase))
+				{
+					return true;
+				}
+			}
+			return false;
+		};
 
 		//* Initialize
 		protected override async Task OnAfterRenderAsync(bool firstRender)

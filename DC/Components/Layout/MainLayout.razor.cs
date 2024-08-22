@@ -5,7 +5,6 @@ namespace DC.Components.Layout
   public partial class MainLayout
   {
     private bool _drawerOpen = true;
-    private bool _isDarkMode = true;
     private MudTheme? _theme = null;
 
     protected override void OnInitialized()
@@ -23,12 +22,6 @@ namespace DC.Components.Layout
     private void DrawerToggle()
     {
       _drawerOpen = !_drawerOpen;
-      StateHasChanged();
-    }
-
-    private void DarkModeToggle()
-    {
-      _isDarkMode = !_isDarkMode;
       StateHasChanged();
     }
 
@@ -69,12 +62,6 @@ namespace DC.Components.Layout
       TableLines = "#33323e",
       Divider = "#292838",
       OverlayLight = "#1e1e2d80",
-    };
-
-    public string DarkLightModeButtonIcon => _isDarkMode switch
-    {
-      true => Icons.Material.Rounded.LightMode,
-      false => Icons.Material.Outlined.DarkMode,
     };
   }
 }

@@ -387,7 +387,7 @@ namespace DC.Components.Pages
 				["maxPossibleScore"] = totalPossiblePoints
 			};
 
-			var options = new DialogOptions { CloseButton = true, CloseOnEscapeKey = true };
+			var options = new DialogOptions { FullWidth = true, CloseButton = true, CloseOnEscapeKey = true };
 			var dialog = await dialogService.ShowAsync<AutoGradeDialog>("Auto Grading", parameters, options);
 			var result = await dialog.Result;
 
@@ -398,7 +398,7 @@ namespace DC.Components.Pages
 			}
 		}
 
-		private async Task AutoGradeStaff(double minRange, double maxRange, List<int> selectedStaffIds)
+		private async Task AutoGradeStaff(double range1, double range2, List<int> selectedStaffIds)
 		{
 			if (selectedSurvey == null)
 			{
@@ -406,16 +406,29 @@ namespace DC.Components.Pages
 				return;
 			}
 
+			double minRange = Math.Min(range1, range2);
+			double maxRange = Math.Max(range1, range2);
+
 			var surveyQuestions = await appDbContext.SurveyQuestionModel
 					.Where(sq => sq.SurveyId == selectedSurvey.Id)
 					.Include(sq => sq.Question)
 					.ThenInclude(q => q.Answers)
 					.ToListAsync();
 
+			if (surveyQuestions == null || !surveyQuestions.Any())
+			{
+				sb.Add("No questions found for this survey", Severity.Error);
+				return;
+			}
+
 			foreach (var staffId in selectedStaffIds)
 			{
 				var staff = allStaff.FirstOrDefault(s => s.Id == staffId);
-				if (staff == null) continue;
+				if (staff == null)
+				{
+					sb.Add($"Staff with ID {staffId} not found", Severity.Warning);
+					continue;
+				}
 
 				bool scoreInRange;
 				int attempts = 0;
@@ -423,61 +436,94 @@ namespace DC.Components.Pages
 
 				do
 				{
-					// Clear existing answers for this staff
-					var existingAnswers = await appDbContext.QuestionAnswerModel
-							.Where(qa => qa.SurveyId == selectedSurvey.Id && qa.StaffId == staffId)
-							.ToListAsync();
-					appDbContext.QuestionAnswerModel.RemoveRange(existingAnswers);
-
-					// Generate new answers
-					var newAnswers = new List<QuestionAnswerModel>();
-					double currentScore = 0;
-
-					foreach (var surveyQuestion in surveyQuestions)
+					try
 					{
-						if (surveyQuestion.Question.AnswerType == AnswerType.SingleChoice)
+						var existingAnswers = await appDbContext.QuestionAnswerModel
+								.Where(qa => qa.SurveyId == selectedSurvey.Id && qa.StaffId == staffId)
+								.ToListAsync();
+
+						if (existingAnswers != null && existingAnswers.Any())
 						{
-							var selectedAnswer = SelectAnswer(surveyQuestion.Question.Answers, currentScore, minRange, maxRange);
-							newAnswers.Add(new QuestionAnswerModel
-							{
-								SurveyId = selectedSurvey.Id,
-								StaffId = staffId,
-								QuestionId = surveyQuestion.QuestionId,
-								AnswerId = selectedAnswer.Id
-							});
-							currentScore += selectedAnswer.Points;
+							appDbContext.QuestionAnswerModel.RemoveRange(existingAnswers);
 						}
-						else // MultipleChoice
+
+						var newAnswers = new List<QuestionAnswerModel>();
+						double currentScore = 0;
+
+						foreach (var surveyQuestion in surveyQuestions)
 						{
-							var selectedAnswers = SelectMultipleAnswers(surveyQuestion.Question.Answers, currentScore, minRange, maxRange);
-							foreach (var answer in selectedAnswers)
+							if (surveyQuestion.Question == null || surveyQuestion.Question.Answers == null)
 							{
+								throw new InvalidOperationException($"Invalid question data for question ID {surveyQuestion.QuestionId}");
+							}
+
+							if (surveyQuestion.Question.AnswerType == AnswerType.SingleChoice)
+							{
+								var selectedAnswer = SelectAnswer(surveyQuestion.Question.Answers, currentScore, minRange, maxRange);
+								if (selectedAnswer == null)
+								{
+									throw new InvalidOperationException($"Unable to select a valid answer for question ID {surveyQuestion.QuestionId}");
+								}
 								newAnswers.Add(new QuestionAnswerModel
 								{
 									SurveyId = selectedSurvey.Id,
 									StaffId = staffId,
 									QuestionId = surveyQuestion.QuestionId,
-									AnswerId = answer.Id
+									AnswerId = selectedAnswer.Id
 								});
-								currentScore += answer.Points;
+								currentScore += selectedAnswer.Points;
+							}
+							else // MultipleChoice
+							{
+								var selectedAnswers = SelectMultipleAnswers(surveyQuestion.Question.Answers, currentScore, minRange, maxRange);
+								foreach (var answer in selectedAnswers)
+								{
+									newAnswers.Add(new QuestionAnswerModel
+									{
+										SurveyId = selectedSurvey.Id,
+										StaffId = staffId,
+										QuestionId = surveyQuestion.QuestionId,
+										AnswerId = answer.Id
+									});
+									currentScore += answer.Points;
+								}
 							}
 						}
+
+						if (newAnswers.Any())
+						{
+							appDbContext.QuestionAnswerModel.AddRange(newAnswers);
+							await appDbContext.SaveChangesAsync();
+
+							await CalculateAndSaveScores(selectedSurvey.Id);
+
+							if (staffScores.TryGetValue(staffId, out var score))
+							{
+								scoreInRange = score >= minRange && score <= maxRange;
+							}
+							else
+							{
+								throw new InvalidOperationException($"Score not found for staff ID {staffId}");
+							}
+						}
+						else
+						{
+							throw new InvalidOperationException("No answers were generated");
+						}
+					}
+					catch (Exception ex)
+					{
+						Console.WriteLine($"Error in attempt {attempts + 1} for staff {staff.FullName}: {ex.Message}");
+						scoreInRange = false;
 					}
 
-					appDbContext.QuestionAnswerModel.AddRange(newAnswers);
-					await appDbContext.SaveChangesAsync();
-
-					// Calculate score
-					await CalculateAndSaveScores(selectedSurvey.Id);
-
-					scoreInRange = staffScores[staffId] >= minRange && staffScores[staffId] <= maxRange;
 					attempts++;
 
 				} while (!scoreInRange && attempts < maxAttempts);
 
 				if (!scoreInRange)
 				{
-					sb.Add($"Could not generate a score within the specified range for {staff.FullName} after {maxAttempts} attempts", Severity.Warning);
+					sb.Add($"Could not generate a score within the range {minRange}-{maxRange} for {staff.FullName} after {maxAttempts} attempts", Severity.Warning);
 				}
 			}
 
@@ -486,14 +532,14 @@ namespace DC.Components.Pages
 			StateHasChanged();
 		}
 
-		private AnswerModel SelectAnswer(ICollection<AnswerModel> answers, double currentScore, double minRange, double maxRange)
+		private AnswerModel? SelectAnswer(ICollection<AnswerModel> answers, double currentScore, double minRange, double maxRange)
 		{
 			var remainingRange = maxRange - currentScore;
 			var possibleAnswers = answers.Where(a => currentScore + a.Points <= maxRange).ToList();
 
 			if (!possibleAnswers.Any())
 			{
-				return answers.OrderBy(a => a.Points).First(); // Choose the answer with the least points
+				return answers.OrderBy(a => a.Points).FirstOrDefault(); // Choose the answer with the least points, or null if no answers
 			}
 
 			if (currentScore < minRange)
@@ -502,7 +548,7 @@ namespace DC.Components.Pages
 				possibleAnswers = possibleAnswers.Where(a => a.Points > 0).ToList();
 			}
 
-			return possibleAnswers.OrderBy(x => Guid.NewGuid()).First();
+			return possibleAnswers.Any() ? possibleAnswers.OrderBy(x => Guid.NewGuid()).First() : null;
 		}
 
 		private List<AnswerModel> SelectMultipleAnswers(ICollection<AnswerModel> answers, double currentScore, double minRange, double maxRange)

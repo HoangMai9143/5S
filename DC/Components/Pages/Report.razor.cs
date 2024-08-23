@@ -35,9 +35,11 @@ namespace DC.Components.Pages
     private List<StaffModel> lowestScoringStaff = new List<StaffModel>();
 
     // Chart Data
+    private List<ChartSeries> series = new();
+    private string[] xAxisLabels = Array.Empty<string>();
     private double[] data = Array.Empty<double>();
     private string[] labels = Array.Empty<string>();
-    private readonly string[] scoreRanges = { "0-10", "11-20", "21-30", "31-40", "41-50", "51-60", "61-70", "71-80", "81-90", "91-100" };
+    private List<(int Start, int End, string Label)> scoreRanges = new();
 
     // Statistics
     private int gradedStaff;
@@ -135,16 +137,36 @@ namespace DC.Components.Pages
         // Update averageScore calculation
         averageScore = surveyResults.Any() ? surveyResults.Average(sr => sr.FinalGrade) : 0;
 
-        // Update score distribution calculation (reversed)
-        var scoreDistribution = new int[10];
-        foreach (var result in surveyResults)
+        // Create dynamic score ranges
+        scoreRanges.Clear();
+        scoreRanges.Add(((int)totalPossiblePoints, (int)totalPossiblePoints, $"{totalPossiblePoints}"));
+        for (int i = 60; i >= 0; i -= 10)
         {
-          int index = 9 - (int)(result.FinalGrade / (totalPossiblePoints / 10));
-          if (index == -1) index = 0;
-          scoreDistribution[index]++;
+          if (i < totalPossiblePoints)
+          {
+            if (i > 0)
+            {
+              scoreRanges.Add((i, (int)totalPossiblePoints - 1, $"{i}+"));
+            }
+            else
+            {
+              scoreRanges.Add((0, 9, "0"));
+            }
+          }
         }
 
-        // Calculate percentages and create pie chart data
+        // Update score distribution calculation
+        var scoreDistribution = new int[scoreRanges.Count];
+        foreach (var result in surveyResults)
+        {
+          int index = scoreRanges.FindIndex(range => result.FinalGrade >= range.Start && result.FinalGrade <= range.End);
+          if (index >= 0)
+          {
+            scoreDistribution[index]++;
+          }
+        }
+
+        // Calculate percentages and create chart data
         var totalStaff = scoreDistribution.Sum();
         var dataList = new List<double>();
         var labelList = new List<string>();
@@ -154,13 +176,23 @@ namespace DC.Components.Pages
           if (scoreDistribution[i] > 0)
           {
             double percentage = (double)scoreDistribution[i] / totalStaff * 100;
+            var range = scoreRanges[i];
+
             dataList.Add(scoreDistribution[i]);
-            labelList.Add($"{scoreRanges[i]} ({percentage:F1}%)");
+            labelList.Add($"{range.Label} ({percentage:F1}%)");
           }
         }
 
+        // Set data for pie chart
         data = dataList.ToArray();
         labels = labelList.ToArray();
+
+        // Set data for bar chart
+        series = new List<ChartSeries>
+        {
+            new ChartSeries { Name = "Staff Count", Data = dataList.ToArray() }
+        };
+        xAxisLabels = labelList.Select(l => l.Split(' ')[0]).ToArray(); // Use only the range part for x-axis labels
 
         // Load staff data, which will populate filteredStaff and staffScores
         await LoadStaffData();

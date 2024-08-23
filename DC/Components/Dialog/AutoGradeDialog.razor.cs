@@ -10,9 +10,8 @@ namespace DC.Components.Dialog
   public partial class AutoGradeDialog
   {
     [CascadingParameter] MudDialogInstance mudDialog { get; set; }
-    [Parameter] public int bias { get; set; }
-    [Parameter] public int deviation { get; set; }
-
+    [Parameter] public int range1 { get; set; }
+    [Parameter] public int range2 { get; set; }
 
     void Submit() => mudDialog.Close(DialogResult.Ok(true));
     void Cancel() => mudDialog.Cancel();

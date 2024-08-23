@@ -388,7 +388,7 @@ namespace DC.Components.Pages
 
 			if (!result.Canceled)
 			{
-				await LoadStaff();
+				//TODO: Implement auto grading
 				StateHasChanged();
 			}
 		}

@@ -42,15 +42,19 @@
 					</MudGrid>
 				</MudTabPanel>
 				<MudTabPanel Text="Staff" Icon="@Icons.Material.Filled.People">
-					<MudStack>
-						<MudText Typo="Typo.h6" Class="mb-4">Current Survey: @selectedSurvey.Title</MudText>
-						<MudToggleGroup T="string" SelectionMode="SelectionMode.SingleSelection" @bind-Value="staffFilter" Color="Color.Primary">
-							<MudToggleItem Value="@("All")" Text="All" />
-							<MudToggleItem Value="@("Graded")" Text="Graded" />
-							<MudToggleItem Value="@("NotGraded")" Text="Not Graded" />
-						</MudToggleGroup>
-					</MudStack>
-					<MudDataGrid Style="{padding: top: 10px;}" T="StaffModel" Items="@filteredStaff" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_staffQuickFilter">
+					<MudGrid>
+						<MudItem xs="12">
+							<MudText Typo="Typo.h6" Class="mb-4">Current Survey: @selectedSurvey.Title</MudText>
+						</MudItem>
+						<MudItem xs="12" sm="4" Style="padding-bottom:20px">
+							<MudToggleGroup T="string" SelectionMode="SelectionMode.SingleSelection" @bind-Value="staffFilter" Color="Color.Primary">
+								<MudToggleItem Value="@("All")" Text="All" />
+								<MudToggleItem Value="@("Graded")" Text="Graded" />
+								<MudToggleItem Value="@("NotGraded")" Text="Not Graded" />
+							</MudToggleGroup>
+						</MudItem>
+					</MudGrid>
+					<MudDataGrid T="StaffModel" Items="@filteredStaff" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_staffQuickFilter">
 						<ToolBarContent>
 							<MudTextField @bind-Value="_staffSearchString" Placeholder="Search by name, department, or score" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" DebounceInterval="300" />
 						</ToolBarContent>
@@ -58,19 +62,19 @@
 							<PropertyColumn Property="x => x.FullName" Title="Full Name" />
 							<PropertyColumn Property="x => x.Department" Title="Department" />
 							<TemplateColumn Title="Score" CellClass="auto">
-									<CellTemplate Context="staffContext">
-											<div Elevation="0" Class="d-flex flex-column justify-center align-center pa-2" Style="height: 100%;width:80%;">
-													@if (staffScores.TryGetValue(staffContext.Item.Id, out var score))
-													{
-															<MudProgressLinear Size="Size.Medium" Rounded="true" Value="@score" Min="0" Max="@totalPossiblePoints" Color="Color.Primary" Class="my-2 w-100" Style="min-width: 150px;" />
-															<MudText>@score.ToString("F1") / @totalPossiblePoints.ToString("F1")</MudText>
-													}
-													else
-													{
-															<MudText Color="Color.Warning">Not graded yet</MudText>
-													}
-											</div>
-									</CellTemplate>
+								<CellTemplate Context="staffContext">
+									<div Elevation="0" Class="d-flex flex-column justify-center align-center pa-2" Style="height: 100%;width:80%;">
+										@if (staffScores.TryGetValue(staffContext.Item.Id, out var score))
+										{
+											<MudProgressLinear Size="Size.Medium" Rounded="true" Value="@score" Min="0" Max="@totalPossiblePoints" Color="Color.Primary" Class="my-2 w-100" Style="min-width: 150px;" />
+											<MudText>@score.ToString("F1") / @totalPossiblePoints.ToString("F1")</MudText>
+										}
+										else
+										{
+											<MudText Color="Color.Warning">Not graded yet</MudText>
+										}
+									</div>
+								</CellTemplate>
 							</TemplateColumn>
 							<TemplateColumn Title="Note">
 								<CellTemplate Context="staffContext">

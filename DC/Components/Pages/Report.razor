@@ -45,24 +45,22 @@
               </MudCardContent>
             </MudCard>
           </MudItem>
-          <MudGrid Style="padding-top: 20px;">
-            <MudItem xs="12" sm="6">
-              <MudCard>
-                <MudCardContent>
-                  <MudText Typo="Typo.h6">Score Distribution (Bar Chart)</MudText>
-                  <MudChart ChartType="ChartType.Bar" ChartSeries="@series" XAxisLabels="@xAxisLabels" Width="100%" Height="350px" ChartOptions="new ChartOptions { YAxisTicks = 1 }"></MudChart>
-                </MudCardContent>
-              </MudCard>
-            </MudItem>
-            <MudItem xs="12" sm="6">
-              <MudCard>
-                <MudCardContent>
-                  <MudText Typo="Typo.h6">Score Distribution (Pie Chart)</MudText>
-                  <MudChart ChartType="ChartType.Pie" InputData="@data" InputLabels="@labels" Width="100%" Height="350px" />
-                </MudCardContent>
-              </MudCard>
-            </MudItem>
-          </MudGrid>
+          <MudItem xs="12" sm="6">
+            <MudCard>
+              <MudCardContent>
+                <MudText Typo="Typo.h6">Score Distribution (Bar Chart)</MudText>
+                <MudChart ChartType="ChartType.Bar" ChartSeries="@series" XAxisLabels="@xAxisLabels" Width="100%" Height="350px" ChartOptions="new ChartOptions { YAxisTicks = 1 }"></MudChart>
+              </MudCardContent>
+            </MudCard>
+          </MudItem>
+          <MudItem xs="12" sm="6">
+            <MudCard>
+              <MudCardContent>
+                <MudText Typo="Typo.h6">Score Distribution (Pie Chart)</MudText>
+                <MudChart ChartType="ChartType.Pie" InputData="@data" InputLabels="@labels" Width="100%" Height="350px" />
+              </MudCardContent>
+            </MudCard>
+          </MudItem>
         }
         @if (selectedSurvey != null && topScoringStaff.Any())
         {

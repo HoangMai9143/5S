@@ -25,6 +25,7 @@ namespace DC.Components.Pages
 		private Dictionary<int, double> surveyProgress = new Dictionary<int, double>();
 		private readonly Dictionary<int, string> tempStaffNotes = [];
 		private double totalPossiblePoints = 0.0;
+		private const int MAX_ATTEMPTS = 50;
 
 
 		private List<StaffModel> filteredStaff => allStaff.Where(FilterStaff).ToList();
@@ -432,7 +433,7 @@ namespace DC.Components.Pages
 
 				bool scoreInRange;
 				int attempts = 0;
-				const int maxAttempts = 30;
+				maxAttempts = 50;
 
 				do
 				{
@@ -458,7 +459,7 @@ namespace DC.Components.Pages
 							}
 
 							if (surveyQuestion.Question.AnswerType == AnswerType.SingleChoice)
-							{
+							{ // handle single choice
 								var selectedAnswer = SelectAnswer(surveyQuestion.Question.Answers, currentScore, minRange, maxRange);
 								if (selectedAnswer == null)
 								{
@@ -473,7 +474,7 @@ namespace DC.Components.Pages
 								});
 								currentScore += selectedAnswer.Points;
 							}
-							else // MultipleChoice
+							else // handle multiple choice
 							{
 								var selectedAnswers = SelectMultipleAnswers(surveyQuestion.Question.Answers, currentScore, minRange, maxRange);
 								foreach (var answer in selectedAnswers)
@@ -519,11 +520,11 @@ namespace DC.Components.Pages
 
 					attempts++;
 
-				} while (!scoreInRange && attempts < maxAttempts);
+				} while (!scoreInRange && attempts < MAX_ATTEMPTS);
 
 				if (!scoreInRange)
 				{
-					sb.Add($"Could not generate a score within the range {minRange}-{maxRange} for {staff.FullName} after {maxAttempts} attempts", Severity.Warning);
+					sb.Add($"Could not generate a score within the range {minRange}-{maxRange} for {staff.FullName} after {MAX_ATTEMPTS} attempts", Severity.Warning);
 				}
 			}
 

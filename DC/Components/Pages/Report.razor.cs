@@ -442,13 +442,11 @@ namespace DC.Components.Pages
           }
           previousScore = currentScore;
 
-          ws.Cell(row, 1).Value = ranking;
-          ws.Cell(row, 2).Value = staff.Id;
-          ws.Cell(row, 3).Value = staff.FullName;
-          ws.Cell(row, 4).Value = staff.Department;
-          var scoreCell = ws.Cell(row, 5);
-          scoreCell.Value = $"{currentScore:F2}/{totalPossiblePoints:F2}";
-          scoreCell.Style.NumberFormat.Format = "@";
+          ws.Cell(row, 1).Value = ranking; // Ranking
+          ws.Cell(row, 2).Value = staff.Id; // Staff ID
+          ws.Cell(row, 3).Value = staff.FullName; // Staff Name
+          ws.Cell(row, 4).Value = staff.Department; // Department
+          ws.Cell(row, 5).Value = currentScore; // Score as number
           row++;
         }
 

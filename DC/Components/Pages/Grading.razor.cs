@@ -381,18 +381,89 @@ namespace DC.Components.Pages
 
 		private async Task OpenAutoGradeDialog()
 		{
+			var parameters = new DialogParameters
+			{
+				["staffList"] = allStaff,
+				["maxPossibleScore"] = totalPossiblePoints
+			};
 
 			var options = new DialogOptions { CloseButton = true, CloseOnEscapeKey = true };
-			var dialog = await dialogService.ShowAsync<AutoGradeDialog>("Dark magic", options);
+			var dialog = await dialogService.ShowAsync<AutoGradeDialog>("Auto Grading", parameters, options);
 			var result = await dialog.Result;
 
 			if (!result.Canceled)
 			{
-				//TODO: Implement auto grading
-				StateHasChanged();
+				var dialogResult = (dynamic)result.Data;
+				await AutoGradeStaff(dialogResult.MinRange, dialogResult.MaxRange, dialogResult.SelectedStaff);
 			}
 		}
 
+		private async Task AutoGradeStaff(double minRange, double maxRange, List<int> selectedStaffIds)
+		{
+			if (selectedSurvey == null)
+			{
+				sb.Add("Please select a survey first", Severity.Error);
+				return;
+			}
+
+			var surveyQuestions = await appDbContext.SurveyQuestionModel
+					.Where(sq => sq.SurveyId == selectedSurvey.Id)
+					.Include(sq => sq.Question)
+					.ThenInclude(q => q.Answers)
+					.ToListAsync();
+
+			foreach (var staffId in selectedStaffIds)
+			{
+				var staff = allStaff.FirstOrDefault(s => s.Id == staffId);
+				if (staff == null) continue;
+
+				bool scoreInRange;
+				int attempts = 0;
+				const int maxAttempts = 10;
+
+				do
+				{
+					// Clear existing answers for this staff
+					var existingAnswers = await appDbContext.QuestionAnswerModel
+							.Where(qa => qa.SurveyId == selectedSurvey.Id && qa.StaffId == staffId)
+							.ToListAsync();
+					appDbContext.QuestionAnswerModel.RemoveRange(existingAnswers);
+
+					// Generate new random answers
+					var newAnswers = new List<QuestionAnswerModel>();
+					foreach (var surveyQuestion in surveyQuestions)
+					{
+						var randomAnswer = surveyQuestion.Question.Answers.OrderBy(x => Guid.NewGuid()).First();
+						newAnswers.Add(new QuestionAnswerModel
+						{
+							SurveyId = selectedSurvey.Id,
+							StaffId = staffId,
+							QuestionId = surveyQuestion.QuestionId,
+							AnswerId = randomAnswer.Id
+						});
+					}
+
+					appDbContext.QuestionAnswerModel.AddRange(newAnswers);
+					await appDbContext.SaveChangesAsync();
+
+					// Calculate score
+					await CalculateAndSaveScores(selectedSurvey.Id);
+
+					scoreInRange = staffScores[staffId] >= minRange && staffScores[staffId] <= maxRange;
+					attempts++;
+
+				} while (!scoreInRange && attempts < maxAttempts && staffScores[staffId] < 0);
+
+				if (!scoreInRange)
+				{
+					sb.Add($"Could not generate a score within the specified range for {staff.FullName} after {maxAttempts} attempts", Severity.Warning);
+				}
+			}
+
+			sb.Add("Auto grading completed", Severity.Success);
+			await LoadStaff();
+			StateHasChanged();
+		}
 
 		private async Task SaveGradingResult(List<QuestionAnswerModel> gradingResult, bool changes)
 		{
@@ -507,4 +578,5 @@ namespace DC.Components.Pages
 			}
 		}
 	}
+
 }

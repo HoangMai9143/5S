@@ -1,11 +1,23 @@
+@inject AppDbContext appDbContext
+
 <MudDialog>
   <DialogContent>
-    <MudText>Choose use slider to choose grading range</MudText>
-    <MudSlider Value="@range1">Range 1</MudSlider>
-    <MudSlider Value="@range1">Range 2</MudSlider>
+    <MudText>Choose grading range:</MudText>
+    <MudSlider @bind-Value="@minRange" Min="0" Max="@maxPossibleScore" Step="1">Min Score: @minRange</MudSlider>
+    <MudSlider @bind-Value="@maxRange" Min="0" Max="@maxPossibleScore" Step="1">Max Score: @maxRange</MudSlider>
+
+    <MudText Class="mt-4">Select staff to auto-grade:</MudText>
+    <MudList T="string" Dense="true" DisableGutters="true">
+      @foreach (var staff in staffViewModels)
+      {
+        <MudListItem>
+          <MudCheckBox @bind-Value="@staff.IsSelected" Label="@staff.FullName" />
+        </MudListItem>
+      }
+    </MudList>
   </DialogContent>
   <DialogActions>
     <MudButton OnClick="Cancel">Cancel</MudButton>
-    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit">Submit</MudButton>
+    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit">Auto Grade</MudButton>
   </DialogActions>
 </MudDialog>

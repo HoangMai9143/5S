@@ -35,9 +35,9 @@ namespace DC.Components.Pages
     private List<StaffModel> lowestScoringStaff = new List<StaffModel>();
 
     // Chart Data
-    private List<ChartSeries> series = new();
-    private readonly string[] xAxisLabels = { "0-10", "11-20", "21-30", "31-40", "41-50", "51-60", "61-70", "71-80", "81-90", "91-100" };
-    private double yAxisMax;
+    private double[] data = Array.Empty<double>();
+    private string[] labels = Array.Empty<string>();
+    private readonly string[] scoreRanges = { "0-10", "11-20", "21-30", "31-40", "41-50", "51-60", "61-70", "71-80", "81-90", "91-100" };
 
     // Statistics
     private int gradedStaff;
@@ -135,20 +135,32 @@ namespace DC.Components.Pages
         // Update averageScore calculation
         averageScore = surveyResults.Any() ? surveyResults.Average(sr => sr.FinalGrade) : 0;
 
-        // Update score distribution calculation
+        // Update score distribution calculation (reversed)
         var scoreDistribution = new int[10];
         foreach (var result in surveyResults)
         {
-          int index = (int)(result.FinalGrade / (totalPossiblePoints / 10));
-          if (index == 10) index = 9;
+          int index = 9 - (int)(result.FinalGrade / (totalPossiblePoints / 10));
+          if (index == -1) index = 0;
           scoreDistribution[index]++;
         }
 
-        yAxisMax = scoreDistribution.Max() * 1.1;
-        series = new List<ChartSeries>
-    {
-        new ChartSeries { Name = "Staff Count", Data = scoreDistribution.Select(x => (double)x).ToArray() }
-    };
+        // Calculate percentages and create pie chart data
+        var totalStaff = scoreDistribution.Sum();
+        var dataList = new List<double>();
+        var labelList = new List<string>();
+
+        for (int i = 0; i < scoreDistribution.Length; i++)
+        {
+          if (scoreDistribution[i] > 0)
+          {
+            double percentage = (double)scoreDistribution[i] / totalStaff * 100;
+            dataList.Add(scoreDistribution[i]);
+            labelList.Add($"{scoreRanges[i]} ({percentage:F1}%)");
+          }
+        }
+
+        data = dataList.ToArray();
+        labels = labelList.ToArray();
 
         // Load staff data, which will populate filteredStaff and staffScores
         await LoadStaffData();

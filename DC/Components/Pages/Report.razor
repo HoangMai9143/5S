@@ -26,17 +26,17 @@
           <MudAutocomplete T="string" Label="Select Department" @bind-Value="selectedDepartment" SearchFunc="@SearchDepartments" AnchorOrigin="Origin.BottomCenter" ResetValueOnEmptyText="true" CoerceText="true" AdornmentColor="Color.Primary" Clearable="true">
           </MudAutocomplete>
         </MudItem>
-        
+
         @if (selectedSurvey != null)
         {
           <MudItem xs="12" sm="4">
-          <MudCard>
-            <MudCardContent>
-              <MudText Typo="Typo.h6">Average Score</MudText>
-              <MudText Typo="Typo.h4">@averageScore.ToString("F2")/@totalPossiblePoints.ToString("F2")</MudText>
-            </MudCardContent>
-          </MudCard>
-        </MudItem>
+            <MudCard>
+              <MudCardContent>
+                <MudText Typo="Typo.h6">Average Score</MudText>
+                <MudText Typo="Typo.h4">@averageScore.ToString("F2")/@totalPossiblePoints.ToString("F2")</MudText>
+              </MudCardContent>
+            </MudCard>
+          </MudItem>
           <MudItem xs="12" sm="4">
             <MudCard>
               <MudCardContent>
@@ -46,22 +46,22 @@
             </MudCard>
           </MudItem>
           <MudItem xs="12">
-          <MudCard>
-            <MudCardContent>
+            <MudCard>
+              <MudCardContent>
                 <MudText Typo="Typo.h6">Score distribution of @selectedSurvey.Title.ToLower()</MudText>
-              <MudChart ChartType="ChartType.Bar" ChartSeries="@series" XAxisLabels="@xAxisLabels" Width="100%" Height="350px" ChartOptions="new ChartOptions { YAxisTicks = 1 }"></MudChart>
-            </MudCardContent>
-          </MudCard>
-        </MudItem>
+                <MudChart ChartType="ChartType.Pie" InputData="@data" InputLabels="@labels" Width="100%" Height="350px" />
+              </MudCardContent>
+            </MudCard>
+          </MudItem>
         }
-        @if (selectedSurvey != null  && topScoringStaff.Any())
+        @if (selectedSurvey != null && topScoringStaff.Any())
         {
           <MudItem xs="12" sm="6">
             <MudCard>
               <MudCardContent>
                 <MudText Typo="Typo.h6">
-                    @(topScoringStaff.Count == 1 ? "Highest Score: " : "Highest Scores: ")
-                    @staffScores[topScoringStaff[0].Id].ToString("F2")/@totalPossiblePoints.ToString("F2")
+                  @(topScoringStaff.Count == 1 ? "Highest Score: " : "Highest Scores: ")
+                  @staffScores[topScoringStaff[0].Id].ToString("F2")/@totalPossiblePoints.ToString("F2")
                 </MudText>
                 @foreach (var staff in topScoringStaff)
                 {
@@ -71,14 +71,14 @@
             </MudCard>
           </MudItem>
         }
-        @if (selectedSurvey != null  && lowestScoringStaff.Any())
+        @if (selectedSurvey != null && lowestScoringStaff.Any())
         {
           <MudItem xs="12" sm="6">
             <MudCard>
               <MudCardContent>
                 <MudText Typo="Typo.h6">
-                    @(lowestScoringStaff.Count == 1 ? "Lowest Score: " : "Lowest Scores: ")
-                    @staffScores[lowestScoringStaff[0].Id].ToString("F2")/@totalPossiblePoints.ToString("F2")
+                  @(lowestScoringStaff.Count == 1 ? "Lowest Score: " : "Lowest Scores: ")
+                  @staffScores[lowestScoringStaff[0].Id].ToString("F2")/@totalPossiblePoints.ToString("F2")
                 </MudText>
                 @foreach (var staff in lowestScoringStaff)
                 {
@@ -110,19 +110,19 @@
                 <PropertyColumn Property="x => x.FullName" Title="Full Name" Sortable="false" />
                 <PropertyColumn Property="x => x.Department" Title="Department" />
                 <TemplateColumn Title="Score" CellClass="auto">
-                    <CellTemplate Context="staffContext">
-                        <div Elevation="0" Class="d-flex flex-column justify-center align-center pa-2" Style="height: 100%;width:80%;">
-                            @if (staffScores.TryGetValue(staffContext.Item.Id, out var score))
-                            {
-                                <MudProgressLinear Size="Size.Medium" Rounded="true" Value="@score" Min="0" Max="@totalPossiblePoints" Color="Color.Primary" Class="my-2 w-100" Style="min-width: 150px;" />
-                                <MudText>@score.ToString("F2") / @totalPossiblePoints.ToString("F2")</MudText>
-                            }
-                            else
-                            {
-                                <MudText Color="Color.Warning">Not graded yet</MudText>
-                            }
-                        </div>
-                    </CellTemplate>
+                  <CellTemplate Context="staffContext">
+                    <div Elevation="0" Class="d-flex flex-column justify-center align-center pa-2" Style="height: 100%;width:80%;">
+                      @if (staffScores.TryGetValue(staffContext.Item.Id, out var score))
+                      {
+                        <MudProgressLinear Size="Size.Medium" Rounded="true" Value="@score" Min="0" Max="@totalPossiblePoints" Color="Color.Primary" Class="my-2 w-100" Style="min-width: 150px;" />
+                        <MudText>@score.ToString("F2") / @totalPossiblePoints.ToString("F2")</MudText>
+                      }
+                      else
+                      {
+                        <MudText Color="Color.Warning">Not graded yet</MudText>
+                      }
+                    </div>
+                  </CellTemplate>
                 </TemplateColumn>
                 <TemplateColumn>
                   <CellTemplate Context="staffContext">

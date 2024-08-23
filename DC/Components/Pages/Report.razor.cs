@@ -139,21 +139,18 @@ namespace DC.Components.Pages
 
         // Create dynamic score ranges
         scoreRanges.Clear();
-        scoreRanges.Add(((int)totalPossiblePoints, (int)totalPossiblePoints, $"{totalPossiblePoints}"));
-        for (int i = 60; i >= 0; i -= 10)
+        scoreRanges.Add((0, 9, "0"));
+        for (int i = 10; i <= (int)totalPossiblePoints; i += 10)
         {
           if (i < totalPossiblePoints)
           {
-            if (i > 0)
-            {
-              scoreRanges.Add((i, (int)totalPossiblePoints - 1, $"{i}+"));
-            }
-            else
-            {
-              scoreRanges.Add((0, 9, "0"));
-            }
+            scoreRanges.Add((i, Math.Min(i + 9, (int)totalPossiblePoints - 1), $"{i}-{Math.Min(i + 9, (int)totalPossiblePoints - 1)}"));
           }
         }
+        scoreRanges.Add(((int)totalPossiblePoints, (int)totalPossiblePoints, $"{totalPossiblePoints}"));
+
+        // Reverse the scoreRanges list
+        scoreRanges.Reverse();
 
         // Update score distribution calculation
         var scoreDistribution = new int[scoreRanges.Count];
@@ -171,7 +168,7 @@ namespace DC.Components.Pages
         var dataList = new List<double>();
         var labelList = new List<string>();
 
-        for (int i = 0; i < scoreDistribution.Length; i++)
+        for (int i = scoreRanges.Count - 1; i >= 0; i--)
         {
           if (scoreDistribution[i] > 0)
           {
@@ -183,7 +180,17 @@ namespace DC.Components.Pages
           }
         }
 
-        // Set data for pie chart
+        // For bar chart: Reverse dataList to have lowest to highest from left to right
+        var barChartData = dataList.ToArray().Reverse().ToArray();
+
+        // Set data for bar chart
+        series = new List<ChartSeries>
+        {
+            new ChartSeries { Name = "Staff Count", Data = barChartData }
+        };
+        xAxisLabels = labelList.Select(l => l.Split(' ')[0]).Reverse().ToArray(); // Reverse to match the data order
+
+        // For pie chart: Use the original dataList and labelList (lowest to highest, counterclockwise)
         data = dataList.ToArray();
         labels = labelList.ToArray();
 

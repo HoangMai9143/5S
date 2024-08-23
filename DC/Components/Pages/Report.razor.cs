@@ -180,7 +180,7 @@ namespace DC.Components.Pages
           }
         }
 
-        // For bar chart: Reverse dataList to have lowest to highest from left to right
+        // Bar chart
         var barChartData = dataList.ToArray().Reverse().ToArray();
 
         // Set data for bar chart
@@ -190,8 +190,8 @@ namespace DC.Components.Pages
         };
         xAxisLabels = labelList.Select(l => l.Split(' ')[0]).Reverse().ToArray(); // Reverse to match the data order
 
-        // For pie chart: Use the original dataList and labelList (lowest to highest, counterclockwise)
-        data = dataList.ToArray();
+        // Pie chart
+        data = dataList.ToArray().Reverse().ToArray();
         labels = labelList.ToArray();
 
         // Set data for bar chart

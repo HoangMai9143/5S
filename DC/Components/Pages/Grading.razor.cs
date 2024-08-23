@@ -379,6 +379,20 @@ namespace DC.Components.Pages
 			}
 		}
 
+		private async Task OpenAutoGradeDialog()
+		{
+
+			var options = new DialogOptions { CloseButton = true, CloseOnEscapeKey = true };
+			var dialog = await dialogService.ShowAsync<AutoGradeDialog>("Dark magic", options);
+			var result = await dialog.Result;
+
+			if (!result.Canceled)
+			{
+				await LoadStaff();
+				StateHasChanged();
+			}
+		}
+
 
 		private async Task SaveGradingResult(List<QuestionAnswerModel> gradingResult, bool changes)
 		{

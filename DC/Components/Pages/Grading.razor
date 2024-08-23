@@ -46,6 +46,11 @@
 						<MudItem xs="12">
 							<MudText Typo="Typo.h6" Class="mb-4">Current Survey: @selectedSurvey.Title</MudText>
 						</MudItem>
+						<MudItem xs="12" sm="1">
+							<MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="@(() => OpenAutoGradeDialog())">
+								Magic 🔮
+							</MudButton>
+						</MudItem>
 						<MudItem xs="12" sm="4" Style="padding-bottom:20px">
 							<MudToggleGroup T="string" SelectionMode="SelectionMode.SingleSelection" @bind-Value="staffFilter" Color="Color.Primary">
 								<MudToggleItem Value="@("All")" Text="All" />

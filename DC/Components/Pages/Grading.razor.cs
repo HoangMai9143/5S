@@ -555,8 +555,9 @@ namespace DC.Components.Pages
 		{
 			var selectedAnswers = new List<AnswerModel>();
 			var remainingAnswers = new List<AnswerModel>(answers);
+			var desireNumberOfAnswers = new Random().Next(1, answers.Count);
 
-			while (remainingAnswers.Any() && selectedAnswers.Count < 2)
+			while (remainingAnswers.Any() && selectedAnswers.Count < desireNumberOfAnswers)
 			{
 				var answer = SelectAnswer(remainingAnswers, currentScore, minRange, maxRange);
 				selectedAnswers.Add(answer);

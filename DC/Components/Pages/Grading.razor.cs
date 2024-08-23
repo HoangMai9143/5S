@@ -419,7 +419,7 @@ namespace DC.Components.Pages
 
 				bool scoreInRange;
 				int attempts = 0;
-				const int maxAttempts = 10;
+				const int maxAttempts = 30;
 
 				do
 				{
@@ -429,18 +429,39 @@ namespace DC.Components.Pages
 							.ToListAsync();
 					appDbContext.QuestionAnswerModel.RemoveRange(existingAnswers);
 
-					// Generate new random answers
+					// Generate new answers
 					var newAnswers = new List<QuestionAnswerModel>();
+					double currentScore = 0;
+
 					foreach (var surveyQuestion in surveyQuestions)
 					{
-						var randomAnswer = surveyQuestion.Question.Answers.OrderBy(x => Guid.NewGuid()).First();
-						newAnswers.Add(new QuestionAnswerModel
+						if (surveyQuestion.Question.AnswerType == AnswerType.SingleChoice)
 						{
-							SurveyId = selectedSurvey.Id,
-							StaffId = staffId,
-							QuestionId = surveyQuestion.QuestionId,
-							AnswerId = randomAnswer.Id
-						});
+							var selectedAnswer = SelectAnswer(surveyQuestion.Question.Answers, currentScore, minRange, maxRange);
+							newAnswers.Add(new QuestionAnswerModel
+							{
+								SurveyId = selectedSurvey.Id,
+								StaffId = staffId,
+								QuestionId = surveyQuestion.QuestionId,
+								AnswerId = selectedAnswer.Id
+							});
+							currentScore += selectedAnswer.Points;
+						}
+						else // MultipleChoice
+						{
+							var selectedAnswers = SelectMultipleAnswers(surveyQuestion.Question.Answers, currentScore, minRange, maxRange);
+							foreach (var answer in selectedAnswers)
+							{
+								newAnswers.Add(new QuestionAnswerModel
+								{
+									SurveyId = selectedSurvey.Id,
+									StaffId = staffId,
+									QuestionId = surveyQuestion.QuestionId,
+									AnswerId = answer.Id
+								});
+								currentScore += answer.Points;
+							}
+						}
 					}
 
 					appDbContext.QuestionAnswerModel.AddRange(newAnswers);
@@ -452,7 +473,7 @@ namespace DC.Components.Pages
 					scoreInRange = staffScores[staffId] >= minRange && staffScores[staffId] <= maxRange;
 					attempts++;
 
-				} while (!scoreInRange && attempts < maxAttempts && staffScores[staffId] < 0);
+				} while (!scoreInRange && attempts < maxAttempts);
 
 				if (!scoreInRange)
 				{
@@ -463,6 +484,46 @@ namespace DC.Components.Pages
 			sb.Add("Auto grading completed", Severity.Success);
 			await LoadStaff();
 			StateHasChanged();
+		}
+
+		private AnswerModel SelectAnswer(ICollection<AnswerModel> answers, double currentScore, double minRange, double maxRange)
+		{
+			var remainingRange = maxRange - currentScore;
+			var possibleAnswers = answers.Where(a => currentScore + a.Points <= maxRange).ToList();
+
+			if (!possibleAnswers.Any())
+			{
+				return answers.OrderBy(a => a.Points).First(); // Choose the answer with the least points
+			}
+
+			if (currentScore < minRange)
+			{
+				// Prioritize answers that increase the score
+				possibleAnswers = possibleAnswers.Where(a => a.Points > 0).ToList();
+			}
+
+			return possibleAnswers.OrderBy(x => Guid.NewGuid()).First();
+		}
+
+		private List<AnswerModel> SelectMultipleAnswers(ICollection<AnswerModel> answers, double currentScore, double minRange, double maxRange)
+		{
+			var selectedAnswers = new List<AnswerModel>();
+			var remainingAnswers = new List<AnswerModel>(answers);
+
+			while (remainingAnswers.Any() && selectedAnswers.Count < 2)
+			{
+				var answer = SelectAnswer(remainingAnswers, currentScore, minRange, maxRange);
+				selectedAnswers.Add(answer);
+				remainingAnswers.Remove(answer);
+				currentScore += answer.Points;
+
+				if (currentScore >= maxRange)
+				{
+					break;
+				}
+			}
+
+			return selectedAnswers;
 		}
 
 		private async Task SaveGradingResult(List<QuestionAnswerModel> gradingResult, bool changes)

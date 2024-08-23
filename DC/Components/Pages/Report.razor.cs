@@ -144,7 +144,7 @@ namespace DC.Components.Pages
         {
           if (i < totalPossiblePoints)
           {
-            scoreRanges.Add((i, Math.Min(i + 9, (int)totalPossiblePoints - 1), $"{i}-{Math.Min(i + 9, (int)totalPossiblePoints - 1)}"));
+            scoreRanges.Add((i, Math.Min(i + 9, (int)totalPossiblePoints - 1), $"{i}+"));
           }
         }
         scoreRanges.Add(((int)totalPossiblePoints, (int)totalPossiblePoints, $"{totalPossiblePoints}"));

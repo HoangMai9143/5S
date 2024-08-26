@@ -12,7 +12,7 @@ namespace DC.Components.Pages.Account
     private List<UserAccountModel> userList = new List<UserAccountModel>();
     private string newUsername = string.Empty;
     private string newPassword = string.Empty;
-    private string newRole = "User";
+    private string newRole = "Mod";
     private string _searchString = string.Empty;
     private System.Timers.Timer _debounceTimer;
     private const int DebounceDelay = 300; // ms

@@ -29,7 +29,8 @@ namespace DC.Components.Dialog
         Department = s.Department,
         CurrentScore = staffScores.TryGetValue(s.Id, out var score) ? score : (double?)null,
         IsSelected = false
-      }).ToList();
+      }).OrderByDescending(s => s.CurrentScore).ToList();
+
       minRange = 0;
       maxRange = maxPossibleScore;
     }
@@ -54,14 +55,6 @@ namespace DC.Components.Dialog
       {
         staff.IsSelected = false;
       }
-    }
-
-    private Color GetScoreColor(double score)
-    {
-      if (score >= maxPossibleScore * 0.8) return Color.Success;
-      if (score >= maxPossibleScore * 0.6) return Color.Info;
-      if (score >= maxPossibleScore * 0.4) return Color.Warning;
-      return Color.Error;
     }
 
     void Submit() => MudDialog.Close(DialogResult.Ok(new { MinRange = minRange, MaxRange = maxRange, SelectedStaff = staffViewModels.Where(s => s.IsSelected).Select(s => s.Id).ToList() }));

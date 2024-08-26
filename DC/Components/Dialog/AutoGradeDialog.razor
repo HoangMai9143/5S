@@ -4,11 +4,7 @@
   <DialogContent>
     <MudGrid>
       <MudItem xs="12">
-        <MudText Typo="Typo.h6" Class="mb-4">Auto Grading Configuration</MudText>
-      </MudItem>
-      
-      <MudItem xs="12">
-        <MudCard Elevation="0">
+        <MudGrid>
           <MudCardHeader>
             <CardHeaderContent>
               <MudText Typo="Typo.h6">Grading Range</MudText>
@@ -22,7 +18,7 @@
               Max Score: @maxRange
             </MudSlider>
           </MudCardContent>
-        </MudCard>
+        </MudGrid>
       </MudItem>
 
       <MudItem xs="12">
@@ -34,15 +30,15 @@
           </MudCardHeader>
           <MudCardContent>
             <MudGrid>
-              <MudItem xs="12" sm="6">
+              <MudItem xs="12" sm="2">
                 <MudButton OnClick="@SelectAllStaff" Color="Color.Primary" Variant="Variant.Outlined" Class="mr-2">Select All</MudButton>
                 <MudButton OnClick="@DeselectAllStaff" Color="Color.Secondary" Variant="Variant.Outlined">Deselect All</MudButton>
               </MudItem>
-              <MudItem xs="12" sm="6">
+              <MudItem xs="12" sm="10">
                 <MudTextField @bind-Value="@searchString" Placeholder="Search staff..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
               </MudItem>
             </MudGrid>
-            <MudTable Items="@FilteredStaffList" Dense="true" Hover="true" Bordered="false" Striped="true" Class="mt-4">
+            <MudTable Items="@FilteredStaffList"  Bordered="false" Class="mt-4">
               <HeaderContent>
                 <MudTh>Select</MudTh>
                 <MudTh>Name</MudTh>
@@ -58,11 +54,11 @@
                 <MudTd DataLabel="Current Score">
                   @if (context.CurrentScore.HasValue)
                   {
-                    <MudChip T="string" Color="@GetScoreColor(context.CurrentScore.Value)">@context.CurrentScore.Value.ToString("F1")</MudChip>
+                      <MudText T="string" >@context.CurrentScore.Value.ToString("F1")/@maxPossibleScore</MudText>
                   }
                   else
                   {
-                    <MudChip T="string" Color="Color.Default">Not graded</MudChip>
+                      <MudText T="string" Color="Color.Default">Not graded</MudText>
                   }
                 </MudTd>
               </RowTemplate>

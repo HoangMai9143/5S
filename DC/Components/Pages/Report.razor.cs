@@ -34,11 +34,15 @@ namespace DC.Components.Pages
     private List<StaffModel> topScoringStaff = new List<StaffModel>();
     private List<StaffModel> lowestScoringStaff = new List<StaffModel>();
 
-    // Chart Data
+    // Bar chart data
+    private double[] barChartData;
+    private string[] barChartLabels;
+
+    // Pie chart data
+    private double[] pieChartData;
+    private string[] pieChartLabels;
+
     private List<ChartSeries> series = new();
-    private string[] xAxisLabels = Array.Empty<string>();
-    private double[] data = Array.Empty<double>();
-    private string[] labels = Array.Empty<string>();
     private List<(int Start, int End, string Label)> scoreRanges = new();
 
     // Statistics
@@ -139,6 +143,7 @@ namespace DC.Components.Pages
 
         // Create dynamic score ranges
         scoreRanges.Clear();
+        scoreRanges.Add((int.MinValue, -1, "<0")); // Add this line for scores less than 0
         scoreRanges.Add((0, 9, "0"));
         for (int i = 10; i <= (int)totalPossiblePoints; i += 10)
         {
@@ -164,42 +169,42 @@ namespace DC.Components.Pages
         }
 
         // Calculate percentages and create chart data
+        // Calculate percentages and create chart data
         var totalStaff = scoreDistribution.Sum();
-        var dataList = new List<double>();
-        var labelList = new List<string>();
+        var barDataList = new List<double>();
+        var barLabelList = new List<string>();
+        var pieDataList = new List<double>();
+        var pieLabelList = new List<string>();
 
-        for (int i = scoreRanges.Count - 1; i >= 0; i--)
+        for (int i = 0; i < scoreRanges.Count; i++)
         {
           if (scoreDistribution[i] > 0)
           {
             double percentage = (double)scoreDistribution[i] / totalStaff * 100;
             var range = scoreRanges[i];
 
-            dataList.Add(scoreDistribution[i]);
-            labelList.Add($"{range.Label} ({percentage:F1}%)");
+            barDataList.Add(scoreDistribution[i]);
+            barLabelList.Add(range.Label);
+
+            pieDataList.Add(percentage);
+            pieLabelList.Add($"{range.Label} ({percentage:F1}%)");
           }
         }
 
-        // Bar chart
-        var barChartData = dataList.ToArray().Reverse().ToArray();
+        // Set bar chart data
+        barChartData = barDataList.ToArray().Reverse().ToArray();
+        barChartLabels = barLabelList.Select(l => l.Split(' ')[0]).Reverse().ToArray();
 
-        // Set data for bar chart
+        // Set pie chart data
+        pieChartData = pieDataList.ToArray().Reverse().ToArray();
+        pieChartLabels = pieLabelList.ToArray().Reverse().ToArray();
+
+        // Set data for bar chart series
         series = new List<ChartSeries>
         {
             new ChartSeries { Name = "Staff Count", Data = barChartData }
         };
-        xAxisLabels = labelList.Select(l => l.Split(' ')[0]).Reverse().ToArray(); // Reverse to match the data order
 
-        // Pie chart
-        data = dataList.ToArray().Reverse().ToArray();
-        labels = labelList.ToArray();
-
-        // Set data for bar chart
-        series = new List<ChartSeries>
-        {
-            new ChartSeries { Name = "Staff Count", Data = dataList.ToArray() }
-        };
-        xAxisLabels = labelList.Select(l => l.Split(' ')[0]).ToArray(); // Use only the range part for x-axis labels
 
         // Load staff data, which will populate filteredStaff and staffScores
         await LoadStaffData();

@@ -2,118 +2,78 @@
 
 <MudDialog>
   <DialogContent>
-    @if (!previewMode)
-    {
-      <MudGrid>
-        <MudItem xs="12">
-          <MudText Typo="Typo.h6" Class="mb-4">Auto Grading Configuration</MudText>
-        </MudItem>
+    <MudGrid>
+      <MudItem xs="12">
+        <MudText Typo="Typo.h6" Class="mb-4">Auto Grading Configuration</MudText>
+      </MudItem>
+      
+      <MudItem xs="12">
+        <MudCard Elevation="0">
+          <MudCardHeader>
+            <CardHeaderContent>
+              <MudText Typo="Typo.h6">Grading Range</MudText>
+            </CardHeaderContent>
+          </MudCardHeader>
+          <MudCardContent>
+            <MudSlider @bind-Value="@minRange" Min="0" Max="@maxPossibleScore" Step="1" Color="Color.Primary">
+              Min Score: @minRange
+            </MudSlider>
+            <MudSlider @bind-Value="@maxRange" Min="0" Max="@maxPossibleScore" Step="1" Color="Color.Secondary">
+              Max Score: @maxRange
+            </MudSlider>
+          </MudCardContent>
+        </MudCard>
+      </MudItem>
 
-        <MudItem xs="12">
-          <MudCard Elevation="0">
-            <MudCardHeader>
-              <CardHeaderContent>
-                <MudText Typo="Typo.h6">Grading Range</MudText>
-              </CardHeaderContent>
-            </MudCardHeader>
-            <MudCardContent>
-              <MudSlider @bind-Value="@minRange" Min="0" Max="@maxPossibleScore" Step="1" Color="Color.Primary">
-                Min Score: @minRange
-              </MudSlider>
-              <MudSlider @bind-Value="@maxRange" Min="0" Max="@maxPossibleScore" Step="1" Color="Color.Secondary">
-                Max Score: @maxRange
-              </MudSlider>
-            </MudCardContent>
-          </MudCard>
-        </MudItem>
-
-        <MudItem xs="12">
-          <MudCard Elevation="0">
-            <MudCardHeader>
-              <CardHeaderContent>
-                <MudText Typo="Typo.h6">Staff Selection</MudText>
-              </CardHeaderContent>
-            </MudCardHeader>
-            <MudCardContent>
-              <MudGrid>
-                <MudItem xs="12" sm="6">
-                  <MudButton OnClick="@SelectAllStaff" Color="Color.Primary" Variant="Variant.Outlined" Class="mr-2">Select All</MudButton>
-                  <MudButton OnClick="@DeselectAllStaff" Color="Color.Secondary" Variant="Variant.Outlined">Deselect All</MudButton>
-                </MudItem>
-                <MudItem xs="12" sm="6">
-                  <MudTextField @bind-Value="@searchString" Placeholder="Search staff..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-                </MudItem>
-              </MudGrid>
-              <MudTable Items="@FilteredStaffList" Dense="true" Hover="true" Bordered="false" Striped="true" Class="mt-4">
-                <HeaderContent>
-                  <MudTh>Select</MudTh>
-                  <MudTh>Name</MudTh>
-                  <MudTh>Department</MudTh>
-                  <MudTh>Current Score</MudTh>
-                </HeaderContent>
-                <RowTemplate>
-                  <MudTd DataLabel="Select">
-                    <MudCheckBox T="bool" @bind-Value="@context.IsSelected" Color="Color.Primary" />
-                  </MudTd>
-                  <MudTd DataLabel="Name">@context.FullName</MudTd>
-                  <MudTd DataLabel="Department">@context.Department</MudTd>
-                  <MudTd DataLabel="Current Score">
-                    @if (context.CurrentScore.HasValue)
-                    {
-                      <MudText>@context.CurrentScore.Value.ToString("F1")</MudText>
-                    }
-                    else
-                    {
-                      <MudText Color="Color.Default">Not graded</MudText>
-                    }
-                  </MudTd>
-                </RowTemplate>
-              </MudTable>
-            </MudCardContent>
-          </MudCard>
-        </MudItem>
-      </MudGrid>
-    }
-    else
-    {
-      <MudText Typo="Typo.h6" Class="mb-4">Preview Auto Grading Results</MudText>
-      <MudTable Items="@PreviewStaffList" Dense="true" Hover="true" Bordered="false" Striped="true">
-        <HeaderContent>
-          <MudTh>Name</MudTh>
-          <MudTh>Department</MudTh>
-          <MudTh>Current Score</MudTh>
-          <MudTh>New Score</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-          <MudTd DataLabel="Name">@context.FullName</MudTd>
-          <MudTd DataLabel="Department">@context.Department</MudTd>
-          <MudTd DataLabel="Current Score">
-            @if (context.CurrentScore.HasValue)
-            {
-              <MudText>@context.CurrentScore.Value.ToString("F1")</MudText>
-            }
-            else
-            {
-              <MudText>Not graded</MudText>
-            }
-          </MudTd>
-          <MudTd DataLabel="New Score">
-            <MudText Color="@GetPreviewScoreColor(context.CurrentScore, context.NewScore)">@context.NewScore.ToString("F1")</MudText>
-          </MudTd>
-        </RowTemplate>
-      </MudTable>
-    }
+      <MudItem xs="12">
+        <MudCard Elevation="0">
+          <MudCardHeader>
+            <CardHeaderContent>
+              <MudText Typo="Typo.h6">Staff Selection</MudText>
+            </CardHeaderContent>
+          </MudCardHeader>
+          <MudCardContent>
+            <MudGrid>
+              <MudItem xs="12" sm="6">
+                <MudButton OnClick="@SelectAllStaff" Color="Color.Primary" Variant="Variant.Outlined" Class="mr-2">Select All</MudButton>
+                <MudButton OnClick="@DeselectAllStaff" Color="Color.Secondary" Variant="Variant.Outlined">Deselect All</MudButton>
+              </MudItem>
+              <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="@searchString" Placeholder="Search staff..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+              </MudItem>
+            </MudGrid>
+            <MudTable Items="@FilteredStaffList" Dense="true" Hover="true" Bordered="false" Striped="true" Class="mt-4">
+              <HeaderContent>
+                <MudTh>Select</MudTh>
+                <MudTh>Name</MudTh>
+                <MudTh>Department</MudTh>
+                <MudTh>Current Score</MudTh>
+              </HeaderContent>
+              <RowTemplate>
+                <MudTd DataLabel="Select">
+                  <MudCheckBox T="bool" @bind-value="@context.IsSelected" Color="Color.Primary" />
+                </MudTd>
+                <MudTd DataLabel="Name">@context.FullName</MudTd>
+                <MudTd DataLabel="Department">@context.Department</MudTd>
+                <MudTd DataLabel="Current Score">
+                  @if (context.CurrentScore.HasValue)
+                  {
+                    <MudChip T="string" Color="@GetScoreColor(context.CurrentScore.Value)">@context.CurrentScore.Value.ToString("F1")</MudChip>
+                  }
+                  else
+                  {
+                    <MudChip T="string" Color="Color.Default">Not graded</MudChip>
+                  }
+                </MudTd>
+              </RowTemplate>
+            </MudTable>
+          </MudCardContent>
+        </MudCard>
+      </MudItem>
+    </MudGrid>
   </DialogContent>
   <DialogActions>
     <MudButton OnClick="Cancel">Cancel</MudButton>
-    @if (!previewMode)
-    {
-      <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="PreviewAutoGrade">Preview</MudButton>
-    }
-    else
-    {
-      <MudButton Color="Color.Secondary" Variant="Variant.Filled" OnClick="BackToConfiguration">Back</MudButton>
-      <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit">Save</MudButton>
-    }
+    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit">Auto Grade</MudButton>
   </DialogActions>
 </MudDialog>

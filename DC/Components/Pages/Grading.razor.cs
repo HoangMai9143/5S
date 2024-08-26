@@ -391,6 +391,12 @@ namespace DC.Components.Pages
 
 		private async Task OpenAutoGradeDialog()
 		{
+			if (isAutoGrading)
+			{
+				sb.Add("Auto grading is already in progress, please try again later", Severity.Warning);
+				return;
+			}
+
 			var parameters = new DialogParameters
 			{
 				["staffList"] = allStaff,

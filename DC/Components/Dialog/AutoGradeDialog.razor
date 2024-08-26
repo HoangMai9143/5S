@@ -2,19 +2,62 @@
 
 <MudDialog>
   <DialogContent>
-    <MudText>Choose grading range:</MudText>
-    <MudSlider @bind-Value="@minRange" Min="0" Max="@maxPossibleScore" Step="1">Min Score: @minRange</MudSlider>
-    <MudSlider @bind-Value="@maxRange" Min="0" Max="@maxPossibleScore" Step="1">Max Score: @maxRange</MudSlider>
+    <MudGrid>
+      <MudItem xs="12">
+        <MudText Typo="Typo.h6" Class="mb-4">Auto Grading Configuration</MudText>
+      </MudItem>
+      
+      <MudItem xs="12">
+        <MudCard Elevation="0">
+          <MudCardHeader>
+            <CardHeaderContent>
+              <MudText Typo="Typo.h6">Grading Range</MudText>
+            </CardHeaderContent>
+          </MudCardHeader>
+          <MudCardContent>
+            <MudSlider @bind-Value="@minRange" Min="0" Max="@maxPossibleScore" Step="1" Color="Color.Primary">
+              Min Score: @minRange
+            </MudSlider>
+            <MudSlider @bind-Value="@maxRange" Min="0" Max="@maxPossibleScore" Step="1" Color="Color.Secondary">
+              Max Score: @maxRange
+            </MudSlider>
+          </MudCardContent>
+        </MudCard>
+      </MudItem>
 
-    <MudText Class="mt-4">Select staff to auto-grade:</MudText>
-    <MudList T="string" Dense="true" DisableGutters="true">
-      @foreach (var staff in staffViewModels)
-      {
-        <MudListItem>
-          <MudCheckBox @bind-Value="@staff.IsSelected" Label="@staff.FullName" />
-        </MudListItem>
-      }
-    </MudList>
+      <MudItem xs="12">
+        <MudCard Elevation="0">
+          <MudCardHeader>
+            <CardHeaderContent>
+              <MudText Typo="Typo.h6">Staff Selection</MudText>
+            </CardHeaderContent>
+          </MudCardHeader>
+          <MudCardContent>
+            <MudGrid>
+              <MudItem xs="12">
+                <MudButton OnClick="@SelectAllStaff" Color="Color.Primary" Variant="Variant.Outlined" Class="mr-2">Select All</MudButton>
+                <MudButton OnClick="@DeselectAllStaff" Color="Color.Secondary" Variant="Variant.Outlined">Deselect All</MudButton>
+              </MudItem>
+              <MudItem xs="12">
+                <MudTextField @bind-Value="@searchString" Placeholder="Search staff..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+              </MudItem>
+            </MudGrid>
+            <MudGrid Spacing="2" Class="mt-4">
+              @foreach (var staff in FilteredStaffList)
+              {
+                <MudItem xs="12" sm="6" md="4">
+                  <MudCard Elevation="2" Outlined="true" >
+                    <MudCardContent Class="pa-2">
+                      <MudCheckBox T="bool" @bind-Value="@staff.IsSelected" Color="Color.Primary" Label="@staff.FullName" LabelPosition="LabelPosition.End" />
+                    </MudCardContent>
+                  </MudCard>
+                </MudItem>
+              }
+            </MudGrid>
+          </MudCardContent>
+        </MudCard>
+      </MudItem>
+    </MudGrid>
   </DialogContent>
   <DialogActions>
     <MudButton OnClick="Cancel">Cancel</MudButton>

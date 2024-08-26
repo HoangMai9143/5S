@@ -14,9 +14,15 @@ namespace DC.Components.Dialog
     [Parameter] public List<StaffModel> staffList { get; set; }
     [Parameter] public double maxPossibleScore { get; set; }
 
+    private string searchString = "";
+
     private List<StaffViewModel> staffViewModels;
     private double minRange;
     private double maxRange;
+    private IEnumerable<StaffViewModel> FilteredStaffList => staffViewModels
+        .Where(s => string.IsNullOrWhiteSpace(searchString) ||
+                    s.FullName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        .OrderBy(s => s.FullName);
 
     protected override void OnInitialized()
     {
@@ -28,6 +34,23 @@ namespace DC.Components.Dialog
       }).ToList();
       minRange = 0;
       maxRange = maxPossibleScore;
+    }
+
+
+    private void SelectAllStaff()
+    {
+      foreach (var staff in staffViewModels)
+      {
+        staff.IsSelected = true;
+      }
+    }
+
+    private void DeselectAllStaff()
+    {
+      foreach (var staff in staffViewModels)
+      {
+        staff.IsSelected = false;
+      }
     }
 
     void Submit() => MudDialog.Close(DialogResult.Ok(new { MinRange = minRange, MaxRange = maxRange, SelectedStaff = staffViewModels.Where(s => s.IsSelected).Select(s => s.Id).ToList() }));

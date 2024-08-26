@@ -389,16 +389,42 @@ namespace DC.Components.Pages
 				["staffScores"] = staffScores
 			};
 
-			var options = new DialogOptions { FullScreen = true, CloseButton = true, CloseOnEscapeKey = true };
+			var options = new DialogOptions { FullWidth = true, MaxWidth = MaxWidth.ExtraLarge, CloseButton = true, CloseOnEscapeKey = true };
 			var dialog = await dialogService.ShowAsync<AutoGradeDialog>("Auto Grading", parameters, options);
-
 			var result = await dialog.Result;
 
 			if (!result.Canceled)
 			{
 				var dialogResult = (dynamic)result.Data;
-				await AutoGradeStaff(dialogResult.MinRange, dialogResult.MaxRange, dialogResult.SelectedStaff);
+				var newStaffScores = (Dictionary<int, double>)dialogResult.StaffScores;
+				await SaveNewScores(newStaffScores);
 			}
+		}
+
+		private async Task SaveNewScores(Dictionary<int, double> newScores)
+		{
+			foreach (var (staffId, score) in newScores)
+			{
+				var surveyResult = await appDbContext.SurveyResultModel
+						.FirstOrDefaultAsync(sr => sr.SurveyId == selectedSurvey.Id && sr.StaffId == staffId);
+
+				if (surveyResult == null)
+				{
+					surveyResult = new SurveyResultModel
+					{
+						SurveyId = selectedSurvey.Id,
+						StaffId = staffId
+					};
+					appDbContext.SurveyResultModel.Add(surveyResult);
+				}
+
+				surveyResult.FinalGrade = score;
+			}
+
+			await appDbContext.SaveChangesAsync();
+			await LoadStaff(); // Refresh the staff scores
+			StateHasChanged();
+			sb.Add("Auto grading completed and saved", Severity.Success);
 		}
 
 		private async Task AutoGradeStaff(double range1, double range2, List<int> selectedStaffIds)

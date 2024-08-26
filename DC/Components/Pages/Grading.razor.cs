@@ -433,7 +433,6 @@ namespace DC.Components.Pages
 
 				bool scoreInRange;
 				int attempts = 0;
-				maxAttempts = 50;
 
 				do
 				{

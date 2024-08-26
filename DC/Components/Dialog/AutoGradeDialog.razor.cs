@@ -22,14 +22,14 @@ namespace DC.Components.Dialog
 
     protected override void OnInitialized()
     {
-      staffViewModels = staffList.Select(s => new StaffViewModel
+      staffViewModels = [.. staffList.Select(s => new StaffViewModel
       {
         Id = s.Id,
         FullName = s.FullName,
         Department = s.Department,
         CurrentScore = staffScores.TryGetValue(s.Id, out var score) ? score : (double?)null,
         IsSelected = false
-      }).OrderByDescending(s => s.CurrentScore).ToList();
+      }).OrderByDescending(s => s.CurrentScore)];
 
       minRange = 0;
       maxRange = maxPossibleScore;

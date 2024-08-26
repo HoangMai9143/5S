@@ -92,7 +92,7 @@
 							<TemplateColumn>
 								<CellTemplate Context="staffContext">
 									<div Elevation="0" Class="d-flex align-center" Style="height: 100%;">
-										<MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenStaffGradingDialog(staffContext.Item))">
+										<MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" OnClick="@(() => OpenStaffGradingDialog(staffContext.Item))" Disabled="@isAutoGrading">
 											Grade
 										</MudButton>
 									</div>

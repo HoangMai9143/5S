@@ -11,6 +11,7 @@ namespace DC.Components.Pages
 	public partial class Grading
 	{
 		private bool isLoading = true;
+		private bool isAutoGrading = false;
 		private int activeIndex;
 		private List<SurveyModel> surveys = [];
 		private List<StaffModel> allStaff = [];
@@ -360,23 +361,31 @@ namespace DC.Components.Pages
 		//* Dialog functions
 		private async Task OpenStaffGradingDialog(StaffModel staff)
 		{
-			var parameters = new DialogParameters
+			try
 			{
-				["Staff"] = staff,
-				["Survey"] = selectedSurvey
-			};
 
-			var options = new DialogOptions { FullScreen = true, CloseButton = true, CloseOnEscapeKey = true };
-			var dialog = await dialogService.ShowAsync<GradingDialog>("Grading", parameters, options);
-			var result = await dialog.Result;
+				var parameters = new DialogParameters
+				{
+					["Staff"] = staff,
+					["Survey"] = selectedSurvey
+				};
 
-			if (!result.Canceled)
+				var options = new DialogOptions { FullScreen = true, CloseButton = true, CloseOnEscapeKey = true };
+				var dialog = await dialogService.ShowAsync<GradingDialog>("Grading", parameters, options);
+				var result = await dialog.Result;
+
+				if (!result.Canceled)
+				{
+					var dialogResult = (dynamic)result.Data;
+					await SaveGradingResult(dialogResult.GradingResult, dialogResult.Changes);
+					await CalculateAndSaveScores(selectedSurvey.Id);
+					await LoadStaff();
+					StateHasChanged();
+				}
+			}
+			catch (Exception ex)
 			{
-				var dialogResult = (dynamic)result.Data;
-				await SaveGradingResult(dialogResult.GradingResult, dialogResult.Changes);
-				await CalculateAndSaveScores(selectedSurvey.Id);
-				await LoadStaff();
-				StateHasChanged();
+				sb.Add($"An error occurred: {ex.Message}", Severity.Error);
 			}
 		}
 
@@ -409,18 +418,23 @@ namespace DC.Components.Pages
 				return;
 			}
 
+			isAutoGrading = true;
+			StateHasChanged();
+
 			double minRange = Math.Min(range1, range2);
 			double maxRange = Math.Max(range1, range2);
 
 			var surveyQuestions = await appDbContext.SurveyQuestionModel
-					.Where(sq => sq.SurveyId == selectedSurvey.Id)
-					.Include(sq => sq.Question)
-					.ThenInclude(q => q.Answers)
-					.ToListAsync();
+							.Where(sq => sq.SurveyId == selectedSurvey.Id)
+							.Include(sq => sq.Question)
+							.ThenInclude(q => q.Answers)
+							.ToListAsync();
 
 			if (surveyQuestions == null || !surveyQuestions.Any())
 			{
 				sb.Add("No questions found for this survey", Severity.Error);
+				isAutoGrading = false;
+				StateHasChanged();
 				return;
 			}
 
@@ -441,8 +455,8 @@ namespace DC.Components.Pages
 					try
 					{
 						var existingAnswers = await appDbContext.QuestionAnswerModel
-								.Where(qa => qa.SurveyId == selectedSurvey.Id && qa.StaffId == staffId)
-								.ToListAsync();
+										.Where(qa => qa.SurveyId == selectedSurvey.Id && qa.StaffId == staffId)
+										.ToListAsync();
 
 						if (existingAnswers != null && existingAnswers.Any())
 						{
@@ -531,6 +545,7 @@ namespace DC.Components.Pages
 
 			sb.Add("Auto grading completed", Severity.Success);
 			await LoadStaff();
+			isAutoGrading = false;
 			StateHasChanged();
 		}
 

@@ -34,26 +34,39 @@
           </MudCardHeader>
           <MudCardContent>
             <MudGrid>
-              <MudItem xs="12">
+              <MudItem xs="12" sm="6">
                 <MudButton OnClick="@SelectAllStaff" Color="Color.Primary" Variant="Variant.Outlined" Class="mr-2">Select All</MudButton>
                 <MudButton OnClick="@DeselectAllStaff" Color="Color.Secondary" Variant="Variant.Outlined">Deselect All</MudButton>
               </MudItem>
-              <MudItem xs="12">
+              <MudItem xs="12" sm="6">
                 <MudTextField @bind-Value="@searchString" Placeholder="Search staff..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
               </MudItem>
             </MudGrid>
-            <MudGrid Spacing="2" Class="mt-4">
-              @foreach (var staff in FilteredStaffList)
-              {
-                <MudItem xs="12" sm="6" md="4">
-                  <MudCard Elevation="2" Outlined="true" >
-                    <MudCardContent Class="pa-2">
-                      <MudCheckBox T="bool" @bind-Value="@staff.IsSelected" Color="Color.Primary" Label="@staff.FullName" LabelPosition="LabelPosition.End" />
-                    </MudCardContent>
-                  </MudCard>
-                </MudItem>
-              }
-            </MudGrid>
+            <MudTable Items="@FilteredStaffList" Dense="true" Hover="true" Bordered="false" Striped="true" Class="mt-4">
+              <HeaderContent>
+                <MudTh>Select</MudTh>
+                <MudTh>Name</MudTh>
+                <MudTh>Department</MudTh>
+                <MudTh>Current Score</MudTh>
+              </HeaderContent>
+              <RowTemplate>
+                <MudTd DataLabel="Select">
+                  <MudCheckBox T="bool" @bind-value="@context.IsSelected" Color="Color.Primary" />
+                </MudTd>
+                <MudTd DataLabel="Name">@context.FullName</MudTd>
+                <MudTd DataLabel="Department">@context.Department</MudTd>
+                <MudTd DataLabel="Current Score">
+                  @if (context.CurrentScore.HasValue)
+                  {
+                    <MudChip T="string" Color="@GetScoreColor(context.CurrentScore.Value)">@context.CurrentScore.Value.ToString("F1")</MudChip>
+                  }
+                  else
+                  {
+                    <MudChip T="string" Color="Color.Default">Not graded</MudChip>
+                  }
+                </MudTd>
+              </RowTemplate>
+            </MudTable>
           </MudCardContent>
         </MudCard>
       </MudItem>

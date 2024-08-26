@@ -385,11 +385,13 @@ namespace DC.Components.Pages
 			var parameters = new DialogParameters
 			{
 				["staffList"] = allStaff,
-				["maxPossibleScore"] = totalPossiblePoints
+				["maxPossibleScore"] = totalPossiblePoints,
+				["staffScores"] = staffScores
 			};
 
-			var options = new DialogOptions { FullWidth = true, CloseButton = true, CloseOnEscapeKey = true };
+			var options = new DialogOptions { FullScreen = true, CloseButton = true, CloseOnEscapeKey = true };
 			var dialog = await dialogService.ShowAsync<AutoGradeDialog>("Auto Grading", parameters, options);
+
 			var result = await dialog.Result;
 
 			if (!result.Canceled)

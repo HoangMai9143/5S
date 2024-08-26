@@ -40,6 +40,8 @@ namespace DC.Components.Pages
     private double[] data = Array.Empty<double>();
     private string[] labels = Array.Empty<string>();
     private List<(int Start, int End, string Label)> scoreRanges = new();
+    private ChartOptions BarChartOptions { get; set; } = new ChartOptions();
+    private ChartOptions PieChartOptions { get; set; } = new ChartOptions();
 
     // Statistics
     private int gradedStaff;
@@ -99,6 +101,17 @@ namespace DC.Components.Pages
         isLoading = false;
         StateHasChanged();
       }
+    }
+    private List<string> GenerateColorGradient(int steps)
+    {
+      var colors = new List<string>();
+      for (int i = 0; i < steps; i++)
+      {
+        int red = (int)(255 * (1 - (double)i / (steps - 1)));
+        int green = (int)(255 * ((double)i / (steps - 1)));
+        colors.Add($"rgb({red},{green},0)");
+      }
+      return colors;
     }
 
     //* 2. Data Loading and Processing
@@ -180,25 +193,39 @@ namespace DC.Components.Pages
           }
         }
 
+        // Generate color gradient
+        var colors = GenerateColorGradient(scoreRanges.Count);
+
         // Bar chart
         var barChartData = dataList.ToArray().Reverse().ToArray();
 
         // Set data for bar chart
         series = new List<ChartSeries>
-        {
-            new ChartSeries { Name = "Staff Count", Data = barChartData }
-        };
+    {
+        new ChartSeries { Name = "Staff Count", Data = barChartData }
+    };
         xAxisLabels = labelList.Select(l => l.Split(' ')[0]).Reverse().ToArray(); // Reverse to match the data order
 
         // Pie chart
-        data = dataList.ToArray().Reverse().ToArray();
+        data = dataList.ToArray().ToArray();
         labels = labelList.ToArray();
 
         // Set data for bar chart
         series = new List<ChartSeries>
+    {
+        new ChartSeries { Name = "Staff Count", Data = dataList.ToArray() }
+    };
+        xAxisLabels = labelList.Select(l => l.Split(' ')[0]).ToArray(); // Use only the range part for x-axis labels
+
+        // Apply colors to chart options
+        var chartOptions = new ChartOptions
         {
-            new ChartSeries { Name = "Staff Count", Data = dataList.ToArray() }
+          ChartPalette = colors.ToArray()
         };
+
+        // Update the chart components to use the new chart options
+        BarChartOptions = chartOptions;
+        PieChartOptions = chartOptions;
         xAxisLabels = labelList.Select(l => l.Split(' ')[0]).ToArray(); // Use only the range part for x-axis labels
 
         // Load staff data, which will populate filteredStaff and staffScores

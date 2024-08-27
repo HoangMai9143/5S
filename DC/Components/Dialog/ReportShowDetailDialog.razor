@@ -46,7 +46,7 @@
 										if (answer != null)
 										{
 											<MudChip T="string" Color="@GetChipColor(answer.Points)">
-												@answer.AnswerText (@answer.Points)
+												@answer.AnswerText (@GetChipText(@answer.Points))
 											</MudChip>
 										}
 									}
@@ -67,8 +67,8 @@
 												if (answer != null)
 												{
 													<MudChip T="string" Color="@GetChipColor(answer.Points)">
-														@answer.AnswerText (@answer.Points)
-													</MudChip>
+												@answer.AnswerText (@GetChipText(@answer.Points))
+											</MudChip>
 												}
 											}
 										</MudStack>

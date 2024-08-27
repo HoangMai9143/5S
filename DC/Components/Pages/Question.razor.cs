@@ -10,9 +10,7 @@ namespace DC.Components.Pages
   public partial class Question
   {
     private const int DEBOUNCE_DELAY = 300; // ms
-
     private bool isLoading = true; // Loading bar
-
     private List<QuestionModel> questionsList = []; // List of questions to display
     private string _searchString = string.Empty; // Search bar string to filter questions
     private AnswerType _selectedAnswerType = AnswerType.SingleChoice; // Default answer type

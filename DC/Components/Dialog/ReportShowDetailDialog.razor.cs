@@ -127,5 +127,12 @@ namespace DC.Components.Dialog
       else
         return Color.Default;
     }
+    private string GetChipText(int points)
+    {
+      if (points > 0)
+        return $"+{points}";
+      else
+        return points.ToString();
+    }
   }
 }

@@ -40,24 +40,24 @@ namespace DC.Components.Pages
     private string _previousStaffSearchString = "";
 
     // Data Collections
-    private List<SurveyModel> surveys = new();
-    private List<string> departments = new();
-    private IEnumerable<StaffModel> filteredStaff = new List<StaffModel>();
-    private Dictionary<int, double> staffScores = new Dictionary<int, double>();
-    private Dictionary<int, string> staffNotes = new Dictionary<int, string>();
-    private List<StaffModel> topScoringStaff = new List<StaffModel>();
-    private List<StaffModel> lowestScoringStaff = new List<StaffModel>();
+    private List<SurveyModel> surveys = [];
+    private List<string> departments = [];
+    private IEnumerable<StaffModel> filteredStaff = [];
+    private Dictionary<int, double> staffScores = [];
+    private Dictionary<int, string> staffNotes = [];
+    private List<StaffModel> topScoringStaff = [];
+    private List<StaffModel> lowestScoringStaff = [];
 
     // Bar chart data
-    private double[] barChartData;
-    private string[] barChartLabels;
+    private double[]? barChartData;
+    private string[]? barChartLabels;
 
     // Pie chart data
-    private double[] pieChartData;
-    private string[] pieChartLabels;
+    private double[]? pieChartData;
+    private string[]? pieChartLabels;
 
-    private List<ChartSeries> series = new();
-    private List<(int Start, int End, string Label)> scoreRanges = new();
+    private List<ChartSeries> series = [];
+    private List<(int Start, int End, string Label)> scoreRanges = [];
 
     // Statistics
     private int gradedStaff;

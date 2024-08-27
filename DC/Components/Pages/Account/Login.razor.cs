@@ -49,6 +49,7 @@ namespace DC.Components.Pages.Account
 				else
 				{
 					// Compare plain text password (temporary, for migration)
+					//! This block is temporary and should be removed after all passwords are hashed for more security
 					passwordValid = (userAccount.Password == Model.password);
 
 					// If password is correct, hash it for future use

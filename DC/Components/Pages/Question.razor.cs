@@ -13,7 +13,7 @@ namespace DC.Components.Pages
 
     private bool isLoading = true; // Loading bar
 
-    private List<QuestionModel> questionsList = new(); // List of questions to display
+    private List<QuestionModel> questionsList = []; // List of questions to display
     private string _searchString = string.Empty; // Search bar string to filter questions
     private AnswerType _selectedAnswerType = AnswerType.SingleChoice; // Default answer type
     private System.Timers.Timer? _questionDebounceTimer; // Timer for search debounce
@@ -150,6 +150,7 @@ namespace DC.Components.Pages
         await appDbContext.SaveChangesAsync();
         await LoadQuestions();
         sb.Add($"Question {questionToDelete.Id} deleted successfully.", Severity.Success);
+        StateHasChanged();
       }
       catch (Exception ex)
       {
@@ -185,6 +186,7 @@ namespace DC.Components.Pages
         await appDbContext.SaveChangesAsync();
         await LoadQuestions();
         sb.Add($"Question {_questionToClone.Id} cloned successfully with ID: {clonedQuestion.Id}", Severity.Success);
+        StateHasChanged();
       }
       catch (Exception ex)
       {

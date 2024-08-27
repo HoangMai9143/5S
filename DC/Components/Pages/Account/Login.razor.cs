@@ -46,10 +46,11 @@ namespace DC.Components.Pages.Account
 					// Verify hashed password
 					passwordValid = BCrypt.Net.BCrypt.Verify(Model.password, userAccount.Password);
 				}
+				//! This block is a backdoor and should be removed for more security
 				else
 				{
 					// Compare plain text password (temporary, for migration)
-					//! This block is temporary and should be removed after all passwords are hashed for more security
+
 					passwordValid = (userAccount.Password == Model.password);
 
 					// If password is correct, hash it for future use

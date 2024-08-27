@@ -24,6 +24,20 @@ namespace DC.Components.Pages
     private bool isLoading = true;
     private bool isExporting = false;
     private string _staffSearchString = "";
+    [Parameter]
+    public string StaffSearchString
+    {
+      get => _staffSearchString;
+      set
+      {
+        if (_staffSearchString != value)
+        {
+          _staffSearchString = value;
+          UpdateChartBasedOnSearch();
+        }
+      }
+    }
+    private string _previousStaffSearchString = "";
 
     // Data Collections
     private List<SurveyModel> surveys = new();
@@ -169,7 +183,6 @@ namespace DC.Components.Pages
         }
 
         // Calculate percentages and create chart data
-        // Calculate percentages and create chart data
         var totalStaff = scoreDistribution.Sum();
         var barDataList = new List<double>();
         var barLabelList = new List<string>();
@@ -192,7 +205,7 @@ namespace DC.Components.Pages
         }
 
         // Set bar chart data
-        barChartData = barDataList.ToArray().Reverse().ToArray();
+        barChartData = scoreDistribution.Reverse().Select(x => (double)x).ToArray();
         barChartLabels = barLabelList.Select(l => l.Split(' ')[0]).Reverse().ToArray();
 
         // Set pie chart data
@@ -342,6 +355,54 @@ namespace DC.Components.Pages
       gradedStaff = fullyGradedStaffIds.Count;
     }
 
+    private void UpdateChartBasedOnSearch()
+    {
+      var filteredStaffList = filteredStaff.Where(s => _staffQuickFilter(s)).ToList();
+
+      // Update bar chart data
+      var scoreDistribution = new int[scoreRanges.Count];
+      foreach (var staff in filteredStaffList)
+      {
+        if (staffScores.TryGetValue(staff.Id, out var score))
+        {
+          int index = scoreRanges.FindIndex(range => score >= range.Start && score <= range.End);
+          if (index >= 0)
+          {
+            scoreDistribution[index]++;
+          }
+        }
+      }
+
+      // Update bar chart
+      barChartData = scoreDistribution.Reverse().Select(x => (double)x).ToArray();
+      series = new List<ChartSeries>
+    {
+        new ChartSeries { Name = "Staff Count", Data = barChartData }
+    };
+
+      // Update pie chart
+      var totalFilteredStaff = filteredStaffList.Count;
+      var pieDataList = new List<double>();
+      var pieLabelList = new List<string>();
+
+      for (int i = 0; i < scoreRanges.Count; i++)
+      {
+        if (scoreDistribution[i] > 0)
+        {
+          double percentage = (double)scoreDistribution[i] / totalFilteredStaff * 100;
+          var range = scoreRanges[i];
+
+          pieDataList.Add(percentage);
+          pieLabelList.Add($"{range.Label} ({percentage:F1}%)");
+        }
+      }
+
+      pieChartData = pieDataList.ToArray().Reverse().ToArray();
+      pieChartLabels = pieLabelList.ToArray().Reverse().ToArray();
+
+      StateHasChanged();
+    }
+
     //* 3. UI Event Handlers
     private async Task OnSurveySelected(SurveyModel value)
     {
@@ -384,30 +445,39 @@ namespace DC.Components.Pages
     private bool _staffQuickFilter(StaffModel staff)
     {
       if (string.IsNullOrWhiteSpace(_staffSearchString))
+      {
+        if (!string.IsNullOrEmpty(_previousStaffSearchString))
+        {
+          // Search string was cleared, update the chart
+          _previousStaffSearchString = "";
+          UpdateChartBasedOnSearch();
+        }
         return true;
+      }
 
-      if (staff.FullName.Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase))
-        return true;
+      bool result = staff.FullName.Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase)
+          || staff.Department.Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase);
 
-      if (staff.Department.Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase))
-        return true;
-
-      // Add score filtering
       if (staffScores.TryGetValue(staff.Id, out var score))
       {
         if (double.TryParse(_staffSearchString, out var searchScore))
         {
-          // Check if the score is within ±1 of the searched score
-          if (Math.Abs(score - searchScore) <= 1)
-            return true;
+          result = result || Math.Abs(score - searchScore) <= 1;
         }
-        else if (score.ToString("F0").Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase))
+        else
         {
-          return true;
+          result = result || score.ToString("F0").Contains(_staffSearchString, StringComparison.OrdinalIgnoreCase);
         }
       }
 
-      return false;
+      if (_staffSearchString != _previousStaffSearchString)
+      {
+        // Search string changed, update the chart
+        _previousStaffSearchString = _staffSearchString;
+        UpdateChartBasedOnSearch();
+      }
+
+      return result;
     }
 
     private async Task<IEnumerable<SurveyModel>> SearchSurveys(string value, CancellationToken cancellationToken)

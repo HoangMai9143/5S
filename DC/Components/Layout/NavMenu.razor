@@ -3,33 +3,35 @@
     <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
       <span class="nav-text">Home</span>
     </MudNavLink>
-    <AuthorizeView Roles="Admin">
+    <AuthorizeView>
       <Authorized>
-        <MudNavLink Href="question" Icon="@Icons.Material.Filled.QuestionAnswer">
-          <span class="nav-text">Manage Questions</span>
-        </MudNavLink>
-        <MudNavLink Href="survey" Icon="@Icons.Material.Filled.Assignment">
-          <span class="nav-text">Manage Surveys</span>
-        </MudNavLink>
-        <MudNavLink Href="grading" Icon="@Icons.Material.Filled.Star">
-          <span class="nav-text">Manage Grading</span>
-        </MudNavLink>
-        <MudNavLink Href="report" Icon="@Icons.Material.Filled.BarChart">
-          <span class="nav-text">Report</span>
-        </MudNavLink>
-        <MudNavLink Href="accountmanage" Icon="@Icons.Material.Filled.AdminPanelSettings">
-          <span class="nav-text">Manage User Account</span>
-        </MudNavLink>
-        <MudNavLink Href="staff" Icon="@Icons.Material.Filled.People">
-          <span class="nav-text">[Debug] Manage Staffs</span>
-        </MudNavLink>
-      </Authorized>
-    </AuthorizeView>
-    <AuthorizeView Roles="Mod">
-      <Authorized>
-        <MudNavLink Href="grading" Icon="@Icons.Material.Filled.Star">
-          <span class="nav-text">Take survey</span>
-        </MudNavLink>
+        @if (context.User.IsInRole("Admin"))
+        {
+          <MudNavLink Href="question" Icon="@Icons.Material.Filled.QuestionAnswer">
+            <span class="nav-text">Manage Questions</span>
+          </MudNavLink>
+          <MudNavLink Href="survey" Icon="@Icons.Material.Filled.Assignment">
+            <span class="nav-text">Manage Surveys</span>
+          </MudNavLink>
+          <MudNavLink Href="grading" Icon="@Icons.Material.Filled.Star">
+            <span class="nav-text">Manage Grading</span>
+          </MudNavLink>
+          <MudNavLink Href="report" Icon="@Icons.Material.Filled.BarChart">
+            <span class="nav-text">Report</span>
+          </MudNavLink>
+          <MudNavLink Href="accountmanage" Icon="@Icons.Material.Filled.AdminPanelSettings">
+            <span class="nav-text">Manage User Account</span>
+          </MudNavLink>
+          <MudNavLink Href="staff" Icon="@Icons.Material.Filled.People">
+            <span class="nav-text">[Debug] Manage Staffs</span>
+          </MudNavLink>
+        }
+        else if (context.User.IsInRole("Mod"))
+        {
+          <MudNavLink Href="grading" Icon="@Icons.Material.Filled.Star">
+            <span class="nav-text">Take survey</span>
+          </MudNavLink>
+        }
       </Authorized>
     </AuthorizeView>
   </div>
@@ -49,6 +51,7 @@
     </AuthorizeView>
   </div>
 </MudNavMenu>
+
 <style>
   .nav-menu {
     display: flex;

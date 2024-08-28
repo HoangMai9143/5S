@@ -36,8 +36,8 @@
 					{
 						<MudCard Elevation="3" Class="my-4">
 							<MudCardContent>
-								<MudText Typo="Typo.subtitle1"><strong>@question.Question.QuestionContext</strong></MudText>
-								@if (question.Question.AnswerType == AnswerType.SingleChoice)
+								<MudText Typo="Typo.subtitle1"><strong>@question.Question?.QuestionContext</strong></MudText>
+								@if (question.Question?.AnswerType == AnswerType.SingleChoice)
 								{
 									var selectedAnswer = questionAnswers.FirstOrDefault(qa => qa.QuestionId == question.QuestionId);
 									if (selectedAnswer != null)
@@ -55,7 +55,7 @@
 										<MudText>No answer selected</MudText>
 									}
 								}
-								else if (question.Question.AnswerType == AnswerType.MultipleChoice)
+								else if (question.Question?.AnswerType == AnswerType.MultipleChoice)
 								{
 									var selectedAnswers = questionAnswers.Where(qa => qa.QuestionId == question.QuestionId).ToList();
 									if (selectedAnswers.Any())
@@ -67,8 +67,8 @@
 												if (answer != null)
 												{
 													<MudChip T="string" Color="@GetChipColor(answer.Points)">
-												@answer.AnswerText (@GetChipText(@answer.Points))
-											</MudChip>
+														@answer.AnswerText (@GetChipText(@answer.Points))
+													</MudChip>
 												}
 											}
 										</MudStack>

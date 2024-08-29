@@ -38,31 +38,28 @@
                 <MudTextField @bind-Value="@searchString" Placeholder="Search staff..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
               </MudItem>
             </MudGrid>
-            <MudTable Items="@FilteredStaffList"  Bordered="false" Class="mt-4">
-              <HeaderContent>
-                <MudTh>Select</MudTh>
-                <MudTh>Name</MudTh>
-                <MudTh>Department</MudTh>
-                <MudTh>Current Score</MudTh>
-              </HeaderContent>
-              <RowTemplate>
-                <MudTd DataLabel="Select">
-                  <MudCheckBox T="bool" @bind-value="@context.IsSelected" Color="Color.Primary" />
-                </MudTd>
-                <MudTd DataLabel="Name">@context.FullName</MudTd>
-                <MudTd DataLabel="Department">@context.Department</MudTd>
-                <MudTd DataLabel="Current Score">
-                  @if (context.CurrentScore.HasValue)
-                  {
-                      <MudText T="string" >@context.CurrentScore.Value.ToString("F1")/@maxPossibleScore</MudText>
-                  }
-                  else
-                  {
-                      <MudText T="string" Color="Color.Default">Not graded</MudText>
-                  }
-                </MudTd>
-              </RowTemplate>
-            </MudTable>
+            <MudDataGrid T="StaffViewModel" Items="@FilteredStaffList" Bordered="false" MultiSelection="true" @bind-SelectedItems="SelectedStaff" Filterable="true" QuickFilter="@QuickFilter" Class="mt-4">
+              <Columns>
+                <SelectColumn T="StaffViewModel" />
+                <PropertyColumn Property="x => x.FullName" Title="Name" />
+                <PropertyColumn Property="x => x.Department" Title="Department" />
+                <TemplateColumn Title="Current Score">
+                  <CellTemplate>
+                    @if (context.Item.CurrentScore.HasValue)
+                    {
+                      <MudText>@context.Item.CurrentScore.Value.ToString("F1")/@maxPossibleScore</MudText>
+                    }
+                    else
+                    {
+                      <MudText Color="Color.Default">Not graded</MudText>
+                    }
+                  </CellTemplate>
+                </TemplateColumn>
+              </Columns>
+              <PagerContent>
+                <MudDataGridPager T="StaffViewModel" />
+              </PagerContent>
+            </MudDataGrid>
           </MudCardContent>
         </MudCard>
       </MudItem>

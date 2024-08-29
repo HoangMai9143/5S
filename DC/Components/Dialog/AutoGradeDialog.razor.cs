@@ -16,57 +16,55 @@ namespace DC.Components.Dialog
     [Parameter] public Dictionary<int, double> staffScores { get; set; }
 
     private List<StaffViewModel> staffViewModels;
+    private HashSet<StaffViewModel> SelectedStaff = new();
     private double minRange;
     private double maxRange;
     private string searchString = "";
 
     protected override void OnInitialized()
     {
-      staffViewModels = [.. staffList.Select(s => new StaffViewModel
+      staffViewModels = staffList
+      .Select(s => new StaffViewModel
       {
         Id = s.Id,
         FullName = s.FullName,
         Department = s.Department,
-        CurrentScore = staffScores.TryGetValue(s.Id, out var score) ? score : (double?)null,
-        IsSelected = false
-      }).OrderByDescending(s => s.CurrentScore)];
+        CurrentScore = staffScores.TryGetValue(s.Id, out var score) ? score : (double?)null
+      })
+      .OrderByDescending(s => s.Id)
+      .ToList();
 
       minRange = 0;
       maxRange = maxPossibleScore;
     }
 
-    private IEnumerable<StaffViewModel> FilteredStaffList => staffViewModels
-      .Where(s => string.IsNullOrWhiteSpace(searchString) ||
-                  s.FullName.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
-                  s.Department.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-      .OrderBy(s => s.FullName);
+    private IEnumerable<StaffViewModel> FilteredStaffList => staffViewModels;
 
     private void SelectAllStaff()
     {
-      foreach (var staff in staffViewModels)
-      {
-        staff.IsSelected = true;
-      }
+      SelectedStaff = new HashSet<StaffViewModel>(staffViewModels);
     }
 
     private void DeselectAllStaff()
     {
-      foreach (var staff in staffViewModels)
-      {
-        staff.IsSelected = false;
-      }
+      SelectedStaff.Clear();
     }
 
-    void Submit() => MudDialog.Close(DialogResult.Ok(new { MinRange = minRange, MaxRange = maxRange, SelectedStaff = staffViewModels.Where(s => s.IsSelected).Select(s => s.Id).ToList() }));
+    private bool QuickFilter(StaffViewModel staff) =>
+    string.IsNullOrWhiteSpace(searchString) ||
+    staff.FullName.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+    staff.Department.Contains(searchString, StringComparison.OrdinalIgnoreCase);
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(new { MinRange = minRange, MaxRange = maxRange, SelectedStaff = SelectedStaff.Select(s => s.Id).ToList() }));
     void Cancel() => MudDialog.Cancel();
   }
 
-  class StaffViewModel
+
+  public class StaffViewModel
   {
     public int Id { get; set; }
     public string FullName { get; set; }
     public string Department { get; set; }
     public double? CurrentScore { get; set; }
-    public bool IsSelected { get; set; }
   }
 }

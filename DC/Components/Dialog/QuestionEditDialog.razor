@@ -14,9 +14,7 @@
             <MudSelectItem Value="@AnswerType.SingleChoice">Single choice</MudSelectItem>
             <MudSelectItem Value="@AnswerType.MultipleChoice">Multiple choice</MudSelectItem>
           </MudSelect>
-
           <MudText Typo="Typo.h6" Class="mt-6 mb-4">Answers</MudText>
-
           @foreach (var answer in currentAnswers)
           {
             <MudCard Elevation="2" Class="mb-4">
@@ -35,7 +33,6 @@
               </MudCardContent>
             </MudCard>
           }
-
           <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" OnClick="AddNewAnswer" Color="Color.Primary" Class="mt-2">Add answer</MudButton>
         </MudCardContent>
       </MudCard>

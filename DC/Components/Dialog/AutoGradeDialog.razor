@@ -47,7 +47,10 @@
                   <CellTemplate>
                     @if (context.Item.CurrentScore.HasValue)
                     {
-                      <MudText>@context.Item.CurrentScore.Value.ToString("F1")/@maxPossibleScore</MudText>
+                      <div class="d-flex flex-column justify-center align-center pa-2" style="height: 100%; width: 80%;">
+                        <MudProgressLinear Size="Size.Medium" Rounded="true" Value="@((double)context.Item.CurrentScore.Value)" Min="0" Max="@maxPossibleScore" Color="Color.Primary" Class="my-2 w-100" Style="min-width: 150px;" />
+                        <MudText>@context.Item.CurrentScore.Value.ToString("F1") / @maxPossibleScore.ToString("F0")</MudText>
+                      </div>
                     }
                     else
                     {

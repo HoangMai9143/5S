@@ -31,7 +31,6 @@ namespace DC.Components.Dialog
         Department = s.Department,
         CurrentScore = staffScores.TryGetValue(s.Id, out var score) ? score : (double?)null
       })
-      .OrderByDescending(s => s.Id)
       .ToList();
 
       minRange = 0;

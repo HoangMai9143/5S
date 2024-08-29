@@ -80,8 +80,6 @@ namespace DC.Components.Pages
       }
     }
 
-
-
     //* 1. Initialization and Loading
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

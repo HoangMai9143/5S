@@ -41,7 +41,7 @@ namespace DC.Components.Pages.Account
 				bool passwordValid = false;
 
 				// Check if the stored password is already hashed
-				if (userAccount.Password.StartsWith("$2a$") || userAccount.Password.StartsWith("$2b$") || userAccount.Password.StartsWith("$2y$"))
+				if (userAccount.Password.StartsWith("$2a$") || userAccount.Password.StartsWith("$2b$") || userAccount.Password.StartsWith("$2y$") || userAccount.Password.StartsWith("$2x$") || userAccount.Password.StartsWith("$2$"))
 				{
 					// Verify hashed password
 					passwordValid = BCrypt.Net.BCrypt.Verify(Model.password, userAccount.Password);
@@ -49,8 +49,6 @@ namespace DC.Components.Pages.Account
 				//! This block is a backdoor and should be removed for more security
 				else
 				{
-					// Compare plain text password (temporary, for migration)
-
 					passwordValid = (userAccount.Password == Model.password);
 
 					// If password is correct, hash it for future use
@@ -61,6 +59,7 @@ namespace DC.Components.Pages.Account
 						await appDbContext.SaveChangesAsync();
 					}
 				}
+				//! This block is a backdoor and should be removed for more security
 
 				if (!passwordValid)
 				{

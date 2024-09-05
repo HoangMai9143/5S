@@ -20,9 +20,9 @@ namespace DC.Components.Dialog
 
     private double? score;
     private string surveyNote;
-    private Dictionary<int, string> questionNotes = new Dictionary<int, string>();
-    private List<SurveyQuestionModel> surveyQuestions = new List<SurveyQuestionModel>();
-    private List<QuestionAnswerModel> questionAnswers = new List<QuestionAnswerModel>();
+    private Dictionary<int, string?> questionNotes = [];
+    private List<SurveyQuestionModel> surveyQuestions = [];
+    private List<QuestionAnswerModel> questionAnswers = [];
 
     private string questionNote;
 
@@ -57,7 +57,7 @@ namespace DC.Components.Dialog
         .Where(r => r.StaffId == Staff.Id && r.SurveyId == SurveyId)
         .ToListAsync();
 
-      questionNotes = results.ToDictionary(r => r.QuestionId, r => r.Note ?? string.Empty);
+      questionNotes = results.ToDictionary(r => r.QuestionId, r => r.Note);
     }
 
     private void Cancel()

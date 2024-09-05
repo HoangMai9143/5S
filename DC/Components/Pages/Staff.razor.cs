@@ -11,7 +11,7 @@ namespace DC.Components.Pages
   public partial class Staff
   {
 
-    private List<StaffModel> staffList = new List<StaffModel>();
+    private List<StaffModel> staffList = [];
     private string newStaffFullName = string.Empty;
     private string newStaffDepartment = string.Empty;
     private bool newStaffIsActive = true;

@@ -14,11 +14,11 @@ namespace DC.Components.Dialog
     [Parameter] public SurveyModel Survey { get; set; }
 
     private bool isLoading = true;
-    private List<SurveyQuestionModel> surveyQuestions = new List<SurveyQuestionModel>();
-    private Dictionary<int, int> selectedAnswer = new Dictionary<int, int>();
-    private Dictionary<int, Dictionary<int, bool>> selectedMultipleAnswers = new Dictionary<int, Dictionary<int, bool>>();
-    private List<QuestionAnswerModel> existingAnswers = new List<QuestionAnswerModel>();
-    private Dictionary<int, string> questionNotes = new Dictionary<int, string>();
+    private List<SurveyQuestionModel> surveyQuestions = [];
+    private Dictionary<int, int> selectedAnswer = [];
+    private Dictionary<int, Dictionary<int, bool>> selectedMultipleAnswers = [];
+    private List<QuestionAnswerModel> existingAnswers = [];
+    private Dictionary<int, string> questionNotes = [];
     private bool answerIsSelected;
 
     protected override async Task OnInitializedAsync()

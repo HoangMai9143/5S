@@ -11,7 +11,7 @@ namespace DC.Components.Dialog
 
     [CascadingParameter] MudDialogInstance mudDialog { get; set; }
 
-    private DateRange dateRange = new DateRange(DateTime.Today, DateTime.Today);
+    private DateRange dateRange = new(DateTime.Today, DateTime.Today);
     private string title = string.Empty;
 
     private void Cancel()

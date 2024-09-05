@@ -40,26 +40,8 @@ namespace DC.Components.Pages.Account
 
 				bool passwordValid = false;
 
-				// Check if the stored password is already hashed
-				if (userAccount.Password.StartsWith("$2a$") || userAccount.Password.StartsWith("$2b$") || userAccount.Password.StartsWith("$2y$") || userAccount.Password.StartsWith("$2x$") || userAccount.Password.StartsWith("$2$"))
-				{
-					// Verify hashed password
-					passwordValid = BCrypt.Net.BCrypt.Verify(Model.password, userAccount.Password);
-				}
-				//! This block is a backdoor and should be removed for more security
-				else
-				{
-					passwordValid = (userAccount.Password == Model.password);
-
-					// If password is correct, hash it for future use
-					if (passwordValid)
-					{
-						userAccount.Password = BCrypt.Net.BCrypt.HashPassword(Model.password);
-						appDbContext.Update(userAccount);
-						await appDbContext.SaveChangesAsync();
-					}
-				}
-				//! This block is a backdoor and should be removed for more security
+				// Verify hashed password
+				passwordValid = BCrypt.Net.BCrypt.Verify(Model.password, userAccount.Password);
 
 				if (!passwordValid)
 				{

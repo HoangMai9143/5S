@@ -11,7 +11,7 @@ namespace DC.Components.Dialog
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
     [Parameter] public StaffModel Staff { get; set; }
 
-    private StaffModel staff = new StaffModel();
+    private StaffModel staff = new();
 
     protected override void OnInitialized()
     {

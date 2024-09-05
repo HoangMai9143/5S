@@ -14,7 +14,7 @@ namespace DC.Components.Dialog
     [Parameter] public int QuestionId { get; set; } // Question ID to edit
 
     private QuestionModel currentQuestion = new(); // Current question to edit
-    private List<AnswerModel> currentAnswers = new(); // Current answers of the question
+    private List<AnswerModel> currentAnswers = []; // Current answers of the question
 
     protected override async Task OnInitializedAsync()
     {

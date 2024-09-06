@@ -72,7 +72,6 @@ namespace DC.Components.Pages.Account
 			catch (Exception ex)
 			{
 				errorMessage = $"An error occurred: {ex.Message}";
-				// Consider logging the full exception details here
 				Console.WriteLine(ex.ToString());
 			}
 		}

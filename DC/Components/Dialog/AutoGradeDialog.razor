@@ -34,7 +34,14 @@
                 <MudButton OnClick="@SelectAllStaff" Color="Color.Primary" Variant="Variant.Outlined" Class="mr-2">Select All</MudButton>
                 <MudButton OnClick="@DeselectAllStaff" Color="Color.Secondary" Variant="Variant.Outlined">Deselect All</MudButton>
               </MudItem>
-              <MudItem xs="12" sm="10">
+              <MudItem xs="12" sm="4">
+                <MudToggleGroup @bind-Value="@staffFilter" Color="Color.Primary">
+                  <MudToggleItem Value="@("All")" Text="All" />
+                  <MudToggleItem Value="@("Graded")" Text="Graded" />
+                  <MudToggleItem Value="@("NotGraded")" Text="Not Graded" />
+                </MudToggleGroup>
+              </MudItem>
+              <MudItem xs="12">
                 <MudTextField @bind-Value="@searchString" Placeholder="Search staff..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
               </MudItem>
             </MudGrid>

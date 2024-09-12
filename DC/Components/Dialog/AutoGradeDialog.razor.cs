@@ -20,28 +20,39 @@ namespace DC.Components.Dialog
     private double minRange;
     private double maxRange;
     private string searchString = "";
+    private string staffFilter = "All";
 
     protected override void OnInitialized()
     {
       staffViewModels = staffList
-      .Select(s => new StaffViewModel
-      {
-        Id = s.Id,
-        FullName = s.FullName,
-        Department = s.Department,
-        CurrentScore = staffScores.TryGetValue(s.Id, out var score) ? score : (double?)null
-      })
-      .ToList();
+          .Select(s => new StaffViewModel
+          {
+            Id = s.Id,
+            FullName = s.FullName,
+            Department = s.Department,
+            CurrentScore = staffScores.TryGetValue(s.Id, out var score) ? score : (double?)null
+          })
+          .ToList();
 
       minRange = 0;
       maxRange = maxPossibleScore;
     }
 
-    private IEnumerable<StaffViewModel> FilteredStaffList => staffViewModels;
+    private IEnumerable<StaffViewModel> FilteredStaffList => staffViewModels.Where(FilterStaff);
+
+    private bool FilterStaff(StaffViewModel staff)
+    {
+      return staffFilter switch
+      {
+        "Graded" => staff.CurrentScore.HasValue,
+        "NotGraded" => !staff.CurrentScore.HasValue,
+        _ => true,
+      };
+    }
 
     private void SelectAllStaff()
     {
-      SelectedStaff = new HashSet<StaffViewModel>(staffViewModels);
+      SelectedStaff = new HashSet<StaffViewModel>(FilteredStaffList);
     }
 
     private void DeselectAllStaff()
@@ -50,9 +61,9 @@ namespace DC.Components.Dialog
     }
 
     private bool QuickFilter(StaffViewModel staff) =>
-    string.IsNullOrWhiteSpace(searchString) ||
-    staff.FullName.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
-    staff.Department.Contains(searchString, StringComparison.OrdinalIgnoreCase);
+        string.IsNullOrWhiteSpace(searchString) ||
+        staff.FullName.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+        staff.Department.Contains(searchString, StringComparison.OrdinalIgnoreCase);
 
     void Submit() => MudDialog.Close(DialogResult.Ok(new { MinRange = minRange, MaxRange = maxRange, SelectedStaff = SelectedStaff.Select(s => s.Id).ToList() }));
     void Cancel() => MudDialog.Cancel();

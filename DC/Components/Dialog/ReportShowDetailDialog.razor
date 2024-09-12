@@ -80,7 +80,7 @@
 								}
 								@if (questionNotes.TryGetValue(question.QuestionId, out var note))
 								{
-									<MudTextField T="string" @bind-Value="questionNotes[question.QuestionId]" Lines="1" AutoGrow="true" Variant="Variant.Outlined" />
+									<MudText> @questionNotes[question.QuestionId] </MudText>
 								}
 							</MudCardContent>
 						</MudCard>
